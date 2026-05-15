@@ -294,11 +294,7 @@ const DashboardPage = () => {
                 <div className="mb-10">
                   <p className="text-[10px] text-bordeaux font-black uppercase tracking-[0.3em] mb-2">Planejamento Completo</p>
                   <h1 className="text-4xl md:text-5xl font-serif italic text-wine-950">Meu Treino</h1>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-                <div className="space-y-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {activeWorkout?.conteudo_treino?.workouts ? activeWorkout.conteudo_treino.workouts.map((w, idx) => (
                     <motion.div 
                       key={idx}
@@ -334,45 +330,31 @@ const DashboardPage = () => {
                         </div>
                       </div>
                     </motion.div>
-                  )) : activeWorkout?.conteudo_treino?.exercises ? activeWorkout.conteudo_treino.exercises.map((ex, i) => (
-                    <div key={i} className="bg-white p-6 rounded-3xl border border-wine-50 shadow-premium flex flex-col md:flex-row md:items-center gap-6">
-                       <div className="w-16 h-16 rounded-2xl bg-wine-50 flex items-center justify-center shrink-0 overflow-hidden text-wine-950">
-                         <FiActivity size={24} />
-                       </div>
-                       <div className="flex-1">
-                         <h4 className="font-bold text-lg text-wine-950 mb-1">{ex.exercise}</h4>
-                         <p className="text-xs text-wine-900/60 mb-3">{ex.detail}</p>
-                         <div className="flex flex-wrap gap-4 text-[10px] font-black uppercase tracking-widest text-bordeaux">
-                           <span className="flex items-center gap-1 bg-wine-50 px-3 py-1 rounded-lg border border-wine-100">{ex.sets}</span>
-                         </div>
-                       </div>
-                       <div className="flex items-center gap-2">
-                         <input type="text" placeholder="Kg" className="w-16 h-12 bg-premium-light border border-wine-100 rounded-xl text-center font-bold text-wine-950 focus:outline-none focus:border-wine-900" />
-                         <button 
-                           onClick={() => {
-                             if (completedExercises.includes(i)) {
-                               setCompletedExercises(completedExercises.filter(item => item !== i))
-                             } else {
-                               setCompletedExercises([...completedExercises, i])
-                             }
-                           }}
-                           className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
-                             completedExercises.includes(i)
-                               ? 'bg-emerald-500 text-white shadow-lg scale-110'
-                               : 'bg-wine-950 text-white shadow-wine hover:bg-bordeaux'
-                           }`}
-                         >
-                           <FiCheck size={20} />
-                         </button>
-                       </div>
+                  )) : activeWorkout?.conteudo_treino?.exercises ? (
+                    <div className="col-span-full space-y-4">
+                      {activeWorkout.conteudo_treino.exercises.map((ex, i) => (
+                        <div key={i} className="bg-white p-6 rounded-3xl border border-wine-50 shadow-premium flex flex-col md:flex-row md:items-center gap-6">
+                           <div className="w-16 h-16 rounded-2xl bg-wine-50 flex items-center justify-center shrink-0 overflow-hidden text-wine-950">
+                             <FiActivity size={24} />
+                           </div>
+                           <div className="flex-1">
+                             <h4 className="font-bold text-lg text-wine-950 mb-1">{ex.exercise || ex.name}</h4>
+                             <p className="text-xs text-wine-900/60 mb-3">{ex.detail}</p>
+                             <div className="flex flex-wrap gap-4 text-[10px] font-black uppercase tracking-widest text-bordeaux">
+                               <span className="flex items-center gap-1 bg-wine-50 px-3 py-1 rounded-lg border border-wine-100">{ex.sets}</span>
+                             </div>
+                           </div>
+                        </div>
+                      ))}
                     </div>
-                  )) : (
-                    <div className="py-20 text-center bg-white rounded-[2.5rem] border border-dashed border-wine-200">
+                  ) : (
+                    <div className="col-span-full py-20 text-center bg-white rounded-[2.5rem] border border-dashed border-wine-200">
                       <FiTarget className="w-12 h-12 text-wine-100 mx-auto mb-4" />
                       <p className="text-wine-900/40 font-medium">Nenhum exercício listado para este ciclo.</p>
                     </div>
                   )}
                 </div>
+              </div>
               </motion.div>
             )}
 
