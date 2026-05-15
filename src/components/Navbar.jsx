@@ -24,23 +24,18 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // const isLandingPage = location.pathname === '/'
-
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'py-4 bg-white/80 backdrop-blur-lg shadow-premium' : 'py-6 bg-transparent'
-          }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'py-4 bg-white/80 backdrop-blur-lg shadow-premium' : 'py-6 bg-transparent'}`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          {/* Logo (Left) */}
           <div className="flex w-1/4">
             <Link to="/" className="flex items-center group">
               <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-12 sm:h-14 md:h-16 w-auto drop-shadow-md" />
             </Link>
           </div>
 
-          {/* Desktop Links (Center) */}
           <div className="hidden lg:flex flex-1 items-center justify-center gap-6 xl:gap-8">
             {navLinks.map((link) => (
               <a
@@ -54,7 +49,6 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Portal Button & Mobile Menu (Right) */}
           <div className="flex w-1/4 justify-end items-center">
             <Link
               to="/login"
@@ -73,7 +67,6 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile Menu (Moved outside nav to avoid backdrop-filter stacking context issues) */}
       <AnimatePresence>
         {isMobileOpen && (
           <motion.div
@@ -112,7 +105,7 @@ const Navbar = () => {
                   onClick={() => setIsMobileOpen(false)}
                   className="btn-premium w-full flex justify-center py-4 text-center"
                 >
-                  Portal Aluna
+                  Portal da Aluna
                 </Link>
               </div>
             </div>

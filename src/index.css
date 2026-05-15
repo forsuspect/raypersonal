@@ -47,8 +47,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .glass-dark {
-  background: rgba(76, 5, 25, 0.05);
-  backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -57,11 +57,11 @@ h1, h2, h3, h4, h5, h6 {
     @apply px-8 py-4 rounded-full font-display font-semibold transition-all duration-300 transform hover:-translate-y-1 active:scale-95;
     background: linear-gradient(135deg, #4c0519, #881337);
     color: white;
-    box-shadow: 0 10px 20px rgba(76, 5, 25, 0.2);
+    box-shadow: 0 10px 20px rgba(76, 5, 25, 0.4);
   }
 
   .btn-premium:hover {
-    box-shadow: 0 15px 30px rgba(76, 5, 25, 0.3);
+    box-shadow: 0 15px 30px rgba(76, 5, 25, 0.6);
   }
 
   .btn-outline {

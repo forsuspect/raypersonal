@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { 
-  FiHome, FiActivity, FiMessageCircle, 
+  FiHome, FiActivity, FiMessageCircle, FiUser,
   FiMenu, FiX, FiDroplet, FiTarget, FiArrowLeft, FiCheck, FiCheckCircle,
-  FiTrendingUp, FiSettings, FiLogOut, FiVideo
+  FiTrendingUp, FiSettings, FiLogOut, FiVideo, FiCalendar, FiShield
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
@@ -115,7 +115,7 @@ const DashboardPage = () => {
     { id: 'workout', icon: FiActivity, label: 'Meu Treino' },
     { id: 'evolution', icon: FiTrendingUp, label: 'Evolução' },
     { id: 'chat', icon: FiMessageCircle, label: 'Chat VIP' },
-    { id: 'settings', icon: FiSettings, label: 'Configurações' },
+    { id: 'profile', icon: FiUser, label: 'Meu Perfil' },
   ]
 
   return (
@@ -358,7 +358,124 @@ const DashboardPage = () => {
               </motion.div>
             )}
 
-            {activeTab !== 'overview' && activeTab !== 'workout' && (
+            {activeTab === 'profile' && (
+              <motion.div
+                key="profile"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-8"
+              >
+                {/* Header */}
+                <div>
+                  <p className="text-[10px] text-bordeaux font-black uppercase tracking-[0.3em] mb-2">Conta</p>
+                  <h1 className="text-4xl md:text-5xl font-serif italic text-wine-950">Meu Perfil</h1>
+                </div>
+
+                {/* Avatar + Identity */}
+                <div className="bg-wine-950 rounded-[2.5rem] p-8 md:p-10 text-white shadow-wine relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-bordeaux/10 blur-3xl rounded-full pointer-events-none" />
+                  <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-8">
+                    <div className="relative shrink-0">
+                      <img
+                        src={userDisplay.avatar}
+                        alt={userDisplay.name}
+                        className="w-28 h-28 rounded-[2rem] border-4 border-bordeaux/40 shadow-2xl object-cover"
+                      />
+                      <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-emerald-500 border-4 border-wine-950 shadow-lg" />
+                    </div>
+                    <div className="text-center md:text-left">
+                      <h2 className="text-3xl font-bold text-white mb-1">{userDisplay.name}</h2>
+                      <p className="text-bordeaux font-black text-xs uppercase tracking-[0.3em] mb-4">@{userData?.usuario}</p>
+                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-bordeaux/20 border border-bordeaux/30">
+                        <FiShield size={14} className="text-bordeaux" />
+                        <span className="text-white font-black text-xs uppercase tracking-widest">{userDisplay.plan}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Plan Details */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    {
+                      icon: FiCalendar,
+                      label: 'Membro desde',
+                      value: userData?.data_cadastro
+                        ? new Date(userData.data_cadastro).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+                        : '—',
+                      accent: 'text-blue-400',
+                      bg: 'bg-blue-500/10'
+                    },
+                    {
+                      icon: FiShield,
+                      label: 'Plano Ativo',
+                      value: userDisplay.plan,
+                      accent: 'text-bordeaux',
+                      bg: 'bg-bordeaux/10'
+                    },
+                    {
+                      icon: FiTarget,
+                      label: 'Vencimento do Plano',
+                      value: userData?.data_cadastro
+                        ? new Date(new Date(userData.data_cadastro).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+                        : '—',
+                      accent: 'text-amber-400',
+                      bg: 'bg-amber-500/10'
+                    },
+                  ].map((item, i) => (
+                    <div key={i} className="bg-white rounded-[2rem] p-6 border border-wine-50 shadow-premium">
+                      <div className={`w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center mb-4`}>
+                        <item.icon size={18} className={item.accent} />
+                      </div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-wine-900/40 mb-1">{item.label}</p>
+                      <p className="font-bold text-wine-950 text-sm leading-tight">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-3">
+                  <button
+                    onClick={() => navigate('/')}
+                    className="w-full flex items-center justify-between px-6 py-4 bg-white rounded-2xl border border-wine-100 hover:border-wine-900/20 hover:shadow-md transition-all group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-wine-50 flex items-center justify-center group-hover:bg-wine-100 transition-colors">
+                        <FiArrowLeft size={18} className="text-wine-900" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-bold text-sm text-wine-950">Voltar ao site</p>
+                        <p className="text-[10px] text-wine-900/40 font-black uppercase tracking-widest">Página principal RM</p>
+                      </div>
+                    </div>
+                    <FiTarget size={16} className="text-wine-900/20 group-hover:text-wine-900/60 transition-colors" />
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('rm_user')
+                      navigate('/login')
+                    }}
+                    className="w-full flex items-center justify-between px-6 py-4 bg-red-50 rounded-2xl border border-red-100 hover:bg-red-100 hover:border-red-200 transition-all group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                        <FiLogOut size={18} className="text-red-500" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-bold text-sm text-red-600">Sair da conta</p>
+                        <p className="text-[10px] text-red-400 font-black uppercase tracking-widest">Encerrar sessão</p>
+                      </div>
+                    </div>
+                    <FiTarget size={16} className="text-red-300 group-hover:text-red-500 transition-colors" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+
+            {(activeTab === 'evolution' || activeTab === 'chat') && (
               <motion.div
                 key="other"
                 initial={{ opacity: 0, y: 20 }}
@@ -369,7 +486,6 @@ const DashboardPage = () => {
                 <div className="w-24 h-24 rounded-full bg-wine-50 text-wine-900 flex items-center justify-center text-4xl mb-6">
                   {activeTab === 'evolution' && <FiTrendingUp />}
                   {activeTab === 'chat' && <FiMessageCircle />}
-                  {activeTab === 'settings' && <FiSettings />}
                 </div>
                 <h2 className="heading-md text-wine-950 mb-4 capitalize">Em construção</h2>
                 <p className="text-wine-900/60 max-w-md">Esta área do portal premium está sendo personalizada para sua conta.</p>

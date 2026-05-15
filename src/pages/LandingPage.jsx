@@ -11,7 +11,7 @@ import Footer from '../components/Footer'
 
 const LandingPage = () => {
   return (
-    <div className="relative bg-premium-white min-h-screen">
+    <div className="relative bg-premium-light min-h-screen">
       <Navbar />
       <Hero />
       <About />

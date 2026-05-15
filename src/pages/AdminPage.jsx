@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { 
   FiHome, FiUsers, FiTarget, FiDollarSign, FiBarChart2,
-  FiBell, FiMenu, FiX, FiPlus,
+  FiBell, FiMenu, FiX, FiPlus, FiRefreshCw,
   FiSearch, FiTrendingUp, FiActivity,
-  FiEdit, FiTrash2, FiCheckCircle, FiChevronRight, FiArrowLeft, FiSun, FiMoon, FiAlertCircle
+  FiEdit, FiTrash2, FiCheckCircle, FiChevronRight, FiArrowLeft, FiAlertCircle
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
@@ -29,7 +29,7 @@ const AdminPage = () => {
   const [newUserPlan, setNewUserPlan] = useState('Premium')
   const [isCreatingUser, setIsCreatingUser] = useState(false)
   const [createError, setCreateError] = useState(null)
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  const isDarkMode = true // Permanent Dark Theme
   const [studentsData, setStudentsData] = useState([])
   const [stats, setStats] = useState({
     activeStudents: 0,
@@ -308,13 +308,13 @@ const AdminPage = () => {
 
 
   return (
-    <div className={`fixed inset-0 w-full h-full flex overflow-hidden z-[100] transition-colors duration-500 ${isDarkMode ? 'bg-wine-950 text-white' : 'bg-premium-light text-wine-950'}`}>
+    <div className="h-screen bg-black text-white flex overflow-hidden">
       <AnimatePresence>
         {loading && (
           <motion.div 
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-white"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black"
           >
             <motion.div
               animate={{ 
@@ -329,30 +329,23 @@ const AdminPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Background Image Overlay */}
-      <div className={`absolute inset-0 mix-blend-overlay z-0 pointer-events-none transition-opacity duration-500 ${isDarkMode ? 'opacity-10' : 'opacity-5'}`}>
+      <div className="absolute inset-0 mix-blend-overlay z-0 pointer-events-none opacity-10">
         <img 
           src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1470&auto=format&fit=crop" 
           alt="Gym Background" 
           className="w-full h-full object-cover"
         />
       </div>
-      <div className={`absolute inset-0 z-0 pointer-events-none transition-colors duration-500 ${isDarkMode ? 'bg-gradient-to-t from-wine-950 via-transparent to-wine-950/80' : 'bg-gradient-to-t from-premium-light via-transparent to-premium-light/50'}`} />
+      <div className="absolute inset-0 z-0 pointer-events-none bg-gradient-to-t from-black via-transparent to-black/80" />
 
-      {/* Sidebar - Admin Hub */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-72 backdrop-blur-3xl border-r transform transition-all duration-500 ease-[0.22, 1, 0.36, 1] ${
-        isDarkMode 
-          ? 'bg-wine-950/80 border-white/5 shadow-2xl' 
-          : 'bg-white/80 border-wine-100 shadow-xl'
-        } ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${!sidebarOpen ? 'invisible lg:visible' : 'visible'}`}>
-        <div className="p-8 flex flex-col h-full relative z-10">
-          <div className="mb-10">
+      <aside className="hidden lg:flex flex-col w-64 bg-black border-r border-white/10 p-6 h-full z-20">
+        <div className="mb-10">
             <Link to="/" className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center">
                 <span className="text-white font-display font-black text-xl">RM</span>
               </div>
               <div>
-                <span className={`font-display font-black text-base ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>RAYANA</span>
+                <span className="font-display font-black text-base text-white">RAYANA</span>
                 <span className="block text-[10px] tracking-[0.2em] uppercase text-bordeaux font-black">Admin Hub</span>
               </div>
             </Link>
@@ -365,8 +358,8 @@ const AdminPage = () => {
                 onClick={() => { setActiveTab(link.id); setSidebarOpen(false) }}
                 className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-bold tracking-tight transition-all duration-300 ${
                   activeTab === link.id
-                    ? (isDarkMode ? 'bg-bordeaux/20 text-white border border-bordeaux/30' : 'bg-wine-50 text-wine-900 border border-wine-100')
-                    : (isDarkMode ? 'text-white/40 hover:text-white hover:bg-white/[0.03]' : 'text-wine-900/60 hover:text-wine-900 hover:bg-wine-50/50')
+                    ? 'bg-bordeaux/20 text-white border border-bordeaux/30'
+                    : 'text-white/40 hover:text-white hover:bg-white/[0.03]'
                 }`}
               >
                 <link.icon className={`w-5 h-5 ${activeTab === link.id ? 'text-bordeaux' : ''}`} />
@@ -375,43 +368,22 @@ const AdminPage = () => {
             ))}
           </nav>
 
-          <button onClick={() => navigate('/')} className={`mt-auto flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold transition-colors ${isDarkMode ? 'text-white/30 hover:text-white' : 'text-wine-900/40 hover:text-wine-900'}`}>
+          <button onClick={() => navigate('/')} className="mt-auto flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold transition-colors text-white/30 hover:text-white">
             <FiArrowLeft className="w-5 h-5" /> Voltar para o site
           </button>
-        </div>
       </aside>
 
-      {/* Main Admin Area */}
       <main className="flex-1 h-full flex flex-col min-w-0 overflow-y-auto relative z-10">
-        {/* Header */}
-        <header className={`px-8 py-6 backdrop-blur-3xl border-b flex items-center justify-between z-40 sticky top-0 transition-colors duration-500 ${isDarkMode ? 'bg-wine-950/50 border-white/5' : 'bg-white/50 border-wine-100'}`}>
-          <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(true)} className={`lg:hidden ${isDarkMode ? 'text-white/50' : 'text-wine-900/50'}`}><FiMenu className="w-6 h-6" /></button>
-            <h1 className={`font-display font-black text-xl uppercase tracking-tighter ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Painel de Gestão</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            {/* Theme Toggle */}
-            <button 
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${isDarkMode ? 'bg-white/5 text-white hover:bg-white/10' : 'bg-wine-50 text-wine-900 hover:bg-wine-100'}`}
-              title={isDarkMode ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
-            >
-              {isDarkMode ? <FiSun className="w-5 h-5" /> : <FiMoon className="w-5 h-5" />}
-            </button>
-            
-             
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center relative transition-colors ${isDarkMode ? 'bg-white/5 text-white/40' : 'bg-wine-50 text-wine-900/40'}`}>
-              <FiBell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-bordeaux text-[9px] text-white flex items-center justify-center font-black">5</span>
-            </div>
+        <header className="hidden lg:flex items-center justify-end p-6 bg-black/50 backdrop-blur-md border-b border-white/10 sticky top-0 z-30">
+          <div className="flex items-center gap-4 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 shadow-sm">
+            <FiBell className="w-5 h-5 text-white/40" />
+            <span className="w-4 h-4 rounded-full bg-bordeaux text-[9px] text-white flex items-center justify-center font-black">5</span>
           </div>
         </header>
 
         <div className="p-8 max-w-7xl mx-auto w-full">
-          {/* Tab Contents */}
           {activeTab === 'dashboard' && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-              {/* Stats Overview */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
                   { icon: FiUsers, label: 'Alunas Ativas', value: stats.activeStudents, change: '+0%', color: 'text-wine-800', bg: 'bg-wine-800/10' },
@@ -419,93 +391,87 @@ const AdminPage = () => {
                   { icon: FiActivity, label: 'Treinos Gerados', value: stats.workoutsGenerated, change: '+0', color: 'text-blue-400', bg: 'bg-blue-500/10' },
                   { icon: FiTrendingUp, label: 'Taxa Retenção', value: `${stats.retentionRate}%`, change: '+0%', color: 'text-bordeaux', bg: 'bg-bordeaux/10' },
                 ].map((s, i) => (
-                  <div key={i} className={`backdrop-blur-xl rounded-[32px] p-6 border shadow-2xl transition-all duration-500 ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-white border-wine-50'}`}>
+                  <div key={i} className="backdrop-blur-xl rounded-[32px] p-6 border border-white/5 bg-white/5 shadow-2xl">
                     <div className={`w-12 h-12 rounded-2xl ${s.bg} flex items-center justify-center mb-4`}>
                       <s.icon className={`w-6 h-6 ${s.color}`} />
                     </div>
-                    <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>{s.label}</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest mb-1 text-white/40">{s.label}</p>
                     <div className="flex items-baseline gap-2">
-                      <p className={`font-display font-black text-3xl ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>{s.value}</p>
+                      <p className="font-display font-black text-3xl text-white">{s.value}</p>
                       <span className={`text-[10px] font-black ${s.change.startsWith('+') ? 'text-emerald-400' : 'text-red-400'}`}>{s.change}</span>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Main Dashboard Grid */}
               <div className="grid lg:grid-cols-3 gap-8">
-                {/* Recent Student Activity */}
                 <div className="lg:col-span-2 space-y-6">
                   <div className="flex items-center justify-between">
-                    <h2 className={`font-display font-black text-lg uppercase tracking-tight ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Atividade das Alunas</h2>
+                    <h2 className="font-display font-black text-lg uppercase tracking-tight text-white">Atividade das Alunas</h2>
                     <button onClick={() => setActiveTab('students')} className="text-bordeaux text-xs font-black uppercase tracking-widest">Ver Tudo</button>
                   </div>
                   
-                  <div className={`backdrop-blur-xl rounded-[32px] overflow-hidden border shadow-2xl transition-all duration-500 ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-white border-wine-50'}`}>
+                  <div className="backdrop-blur-xl rounded-[32px] overflow-hidden border border-white/5 bg-white/5 shadow-2xl">
                     <div className="space-y-1">
                       {studentsData.length > 0 ? studentsData.map((s, i) => (
-                        <div key={i} className={`flex items-center justify-between p-6 hover:bg-white/[0.03] transition-colors border-b last:border-0 ${isDarkMode ? 'border-white/5' : 'border-wine-50'}`}>
+                        <div key={i} className="flex items-center justify-between p-6 hover:bg-white/[0.03] transition-colors border-b border-white/5">
                           <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center text-white font-black">{s.name[0]}</div>
                             <div>
-                              <p className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>{s.name}</p>
-                              <p className={`text-[10px] uppercase font-black tracking-widest ${isDarkMode ? 'text-white/30' : 'text-wine-900/30'}`}>{s.objective}</p>
+                              <p className="font-bold text-sm text-white">{s.name}</p>
+                              <p className="text-[10px] uppercase font-black tracking-widest text-white/30">{s.objective}</p>
                             </div>
                           </div>
                           <div className="hidden md:block">
-                            <p className={`text-[9px] font-black uppercase tracking-widest mb-1 ${isDarkMode ? 'text-white/30' : 'text-wine-900/30'}`}>Status</p>
-                            <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black border ${
-                              s.status === 'Ativo' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 
-                              s.status === 'Atrasado' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-red-500/10 border-red-500/20 text-red-500'
-                            }`}>{s.status}</span>
+                            <p className="text-[9px] font-black uppercase tracking-widest mb-1 text-white/30">Status</p>
+                            <span className="px-2 py-0.5 rounded-lg text-[9px] font-black border bg-emerald-500/10 border-emerald-500/20 text-emerald-400">{s.status}</span>
                           </div>
                           <div className="flex flex-col items-end">
-                            <p className={`text-[9px] font-black uppercase tracking-widest mb-1 ${isDarkMode ? 'text-white/30' : 'text-wine-900/30'}`}>Cadastro</p>
-                            <p className={`font-bold text-xs ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>{s.lastCheck}</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest mb-1 text-white/30">Cadastro</p>
+                            <p className="font-bold text-xs text-white">{s.lastCheck}</p>
                           </div>
-                          <button className={`p-2 transition-colors ${isDarkMode ? 'text-white/20 hover:text-white' : 'text-wine-900/20 hover:text-wine-900'}`}><FiChevronRight /></button>
+                          <button className="p-2 transition-colors text-white/20 hover:text-white"><FiChevronRight /></button>
                         </div>
                       )) : (
                         <div className="p-12 text-center">
-                          <p className={`text-sm font-medium ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Nenhuma atividade recente.</p>
+                          <p className="text-sm font-medium text-white/40">Nenhuma atividade recente.</p>
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Quick Actions / Plans */}
                 <div className="space-y-8">
-                  <h2 className={`font-display font-black text-lg uppercase tracking-tight ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Ações Rápidas</h2>
+                  <h2 className="font-display font-black text-lg uppercase tracking-tight text-white">Ações Rápidas</h2>
                   <div className="grid grid-cols-1 gap-4">
                     <button 
                       onClick={() => { setCreateError(null); setIsCreatingUser(true); }}
-                      className={`flex items-center gap-4 p-5 rounded-3xl backdrop-blur-xl border transition-all group text-left shadow-2xl ${isDarkMode ? 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-wine-900/40' : 'bg-white border-wine-50 hover:bg-wine-50 hover:border-wine-200'}`}
+                      className="flex items-center gap-4 p-5 rounded-3xl backdrop-blur-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-wine-900/40 transition-all group text-left shadow-2xl"
                     >
                       <div className="w-12 h-12 rounded-2xl bg-wine-900/20 flex items-center justify-center group-hover:bg-wine-900/40 transition-all">
                         <FiPlus className="w-6 h-6 text-wine-800" />
                       </div>
                       <div>
-                        <p className={`font-bold text-sm uppercase tracking-tight ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Gerar Acesso</p>
-                        <p className={isDarkMode ? 'text-white/30 text-[10px]' : 'text-wine-900/40 text-[10px]'}>Criar usuário e senha</p>
+                        <p className="font-bold text-sm uppercase tracking-tight text-white">Gerar Acesso</p>
+                        <p className="text-white/30 text-[10px]">Criar usuário e senha</p>
                       </div>
                     </button>
                     <button 
                       onClick={() => { setShowWorkoutModal(true); setSelectedStudentId(''); }}
-                      className={`flex items-center gap-4 p-5 rounded-3xl backdrop-blur-xl border transition-all group text-left shadow-2xl ${isDarkMode ? 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-bordeaux/40' : 'bg-white border-wine-50 hover:bg-wine-50 hover:border-wine-200'}`}
+                      className="flex items-center gap-4 p-5 rounded-3xl backdrop-blur-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-bordeaux/40 transition-all group text-left shadow-2xl"
                     >
                       <div className="w-12 h-12 rounded-2xl bg-bordeaux/10 flex items-center justify-center group-hover:bg-bordeaux/20 transition-all">
                         <FiTarget className="w-6 h-6 text-bordeaux" />
                       </div>
                       <div>
-                        <p className={`font-bold text-sm uppercase tracking-tight ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Gerar Planilha</p>
-                        <p className={isDarkMode ? 'text-white/30 text-[10px]' : 'text-wine-900/40 text-[10px]'}>Lançar novo ciclo</p>
+                        <p className="font-bold text-sm uppercase tracking-tight text-white">Gerar Planilha</p>
+                        <p className="text-white/30 text-[10px]">Lançar novo ciclo</p>
                       </div>
                     </button>
                   </div>
 
-                  <div className={`backdrop-blur-xl rounded-[32px] p-8 border shadow-2xl transition-all duration-500 ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-white border-wine-50'}`}>
-                    <h3 className={`font-display font-black text-xs uppercase tracking-widest mb-6 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Planos Ativos</h3>
+                  <div className="backdrop-blur-xl rounded-[32px] p-8 border border-white/5 bg-white/5 shadow-2xl">
+                    <h3 className="font-display font-black text-xs uppercase tracking-widest mb-6 text-white">Planos Ativos</h3>
                     <div className="space-y-4">
                       {[
                         { label: 'Essencial', val: studentsData.filter(s => s.plano === 'Essencial').length, color: 'bg-white/20' },
@@ -514,10 +480,10 @@ const AdminPage = () => {
                       ].map((p, i) => (
                         <div key={i} className="space-y-2">
                           <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                            <span className={isDarkMode ? 'text-white/40' : 'text-wine-900/40'}>{p.label}</span>
-                            <span className={isDarkMode ? 'text-white' : 'text-wine-950'}>{p.val}</span>
+                            <span className="text-white/40">{p.label}</span>
+                            <span className="text-white">{p.val}</span>
                           </div>
-                          <div className={`h-1.5 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-white/5' : 'bg-wine-50'}`}>
+                          <div className="h-1.5 w-full rounded-full overflow-hidden bg-white/5">
                             <div className={`h-full ${p.color}`} style={{ width: `${studentsData.length > 0 ? (p.val / studentsData.length) * 100 : 0}%` }} />
                           </div>
                         </div>
@@ -533,59 +499,54 @@ const AdminPage = () => {
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className={`font-display font-black text-3xl uppercase tracking-tighter ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Gestão de Alunas</h2>
-                  <p className={isDarkMode ? 'text-white/40 text-sm' : 'text-wine-900/40 text-sm'}>Gerencie todos os acessos e perfis ativos.</p>
+                  <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white">Gestão de Alunas</h2>
+                  <p className="text-white/40 text-sm">Gerencie todos os acessos e perfis ativos.</p>
                 </div>
                 <button onClick={() => setIsCreatingUser(true)} className="px-6 py-3 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-xl">Nova Aluna</button>
               </div>
 
-              <div className={`backdrop-blur-xl rounded-[32px] overflow-hidden border shadow-2xl transition-all duration-500 ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-white border-wine-50'}`}>
-                <div className="p-6 border-b border-wine-50 flex items-center gap-4">
-                  <FiSearch className="text-wine-900/40" />
-                  <input type="text" placeholder="Buscar por nome ou plano..." className="bg-transparent border-none outline-none flex-1 text-sm font-bold" />
+              <div className="backdrop-blur-xl rounded-[32px] overflow-hidden border border-white/5 bg-white/5 shadow-2xl">
+                <div className="p-6 border-b border-white/5 flex items-center gap-4">
+                  <FiSearch className="text-white/40" />
+                  <input type="text" placeholder="Buscar por nome ou plano..." className="bg-transparent border-none outline-none flex-1 text-sm font-bold text-white" />
                 </div>
                 
-                {/* Responsive Header (Desktop Only) */}
-                <div className={`hidden md:grid md:grid-cols-4 p-6 text-[10px] font-black uppercase tracking-widest border-b ${isDarkMode ? 'text-white/40 border-white/5' : 'text-wine-900/40 border-wine-50'}`}>
+                <div className="hidden md:grid md:grid-cols-4 p-6 text-[10px] font-black uppercase tracking-widest border-b text-white/40 border-white/5">
                   <div>Aluna</div>
                   <div>Plano</div>
                   <div>Status</div>
                   <div className="text-right">Ações</div>
                 </div>
 
-                <div className="divide-y divide-wine-50/10">
+                <div className="divide-y divide-white/5">
                   {studentsData.map((s, i) => (
-                    <div key={i} className={`grid grid-cols-1 md:grid-cols-4 items-center p-6 gap-4 md:gap-0 hover:bg-white/[0.02] transition-colors ${isDarkMode ? 'border-white/5' : 'border-wine-50'}`}>
-                      {/* Aluna Name */}
+                    <div key={i} className="grid grid-cols-1 md:grid-cols-4 items-center p-6 gap-4 md:gap-0 hover:bg-white/[0.02] transition-colors border-white/5">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center text-white font-black text-xs shadow-lg">{s.name[0]}</div>
                         <div>
-                          <span className="font-bold text-sm block">{s.name}</span>
+                          <span className="font-bold text-sm block text-white">{s.name}</span>
                           <span className="md:hidden text-[9px] font-black uppercase tracking-widest opacity-40">{s.plano}</span>
                         </div>
                       </div>
 
-                      {/* Plano (Desktop Only) */}
-                      <div className="hidden md:block text-sm font-bold opacity-80">{s.plano}</div>
+                      <div className="hidden md:block text-sm font-bold opacity-80 text-white">{s.plano}</div>
 
-                      {/* Status */}
                       <div className="flex md:block items-center justify-between">
                         <span className="md:hidden text-[10px] font-black uppercase tracking-widest opacity-30">Status</span>
                         <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 shadow-sm">Ativo</span>
                       </div>
 
-                      {/* Ações */}
-                      <div className="flex items-center justify-end gap-4 border-t md:border-t-0 pt-4 md:pt-0 border-wine-50/10">
+                      <div className="flex items-center justify-end gap-4 border-t md:border-t-0 pt-4 md:pt-0 border-white/5">
                         <button 
                           onClick={() => handleEditStudent(s)}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest ${isDarkMode ? 'bg-white/5 text-white hover:bg-white/10' : 'bg-wine-50 text-wine-900 hover:bg-wine-100'}`}
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-white/5 text-white hover:bg-white/10"
                         >
                           <FiEdit size={14} />
                           <span className="md:hidden lg:inline">Editar</span>
                         </button>
                         <button 
                           onClick={() => handleDeleteStudent(s.name)}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest ${isDarkMode ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 hover:bg-red-500/20"
                         >
                           <FiTrash2 size={14} />
                           <span className="md:hidden lg:inline">Excluir</span>
@@ -602,8 +563,8 @@ const AdminPage = () => {
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className={`font-display font-black text-3xl uppercase tracking-tighter ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Planilhas de Treino</h2>
-                  <p className={isDarkMode ? 'text-white/40 text-sm' : 'text-wine-900/40 text-sm'}>Histórico de treinos gerados por IA.</p>
+                  <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white">Planilhas de Treino</h2>
+                  <p className="text-white/40 text-sm">Histórico de treinos gerados por IA.</p>
                 </div>
                 <button 
                   onClick={() => setShowWorkoutModal(true)}
@@ -615,25 +576,25 @@ const AdminPage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {workoutsList.length > 0 ? workoutsList.map((w, i) => (
-                  <div key={i} className={`p-8 rounded-[32px] border transition-all hover:scale-[1.02] cursor-pointer group flex flex-col justify-between ${isDarkMode ? 'bg-white/5 border-white/5 hover:border-bordeaux/40' : 'bg-white border-wine-50 hover:border-wine-900/40'}`}>
+                  <div key={i} className="p-8 rounded-[32px] border border-white/5 bg-white/5 shadow-premium hover:border-bordeaux/40 transition-all hover:scale-[1.02] cursor-pointer group flex flex-col justify-between">
                     <div>
                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-wine-900 to-bordeaux flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
                         <FiTarget size={24} />
                       </div>
-                      <h3 className="font-display font-black text-lg mb-1">{w.titulo}</h3>
-                      <p className={`text-[10px] font-black uppercase text-bordeaux mb-4`}>Aluna: {w.usuarios?.usuario || 'Desconhecida'}</p>
-                      <p className={`text-xs mb-6 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Foco: {w.foco} • {new Date(w.data_criacao).toLocaleDateString('pt-BR')}</p>
+                      <h3 className="font-display font-black text-lg mb-1 text-white">{w.titulo}</h3>
+                      <p className="text-[10px] font-black uppercase text-bordeaux mb-4">Aluna: {w.usuarios?.usuario || 'Desconhecida'}</p>
+                      <p className="text-xs mb-6 text-white/40">Foco: {w.foco} • {new Date(w.data_criacao).toLocaleDateString('pt-BR')}</p>
                     </div>
                     <button 
                       onClick={() => setSelectedWorkout(w)}
-                      className="w-full py-3 rounded-xl border border-wine-900/20 text-wine-900 text-[10px] font-black uppercase tracking-widest hover:bg-wine-900 hover:text-white transition-all"
+                      className="w-full py-3 rounded-xl border border-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-wine-900 transition-all"
                     >
                       Visualizar Treino
                     </button>
                   </div>
                 )) : (
                   <div className="col-span-full p-12 text-center">
-                    <p className={`text-sm font-medium ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Nenhum treino gerado ainda.</p>
+                    <p className="text-sm font-medium text-white/40">Nenhum treino gerado ainda.</p>
                   </div>
                 )}
               </div>
@@ -642,13 +603,13 @@ const AdminPage = () => {
 
           {activeTab === 'analytics' && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-              <h2 className={`font-display font-black text-3xl uppercase tracking-tighter ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Evolução Global</h2>
-              <div className={`p-12 rounded-[40px] border flex flex-col items-center justify-center text-center ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-white border-wine-100 shadow-2xl'}`}>
-                <div className="w-20 h-20 rounded-full bg-wine-900/10 flex items-center justify-center text-wine-900 mb-6">
+              <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white">Evolução Global</h2>
+              <div className="p-12 rounded-[40px] border border-white/5 bg-white/5 flex flex-col items-center justify-center text-center">
+                <div className="lg:hidden bg-black border-b border-white/10 p-4 flex items-center justify-between sticky top-0 z-30">
                   <FiBarChart2 size={40} />
                 </div>
-                <h3 className="text-xl font-black mb-2">Relatórios em Processamento</h3>
-                <p className="text-sm opacity-60 max-w-md">Os dados de evolução das alunas são processados mensalmente. Próxima atualização em 5 dias.</p>
+                <h3 className="text-xl font-black mb-2 text-white">Relatórios em Processamento</h3>
+                <p className="text-sm opacity-60 max-w-md text-white/60">Os dados de evolução das alunas são processados mensalmente. Próxima atualização em 5 dias.</p>
               </div>
             </motion.div>
           )}

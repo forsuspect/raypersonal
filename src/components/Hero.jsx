@@ -61,14 +61,13 @@ const Hero = () => {
           </div>
         </motion.div>
 
-        {/* Image Content (Background on Mobile, Column on Desktop) */}
+        {/* Image Content */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, delay: 0.2 }}
           className="absolute inset-0 lg:relative lg:w-[45%] flex justify-center lg:justify-end z-0 lg:z-20 opacity-20 lg:opacity-100 pointer-events-none lg:pointer-events-auto"
         >
-          {/* Main Image Container */}
           <div className="relative z-10 w-full h-[60vh] lg:h-auto lg:rounded-[3rem] overflow-hidden lg:border-[12px] lg:border-white lg:shadow-premium-lg lg:aspect-[4/5] object-cover">
             <img
               src="https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=1374&auto=format&fit=crop"
@@ -81,7 +80,6 @@ const Hero = () => {
             <div className="absolute inset-0 bg-white/40 lg:hidden" />
           </div>
 
-          {/* Floating Element 1 - Hidden on mobile to avoid clutter since image is background */}
           <motion.div
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -96,7 +94,6 @@ const Hero = () => {
             </div>
           </motion.div>
 
-          {/* Floating Element 2 - Hidden on mobile */}
           <motion.div
             animate={{ y: [0, 10, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
