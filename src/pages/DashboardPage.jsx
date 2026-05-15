@@ -96,7 +96,7 @@ const DashboardPage = () => {
         }, 800)
       }
     }
-  }, [completedExercises, activeWorkout, userData, isWorkoutFinished])
+  }, [completedExercises, activeWorkout, userData, isWorkoutFinished, activeWorkoutTab])
 
   if (loading) return (
     <div className="min-h-screen bg-premium-light flex items-center justify-center">
