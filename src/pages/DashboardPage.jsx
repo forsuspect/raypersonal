@@ -317,7 +317,36 @@ const DashboardPage = () => {
                 </div>
 
                 <div className="space-y-4">
-                  {activeWorkout?.conteudo_treino?.exercises ? activeWorkout.conteudo_treino.exercises.map((ex, i) => (
+                  {isWorkoutFinished ? (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-wine-950 rounded-[2.5rem] p-12 text-white text-center shadow-wine relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-3xl rounded-full" />
+                      <div className="relative z-10">
+                        <div className="w-20 h-20 rounded-full bg-emerald-500 mx-auto flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(16,185,129,0.3)]">
+                          <FiCheck size={40} />
+                        </div>
+                        <h2 className="text-3xl font-serif italic mb-4">Treino de Hoje Concluído!</h2>
+                        <p className="text-white/60 mb-8 max-w-sm mx-auto">
+                          Você deu o seu melhor hoje. Agora é hora de recuperar as energias. Seu novo ciclo estará disponível amanhã.
+                        </p>
+                        <div className="flex flex-col gap-4 max-w-xs mx-auto">
+                          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+                            <span className="text-white/40 text-xs font-bold uppercase tracking-widest">Status</span>
+                            <span className="text-emerald-400 font-bold">REGISTRADO</span>
+                          </div>
+                          <button 
+                            onClick={() => setActiveTab('overview')}
+                            className="bg-white text-wine-950 py-4 rounded-2xl font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform"
+                          >
+                            Voltar ao Início
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ) : activeWorkout?.conteudo_treino?.exercises ? activeWorkout.conteudo_treino.exercises.map((ex, i) => (
                     <div key={i} className="bg-white p-6 rounded-3xl border border-wine-50 shadow-premium flex flex-col md:flex-row md:items-center gap-6">
                        <div className="w-20 h-20 rounded-2xl bg-wine-100 flex items-center justify-center shrink-0 overflow-hidden">
                          <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=200&auto=format&fit=crop" alt="Ex" className="w-full h-full object-cover opacity-60 mix-blend-multiply" />
