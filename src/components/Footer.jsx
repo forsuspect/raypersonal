@@ -1,16 +1,16 @@
 import React from 'react'
-import { FiInstagram, FiYoutube, FiMessageCircle, FiHeart } from 'react-icons/fi'
+import { FiInstagram, FiYoutube, FiMessageCircle, FiHeart, FiArrowRight } from 'react-icons/fi'
 
 const Footer = () => {
   return (
-    <footer className="bg-wine-950 text-white relative overflow-hidden pt-24 pb-8" style={{ minHeight: '50dvh' }}>
+    <footer className="bg-wine-950 text-white relative overflow-hidden pt-16 md:pt-24 pb-8">
       {/* Decorative large text */}
       <div className="absolute bottom-[-10%] right-[-5%] text-[30vw] font-black text-white/[0.02] leading-none pointer-events-none select-none z-0">
         RM
       </div>
 
-      <div className="w-full max-w-7xl mx-auto px-6 relative z-10 flex flex-col justify-between h-full">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-12 md:gap-6 mb-16">
+      <div className="w-full max-w-7xl mx-auto px-6 relative z-10">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-10 md:gap-6 mb-12">
           <div className="flex flex-col items-start text-left max-w-sm">
             <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-14 w-auto brightness-0 invert mb-6" />
             <p className="text-white/60 text-sm mb-8 leading-relaxed">
@@ -43,7 +43,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-center mt-auto">
+        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-center">
           <p className="text-white/40 text-xs font-medium">© {new Date().getFullYear()} Rayana Maria. Todos os direitos reservados.</p>
           <div className="flex items-center gap-2 text-white/40 text-xs font-medium justify-center bg-white/5 px-4 py-2 rounded-full">
             Feito com <FiHeart size={12} className="text-bordeaux fill-bordeaux animate-pulse" /> para alunas dedicadas

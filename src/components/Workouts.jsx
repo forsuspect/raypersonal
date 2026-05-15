@@ -14,7 +14,7 @@ const Workouts = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 })
 
   return (
-    <section id="treinos" className="relative bg-premium-white overflow-hidden flex items-center" style={{ height: '100dvh' }}>
+    <section id="treinos" className="relative bg-premium-white overflow-hidden flex items-center py-16 md:py-24" style={{ minHeight: '80dvh' }}>
       <div className="absolute top-0 right-0 w-1/3 h-full bg-wine-50/30 -skew-x-12 translate-x-1/2 pointer-events-none" />
 
       <div ref={ref} className="w-full max-w-7xl mx-auto px-6 relative z-10">
