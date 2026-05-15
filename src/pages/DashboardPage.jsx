@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { 
   FiHome, FiActivity, FiVideo, FiMessageCircle, FiSettings, 
-  FiLogOut, FiMenu, FiX, FiDroplet, FiTarget, FiTrendingUp, FiArrowLeft 
+  FiLogOut, FiMenu, FiX, FiDroplet, FiTarget, FiTrendingUp, FiArrowLeft, FiCheck
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
@@ -18,6 +18,7 @@ const DashboardPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [userData, setUserData] = useState(null)
   const [activeWorkout, setActiveWorkout] = useState(null)
+  const [completedExercises, setCompletedExercises] = useState([])
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
@@ -260,8 +261,21 @@ const DashboardPage = () => {
                        </div>
                        <div className="flex items-center gap-2">
                          <input type="text" placeholder="Kg" className="w-16 h-12 bg-premium-light border border-wine-100 rounded-xl text-center font-bold text-wine-950 focus:outline-none focus:border-wine-900" />
-                         <button className="w-12 h-12 bg-wine-950 text-white rounded-xl flex items-center justify-center shadow-wine hover:bg-bordeaux transition-colors">
-                           <FiVideo />
+                         <button 
+                           onClick={() => {
+                             if (completedExercises.includes(i)) {
+                               setCompletedExercises(completedExercises.filter(item => item !== i))
+                             } else {
+                               setCompletedExercises([...completedExercises, i])
+                             }
+                           }}
+                           className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                             completedExercises.includes(i)
+                               ? 'bg-emerald-500 text-white shadow-lg scale-110'
+                               : 'bg-wine-950 text-white shadow-wine hover:bg-bordeaux'
+                           }`}
+                         >
+                           <FiCheck size={20} />
                          </button>
                        </div>
                     </div>
