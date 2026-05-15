@@ -127,18 +127,29 @@ const DashboardPage = () => {
               <p className="text-xs text-bordeaux font-bold uppercase tracking-widest truncate">{userDisplay.plan}</p>
             </div>
           </div>
-          <Link to="/" className="flex items-center gap-2 text-wine-900/50 hover:text-wine-900 text-sm font-bold transition-colors w-full mb-2">
-            <FiArrowLeft /> Voltar para o site
-          </Link>
-          <button 
-            onClick={() => {
-              localStorage.removeItem('rm_user')
-              navigate('/login')
-            }} 
-            className="flex items-center gap-2 text-wine-900/50 hover:text-wine-900 text-sm font-bold transition-colors w-full"
-          >
-            <FiLogOut /> Sair da conta
-          </button>
+          <div className="space-y-1">
+            <Link 
+              to="/" 
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-wine-900/60 hover:text-wine-900 hover:bg-wine-50/50 transition-all text-sm font-bold"
+            >
+              <div className="w-8 h-8 rounded-lg bg-wine-50 flex items-center justify-center">
+                <FiArrowLeft size={16} />
+              </div>
+              Voltar para o site
+            </Link>
+            <button 
+              onClick={() => {
+                localStorage.removeItem('rm_user')
+                navigate('/login')
+              }} 
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-wine-900/60 hover:text-red-600 hover:bg-red-50 transition-all text-sm font-bold"
+            >
+              <div className="w-8 h-8 rounded-lg bg-wine-50 group-hover:bg-red-100 flex items-center justify-center">
+                <FiLogOut size={16} />
+              </div>
+              Sair da conta
+            </button>
+          </div>
         </div>
       </aside>
 
