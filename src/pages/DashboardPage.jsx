@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { 
   FiHome, FiActivity, FiMessageCircle, 
-  FiMenu, FiX, FiDroplet, FiTarget, FiArrowLeft, FiCheck, FiCheckCircle
+  FiMenu, FiX, FiDroplet, FiTarget, FiArrowLeft, FiCheck, FiCheckCircle,
+  FiTrendingUp, FiSettings, FiLogOut
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
