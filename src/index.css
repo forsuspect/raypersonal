@@ -18,19 +18,17 @@
   box-sizing: border-box;
 }
 
-html, body, #root {
+html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  max-width: 100vw;
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--premium-light);
   color: var(--wine-950);
   scroll-behavior: smooth;
-  overflow-x: hidden !important;
-  overscroll-behavior: none;
+  overflow-x: hidden;
   position: relative;
 }
 
