@@ -15,6 +15,9 @@ const MOCK_USER = {
 
 const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState('overview')
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [userData, setUserData] = useState(null)
+  const [activeWorkout, setActiveWorkout] = useState(null)
   const [completedExercises, setCompletedExercises] = useState([])
   const [isWorkoutFinished, setIsWorkoutFinished] = useState(false)
   const [loading, setLoading] = useState(true)
