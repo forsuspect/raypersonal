@@ -5,7 +5,7 @@ import {
   FiHome, FiUsers, FiTarget, FiDollarSign, FiBarChart2,
   FiBell, FiSettings, FiLogOut, FiMenu, FiX, FiPlus,
   FiSearch, FiMoreVertical, FiTrendingUp, FiActivity,
-  FiEdit, FiTrash2, FiEye, FiCheckCircle, FiChevronRight, FiArrowLeft, FiSun, FiMoon, FiRefreshCw
+  FiEdit, FiTrash2, FiEye, FiCheckCircle, FiChevronRight, FiArrowLeft, FiSun, FiMoon, FiRefreshCw, FiAlertCircle
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
@@ -39,6 +39,7 @@ const AdminPage = () => {
   })
   const [loading, setLoading] = useState(true)
   const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null })
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' })
   
   // Workout Generation State
   const [showWorkoutModal, setShowWorkoutModal] = useState(false)
@@ -89,6 +90,11 @@ const AdminPage = () => {
     }
   }
 
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => setNotification({ ...notification, show: false }), 4000);
+  }
+
   const fetchData = async () => {
     setLoading(true)
     try {
@@ -98,7 +104,7 @@ const AdminPage = () => {
         .select('*')
 
       if (error) {
-        alert(`Erro ao buscar dados do banco: ${error.message} (Dica: Verifique se o RLS está ativado no Supabase)`);
+        showNotification(`Erro ao buscar dados: ${error.message}`, 'error');
         throw error;
       }
 
@@ -139,10 +145,11 @@ const AdminPage = () => {
           if (error) throw error
           await fetchData() // Refresh data after reset
           setConfirmModal(prev => ({ ...prev, show: false }))
+          showNotification('Sistema resetado com sucesso.');
         } catch (err) {
           console.error("Erro ao resetar:", err)
           setConfirmModal(prev => ({ ...prev, show: false }))
-          alert('Erro ao resetar: ' + err.message)
+          showNotification('Erro ao resetar: ' + err.message, 'error')
         }
       }
     })
@@ -152,7 +159,7 @@ const AdminPage = () => {
 
   const handleDeleteStudent = async (username) => {
     if (username === 'admin') {
-      alert('O usuário administrador não pode ser excluído.');
+      showNotification('O usuário administrador não pode ser excluído.', 'error');
       return;
     }
     setConfirmModal({
@@ -173,11 +180,11 @@ const AdminPage = () => {
           await fetchData()
           
           setConfirmModal(prev => ({ ...prev, show: false }))
+          showNotification(`Acesso de "${username}" removido.`);
         } catch (err) {
           console.error("Erro capturado ao excluir:", err)
           setConfirmModal(prev => ({ ...prev, show: false }))
-          // Using alert for immediate feedback on deletion errors
-          alert(`Erro ao excluir "${username}": ${err.message}\n\nDica: Verifique se as políticas de DELETE estão ativadas no Supabase.`);
+          showNotification(`Erro ao excluir: ${err.message}`, 'error');
         }
       }
     })
@@ -193,7 +200,7 @@ const AdminPage = () => {
 
   const handleGenerateWorkout = async () => {
     if (!selectedStudentId) {
-      alert('Selecione uma aluna primeiro.');
+      showNotification('Selecione uma aluna primeiro.', 'error');
       return;
     }
 
@@ -236,10 +243,10 @@ const AdminPage = () => {
       
       await fetchWorkouts();
       setShowWorkoutModal(false);
-      alert('Treino gerado com sucesso e enviado para o portal da aluna!');
+      showNotification('Treino gerado com sucesso!');
     } catch (err) {
       console.error("Error generating workout:", err);
-      alert('Erro ao gerar treino: ' + err.message);
+      showNotification('Erro ao gerar treino: ' + err.message, 'error');
     } finally {
       setIsGenerating(false);
     }
@@ -866,6 +873,24 @@ const AdminPage = () => {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+      {/* Notification Toast */}
+      <AnimatePresence>
+        {notification.show && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: 20, x: '-50%' }}
+            className={`fixed bottom-10 left-1/2 z-[200] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px] backdrop-blur-xl border ${
+              notification.type === 'success' 
+                ? 'bg-emerald-500/90 text-white border-emerald-400/20' 
+                : 'bg-red-500/90 text-white border-red-400/20'
+            }`}
+          >
+            {notification.type === 'success' ? <FiCheckCircle size={20} /> : <FiAlertCircle size={20} />}
+            <p className="font-bold text-sm">{notification.message}</p>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
