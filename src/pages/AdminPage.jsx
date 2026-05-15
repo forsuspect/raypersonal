@@ -43,6 +43,7 @@ const AdminPage = () => {
   
   // Workout Generation State
   const [showWorkoutModal, setShowWorkoutModal] = useState(false)
+  const [selectedWorkout, setSelectedWorkout] = useState(null)
   const [selectedStudentId, setSelectedStudentId] = useState('')
   const [workoutType, setWorkoutType] = useState('Hipertrofia')
   const [isGenerating, setIsGenerating] = useState(false)
@@ -570,7 +571,12 @@ const AdminPage = () => {
                       <p className={`text-[10px] font-black uppercase text-bordeaux mb-4`}>Aluna: {w.usuarios?.usuario || 'Desconhecida'}</p>
                       <p className={`text-xs mb-6 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Foco: {w.foco} • {new Date(w.data_criacao).toLocaleDateString('pt-BR')}</p>
                     </div>
-                    <button className="w-full py-3 rounded-xl border border-wine-900/20 text-wine-900 text-[10px] font-black uppercase tracking-widest hover:bg-wine-900 hover:text-white transition-all">Visualizar Treino</button>
+                    <button 
+                      onClick={() => setSelectedWorkout(w)}
+                      className="w-full py-3 rounded-xl border border-wine-900/20 text-wine-900 text-[10px] font-black uppercase tracking-widest hover:bg-wine-900 hover:text-white transition-all"
+                    >
+                      Visualizar Treino
+                    </button>
                   </div>
                 )) : (
                   <div className="col-span-full p-12 text-center">
