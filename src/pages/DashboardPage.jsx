@@ -151,40 +151,10 @@ const DashboardPage = () => {
           ))}
         </nav>
 
-        <div className="pt-4 mt-auto space-y-1" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-          {/* User card at bottom */}
-          <div className="flex items-center gap-3 px-2 py-3 rounded-xl mb-2" style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}>
-            <img src={userDisplay.avatar} alt="Avatar" className="w-9 h-9 rounded-full object-cover border-2" style={{ borderColor: 'rgba(136,19,55,0.4)' }} />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-white truncate">{userDisplay.name}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: '#881337' }}>{userDisplay.plan}</p>
-            </div>
-            <button
-              onClick={() => { localStorage.removeItem('rm_user'); navigate('/login') }}
-              className="p-1.5 rounded-lg transition-colors"
-              style={{ color: 'rgba(255,255,255,0.3)' }}
-              title="Sair"
-            >
-              <FiLogOut size={14} />
-            </button>
-          </div>
-        </div>
       </aside>
 
       {/* Main Content Area */}
       <main className="flex-1 h-full overflow-y-auto relative" style={{ backgroundColor: '#141210' }}>
-        {/* Desktop Header */}
-        <header className="hidden lg:flex items-center justify-between p-5 sticky top-0 z-30" style={{ backgroundColor: '#141210', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <div />
-          <div className="flex items-center gap-3 px-4 py-2 rounded-2xl" style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="text-right">
-              <p className="text-sm font-bold text-white leading-none mb-1">{userDisplay.name}</p>
-              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#881337' }}>{userDisplay.plan}</p>
-            </div>
-            <img src={userDisplay.avatar} alt="Avatar" className="w-9 h-9 rounded-full object-cover border-2" style={{ borderColor: 'rgba(136,19,55,0.3)' }} />
-          </div>
-        </header>
-
         {/* Mobile Header */}
         <div className="lg:hidden p-4 flex items-center justify-between sticky top-0 z-30" style={{ backgroundColor: '#1c1916', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <Link to="/" className="flex items-center">
