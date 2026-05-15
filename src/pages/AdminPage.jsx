@@ -286,12 +286,15 @@ const AdminPage = () => {
         }
       ];
 
+      const selectedStudent = students.find(s => s.id === selectedStudentId);
+      const studentName = selectedStudent ? selectedStudent.name : 'Desconhecida';
+
       const { error } = await supabase.from('planilhas_treino').insert({
         aluna_id: selectedStudentId,
-        titulo: `Planejamento Semanal RM: ${workoutType}`,
+        titulo: `Aluna - ${studentName} ( Treino Semanal ) foco em ${workoutType}`,
         foco: workoutType,
         conteudo_treino: { workouts: weeklyCycle },
-        descricao: `Planejamento de elite gerado por IA focado em ${workoutType}. Cobertura total de SEG a SAB.`
+        descricao: `Treino semanal gerado automaticamente com foco em ${workoutType} para ${studentName}. Cobertura total de SEG a SAB.`
       });
 
       if (error) throw error;
