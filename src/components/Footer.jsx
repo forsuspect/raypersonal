@@ -3,46 +3,50 @@ import { FiInstagram, FiYoutube, FiMessageCircle, FiHeart } from 'react-icons/fi
 
 const Footer = () => {
   return (
-    <footer className="bg-wine-950 text-white flex flex-col justify-end overflow-hidden relative" style={{ height: '30dvh', minHeight: '220px' }}>
-      <div className="absolute bottom-0 right-0 text-[20vw] font-black text-white/[0.02] translate-y-1/4 translate-x-1/4 pointer-events-none">
+    <footer className="bg-wine-950 text-white relative overflow-hidden pt-24 pb-8" style={{ minHeight: '50dvh' }}>
+      {/* Decorative large text */}
+      <div className="absolute bottom-[-10%] right-[-5%] text-[30vw] font-black text-white/[0.02] leading-none pointer-events-none select-none z-0">
         RM
       </div>
 
-      <div className="w-full max-w-7xl mx-auto px-6 relative z-10 pb-4">
-        <div className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-6">
-          <div className="flex flex-col items-center md:items-start text-center md:text-left">
-            <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-10 w-auto brightness-0 invert mb-4" />
-            <div className="flex gap-3 justify-center md:justify-start">
-              <a href="#" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/20 transition-colors"><FiInstagram size={14} /></a>
-              <a href="#" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/20 transition-colors"><FiYoutube size={14} /></a>
-              <a href="#" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/20 transition-colors"><FiMessageCircle size={14} /></a>
+      <div className="w-full max-w-7xl mx-auto px-6 relative z-10 flex flex-col justify-between h-full">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-12 md:gap-6 mb-16">
+          <div className="flex flex-col items-start text-left max-w-sm">
+            <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-14 w-auto brightness-0 invert mb-6" />
+            <p className="text-white/60 text-sm mb-8 leading-relaxed">
+              Transformando corpos e mentes através de protocolos de treino de elite. O método perfeito para quem busca resultados definitivos.
+            </p>
+            <div className="flex gap-4">
+              <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-bordeaux transition-colors hover:scale-110 duration-300"><FiInstagram size={18} /></a>
+              <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-bordeaux transition-colors hover:scale-110 duration-300"><FiYoutube size={18} /></a>
+              <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-bordeaux transition-colors hover:scale-110 duration-300"><FiMessageCircle size={18} /></a>
             </div>
           </div>
           
-          <div className="flex gap-8 md:gap-16 text-center md:text-left text-xs">
+          <div className="flex flex-wrap gap-12 md:gap-20 text-left text-sm mt-4 md:mt-0">
             <div>
-              <h4 className="font-bold text-sm mb-2">Navegação</h4>
-              <ul className="space-y-1">
+              <h4 className="font-black uppercase tracking-widest text-white mb-6 text-xs">Navegação</h4>
+              <ul className="space-y-4">
                 <li><a href="#hero" className="text-white/50 hover:text-white transition-colors">Início</a></li>
                 <li><a href="#sobre" className="text-white/50 hover:text-white transition-colors">Sobre Mim</a></li>
-                <li><a href="#planos" className="text-white/50 hover:text-white transition-colors">Planos</a></li>
+                <li><a href="#planos" className="text-white/50 hover:text-white transition-colors">Planos Exclusivos</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-sm mb-2">Suporte</h4>
-              <ul className="space-y-1">
-                <li><a href="#" className="text-white/50 hover:text-white transition-colors">Portal Aluna</a></li>
+              <h4 className="font-black uppercase tracking-widest text-white mb-6 text-xs">Suporte</h4>
+              <ul className="space-y-4">
+                <li><a href="#" className="text-white/50 hover:text-white transition-colors">Portal da Aluna</a></li>
                 <li><a href="#" className="text-white/50 hover:text-white transition-colors">Privacidade</a></li>
-                <li><a href="#" className="text-white/50 hover:text-white transition-colors">Termos Uso</a></li>
+                <li><a href="#" className="text-white/50 hover:text-white transition-colors">Termos de Uso</a></li>
               </ul>
             </div>
           </div>
         </div>
 
-        <div className="pt-4 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-2 text-center">
-          <p className="text-white/30 text-[10px]">© {new Date().getFullYear()} Rayana Maria. Todos os direitos reservados.</p>
-          <div className="flex items-center gap-1.5 text-white/30 text-[10px] justify-center">
-            Feito com <FiHeart size={10} className="text-bordeaux fill-bordeaux" /> para alunas dedicadas.
+        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-center mt-auto">
+          <p className="text-white/40 text-xs font-medium">© {new Date().getFullYear()} Rayana Maria. Todos os direitos reservados.</p>
+          <div className="flex items-center gap-2 text-white/40 text-xs font-medium justify-center bg-white/5 px-4 py-2 rounded-full">
+            Feito com <FiHeart size={12} className="text-bordeaux fill-bordeaux animate-pulse" /> para alunas dedicadas
           </div>
         </div>
       </div>
