@@ -29,18 +29,20 @@ const LoginPage = () => {
         .select('*')
         .eq('usuario', email.trim())
         .eq('senha', password)
-        .single()
+        .limit(1)
 
-      if (error || !data) {
+      if (error || !data || data.length === 0) {
         throw new Error('Usuário ou senha incorretos.')
       }
 
+      const user = data[0]
+
       // Use the returned data to determine navigation
-      if (data.role === 'admin' || email.trim() === 'admin') {
-        localStorage.setItem('rm_user', JSON.stringify({ ...data, usuario: email.trim() }))
+      if (user.role === 'admin' || email.trim() === 'admin') {
+        localStorage.setItem('rm_user', JSON.stringify({ ...user, usuario: email.trim() }))
         navigate('/admin')
       } else {
-        localStorage.setItem('rm_user', JSON.stringify(data))
+        localStorage.setItem('rm_user', JSON.stringify(user))
         navigate('/dashboard')
       }
     } catch (err) {

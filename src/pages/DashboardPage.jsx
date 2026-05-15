@@ -37,11 +37,13 @@ const DashboardPage = () => {
       
       // Verify if user still exists in DB and get latest workout
       try {
-        const { data: userFromDb, error: userError } = await supabase
+        const { data, error: userError } = await supabase
           .from('usuarios')
           .select('*')
           .eq('usuario', user.usuario)
-          .single()
+          .limit(1)
+
+        const userFromDb = data && data.length > 0 ? data[0] : null
 
         if (userError || !userFromDb) {
           localStorage.removeItem('rm_user')
