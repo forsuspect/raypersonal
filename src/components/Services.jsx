@@ -28,15 +28,15 @@ const Services = () => {
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
           {objectives.map((obj, i) => (
             <motion.div
               key={obj.title}
               initial={{ opacity: 0, y: 30 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: i * 0.1, type: "spring", stiffness: 100 }}
-              className="group relative rounded-[2rem] overflow-hidden cursor-pointer shadow-xl hover:shadow-wine/30 transition-all duration-500"
-              style={{ height: 'clamp(160px, 30dvh, 280px)' }}
+              className="group relative rounded-[2rem] overflow-hidden cursor-pointer shadow-xl hover:shadow-wine/30 transition-all duration-500 w-full"
+              style={{ height: 'clamp(280px, 40dvh, 450px)' }}
             >
               <img src={obj.image} alt={obj.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-[1.15]" />
               <div className="absolute inset-0 bg-gradient-to-t from-wine-950/95 via-wine-950/40 to-transparent group-hover:from-wine-950 transition-all duration-500" />
