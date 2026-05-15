@@ -30,6 +30,7 @@ html, body, #root {
   color: var(--wine-950);
   scroll-behavior: smooth;
   overflow-x: hidden !important;
+  overscroll-behavior: none;
   position: relative;
 }
 

@@ -12,8 +12,21 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 2200)
-    return () => clearTimeout(timer)
+    const handleLoad = () => setIsLoading(false)
+    
+    // Fallback timer in case onload takes too long or already happened
+    const timer = setTimeout(() => setIsLoading(false), 1200)
+
+    if (document.readyState === 'complete') {
+      setIsLoading(false)
+    } else {
+      window.addEventListener('load', handleLoad)
+    }
+
+    return () => {
+      window.removeEventListener('load', handleLoad)
+      clearTimeout(timer)
+    }
   }, [])
 
   if (isLoading) {
