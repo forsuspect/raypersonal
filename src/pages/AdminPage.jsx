@@ -286,7 +286,7 @@ const AdminPage = () => {
         }
       ];
 
-      const selectedStudent = students.find(s => s.id === selectedStudentId);
+      const selectedStudent = studentsData.find(s => s.id === selectedStudentId);
       const studentName = selectedStudent ? selectedStudent.name : 'Desconhecida';
 
       const { error } = await supabase.from('planilhas_treino').insert({
@@ -827,10 +827,10 @@ const AdminPage = () => {
                     onChange={(e) => setNewUserPlan(e.target.value)}
                     className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
                   >
-                    <option value="Essencial">Essencial</option>
-                    <option value="Premium">Premium</option>
-                    <option value="VIP Elite">VIP Elite</option>
-                    <option value="Administrador">Administrador</option>
+                    <option value="Essencial" className="bg-[#1c1916] text-white">Essencial</option>
+                    <option value="Premium" className="bg-[#1c1916] text-white">Premium</option>
+                    <option value="VIP Elite" className="bg-[#1c1916] text-white">VIP Elite</option>
+                    <option value="Administrador" className="bg-[#1c1916] text-white">Administrador</option>
                   </select>
                 </div>
 
@@ -913,9 +913,9 @@ const AdminPage = () => {
                     onChange={(e) => setSelectedStudentId(e.target.value)}
                     className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
                   >
-                    <option value="">Selecione uma aluna...</option>
+                    <option value="" className="bg-[#1c1916] text-white/50">Selecione uma aluna...</option>
                     {studentsData.map(s => (
-                      <option key={s.id} value={s.id}>{s.name} ({s.plano})</option>
+                      <option key={s.id} value={s.id} className="bg-[#1c1916] text-white">{s.name} ({s.plano})</option>
                     ))}
                   </select>
                 </div>
@@ -927,10 +927,10 @@ const AdminPage = () => {
                     onChange={(e) => setWorkoutType(e.target.value)}
                     className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
                   >
-                    <option value="Hipertrofia">Hipertrofia (Massa Magra)</option>
-                    <option value="Emagrecimento">Emagrecimento (Cardio/HIT)</option>
-                    <option value="Glúteos & Core">Foco em Glúteos & Core</option>
-                    <option value="Condicionamento">Condicionamento Físico</option>
+                    <option value="Hipertrofia" className="bg-[#1c1916] text-white">Hipertrofia (Massa Magra)</option>
+                    <option value="Emagrecimento" className="bg-[#1c1916] text-white">Emagrecimento (Cardio/HIT)</option>
+                    <option value="Glúteos & Core" className="bg-[#1c1916] text-white">Foco em Glúteos & Core</option>
+                    <option value="Condicionamento" className="bg-[#1c1916] text-white">Condicionamento Físico</option>
                   </select>
                 </div>
 
