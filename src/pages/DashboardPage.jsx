@@ -118,51 +118,56 @@ const DashboardPage = () => {
           ))}
         </nav>
 
-        {/* User Mini Profile */}
-        <div className="pt-6 border-t border-wine-100 mt-auto">
-          <div className="flex items-center gap-3 mb-4">
-            <img src={userDisplay.avatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover border-2 border-wine-100" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-wine-950 truncate">{userDisplay.name}</p>
-              <p className="text-xs text-bordeaux font-bold uppercase tracking-widest truncate">{userDisplay.plan}</p>
+        {/* Footer Navigation */}
+        <div className="pt-6 border-t border-wine-100 mt-auto space-y-1">
+          <Link 
+            to="/" 
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-wine-900/60 hover:text-wine-900 hover:bg-wine-50/50 transition-all text-sm font-bold"
+          >
+            <div className="w-8 h-8 rounded-lg bg-wine-50 flex items-center justify-center">
+              <FiArrowLeft size={16} />
             </div>
-          </div>
-          <div className="space-y-1">
-            <Link 
-              to="/" 
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-wine-900/60 hover:text-wine-900 hover:bg-wine-50/50 transition-all text-sm font-bold"
-            >
-              <div className="w-8 h-8 rounded-lg bg-wine-50 flex items-center justify-center">
-                <FiArrowLeft size={16} />
-              </div>
-              Voltar para o site
-            </Link>
-            <button 
-              onClick={() => {
-                localStorage.removeItem('rm_user')
-                navigate('/login')
-              }} 
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-wine-900/60 hover:text-red-600 hover:bg-red-50 transition-all text-sm font-bold"
-            >
-              <div className="w-8 h-8 rounded-lg bg-wine-50 group-hover:bg-red-100 flex items-center justify-center">
-                <FiLogOut size={16} />
-              </div>
-              Sair da conta
-            </button>
-          </div>
+            Voltar para o site
+          </Link>
+          <button 
+            onClick={() => {
+              localStorage.removeItem('rm_user')
+              navigate('/login')
+            }} 
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-wine-900/60 hover:text-red-600 hover:bg-red-50 transition-all text-sm font-bold"
+          >
+            <div className="w-8 h-8 rounded-lg bg-wine-50 group-hover:bg-red-100 flex items-center justify-center">
+              <FiLogOut size={16} />
+            </div>
+            Sair da conta
+          </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
       <main className="flex-1 lg:ml-64 relative min-h-screen">
+        {/* Desktop Header */}
+        <header className="hidden lg:flex items-center justify-end p-6 bg-white/50 backdrop-blur-md border-b border-wine-100 sticky top-0 z-30">
+          <div className="flex items-center gap-4 px-4 py-2 rounded-2xl bg-white border border-wine-50 shadow-sm">
+            <div className="text-right">
+              <p className="text-sm font-bold text-wine-950 leading-none mb-1">{userDisplay.name}</p>
+              <p className="text-[10px] text-bordeaux font-black uppercase tracking-widest">{userDisplay.plan}</p>
+            </div>
+            <img src={userDisplay.avatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover border-2 border-wine-100 shadow-inner" />
+          </div>
+        </header>
+
         {/* Mobile Header */}
         <div className="lg:hidden bg-white border-b border-wine-100 p-4 flex items-center justify-between sticky top-0 z-30">
           <Link to="/" className="flex items-center">
             <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-10 w-auto" />
           </Link>
-          <button onClick={() => setIsSidebarOpen(true)} className="text-wine-950 p-2">
-            <FiMenu size={24} />
-          </button>
+          <div className="flex items-center gap-3">
+             <img src={userDisplay.avatar} alt="Avatar" className="w-8 h-8 rounded-full border border-wine-100" />
+             <button onClick={() => setIsSidebarOpen(true)} className="text-wine-950 p-2">
+               <FiMenu size={24} />
+             </button>
+          </div>
         </div>
 
         {/* Content Container */}
