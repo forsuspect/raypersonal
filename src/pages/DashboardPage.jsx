@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { 
   FiHome, FiActivity, FiMessageCircle, 
   FiMenu, FiX, FiDroplet, FiTarget, FiArrowLeft, FiCheck, FiCheckCircle,
-  FiTrendingUp, FiSettings, FiLogOut
+  FiTrendingUp, FiSettings, FiLogOut, FiVideo
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
