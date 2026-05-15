@@ -269,36 +269,42 @@ const DashboardPage = () => {
                 </div>
 
                 {/* Today's Workout Card */}
-                <div className="bg-wine-950 rounded-[2.5rem] p-8 text-white shadow-wine relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-rose-soft/20 blur-3xl rounded-full" />
-                  <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="backdrop-blur-xl rounded-[2.5rem] p-8 md:p-10 border border-white/5 shadow-2xl relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)' }}>
+                  {/* Decorative Elements */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-bordeaux/20 blur-[80px] rounded-full pointer-events-none" />
+                  <div className="absolute bottom-0 left-10 w-40 h-40 bg-emerald-500/10 blur-[60px] rounded-full pointer-events-none" />
+                  <div className="absolute inset-0 bg-[url('/img/noise.png')] opacity-20 mix-blend-overlay pointer-events-none" />
+
+                  <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
                   <div>
-                    <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 ${isWorkoutFinished ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-white/10'}`}>
+                    <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border ${isWorkoutFinished ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-white/80 border-white/10'}`}>
                       {isWorkoutFinished ? 'Meta Batida' : 'Treino do Dia'}
                     </span>
-                    <h2 className="text-3xl font-serif italic mb-2">
+                    <h2 className="text-3xl md:text-4xl font-serif italic mb-3 text-white">
                       {isWorkoutFinished ? 'Treino Diário Concluído!' : (activeWorkout ? activeWorkout.titulo : 'Sem Treino Ativo')}
                     </h2>
-                    <p className="text-white/60 text-sm mb-6 max-w-md">
+                    <p className="text-white/50 text-sm mb-6 max-w-md leading-relaxed">
                       {isWorkoutFinished 
                         ? 'Parabéns! Você finalizou todos os exercícios programados para hoje. Descanse bem e mantenha o foco!' 
                         : (activeWorkout ? activeWorkout.descricao : 'Sua personal ainda não gerou seu ciclo de treinos personalizado.')}
                     </p>
                     {!isWorkoutFinished && activeWorkout && (
-                      <button onClick={() => setActiveTab('workout')} className="btn-premium bg-white text-wine-950 px-8 py-3 w-fit text-sm">
+                      <button onClick={() => setActiveTab('workout')} className="bg-white text-wine-950 font-bold px-8 py-3.5 rounded-xl hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-lg text-sm">
                         Iniciar Treino
                       </button>
                     )}
                     {isWorkoutFinished && (
-                       <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                         <FiCheckCircle /> Progresso de hoje: 100%
+                       <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm bg-emerald-500/5 w-fit px-4 py-2 rounded-xl border border-emerald-500/10">
+                         <FiCheckCircle size={16} /> Progresso de hoje: 100%
                        </div>
                     )}
                   </div>
                     {/* Abstract visual */}
-                    <div className="w-32 h-32 rounded-full border-4 border-white/10 flex items-center justify-center">
-                      <div className={`w-24 h-24 rounded-full flex items-center justify-center animate-pulse ${isWorkoutFinished ? 'bg-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.4)]' : 'bg-gradient-to-tr from-bordeaux to-rose-soft'}`}>
-                        {isWorkoutFinished ? <FiCheck size={40} /> : <FiVideo size={32} />}
+                    <div className="relative w-32 h-32 md:w-40 md:h-40 shrink-0 flex items-center justify-center">
+                      <div className="absolute inset-0 border border-white/10 rounded-full animate-[spin_10s_linear_infinite]" />
+                      <div className="absolute inset-2 border border-white/5 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
+                      <div className={`w-24 h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center shadow-2xl transition-all duration-700 ${isWorkoutFinished ? 'bg-emerald-500 shadow-emerald-500/30' : 'bg-bordeaux shadow-bordeaux/30'}`}>
+                        {isWorkoutFinished ? <FiCheck size={40} className="text-white" /> : <FiVideo size={32} className="text-white" />}
                       </div>
                     </div>
                   </div>
