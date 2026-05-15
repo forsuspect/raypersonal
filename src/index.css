@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --wine-950: #2d0611;
+  --wine-900: #4c0519;
+  --wine-800: #9b1c1c;
+  --bordeaux: #881337;
+  --premium-white: #ffffff;
+  --premium-light: #fafafa;
+  --soft-gray: #f3f4f6;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--premium-light);
+  color: var(--wine-950);
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--premium-white);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--wine-900);
+  border-radius: 10px;
+}
+
+/* Glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-dark {
+  background: rgba(76, 5, 25, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@layer components {
+
+  /* Buttons */
+  .btn-premium {
+    @apply px-8 py-4 rounded-full font-display font-semibold transition-all duration-300 transform hover:-translate-y-1 active:scale-95;
+    background: linear-gradient(135deg, #4c0519, #881337);
+    color: white;
+    box-shadow: 0 10px 20px rgba(76, 5, 25, 0.2);
+  }
+
+  .btn-premium:hover {
+    box-shadow: 0 15px 30px rgba(76, 5, 25, 0.3);
+  }
+
+  .btn-outline {
+    @apply px-8 py-4 rounded-full font-display font-semibold border-2 border-wine-900 text-wine-900 transition-all duration-300 hover:bg-wine-900 hover:text-white;
+  }
+}
+
+@layer utilities {
+
+  /* Typography Utilities */
+  .heading-xl {
+    font-size: clamp(2.5rem, 5vw + 1rem, 4.5rem);
+    @apply font-bold leading-[1.1] tracking-tight;
+  }
+
+  .heading-lg {
+    @apply text-4xl md:text-5xl font-bold leading-tight;
+  }
+
+  .heading-md {
+    @apply text-2xl md:text-3xl font-bold;
+  }
+
+  /* Section Padding */
+  .section-padding {
+    @apply py-20 md:py-32;
+  }
+}
+
+/* Animations */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease-out;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Wine Gradient Text */
+.text-wine-gradient {
+  background: linear-gradient(135deg, #4c0519, #881337);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
