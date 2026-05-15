@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
-import {
+import { 
   FiHome, FiUsers, FiTarget, FiDollarSign, FiBarChart2,
-  FiBell, FiSettings, FiLogOut, FiMenu, FiX, FiPlus,
-  FiSearch, FiMoreVertical, FiTrendingUp, FiActivity,
-  FiEdit, FiTrash2, FiEye, FiCheckCircle, FiChevronRight, FiArrowLeft, FiSun, FiMoon, FiRefreshCw, FiAlertCircle
+  FiBell, FiMenu, FiX, FiPlus,
+  FiSearch, FiTrendingUp, FiActivity,
+  FiEdit, FiTrash2, FiCheckCircle, FiChevronRight, FiArrowLeft, FiSun, FiMoon, FiAlertCircle
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 

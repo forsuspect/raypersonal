@@ -2,16 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { 
-  FiHome, FiActivity, FiVideo, FiMessageCircle, FiSettings, 
-  FiLogOut, FiMenu, FiX, FiDroplet, FiTarget, FiTrendingUp, FiArrowLeft, FiCheck, FiCheckCircle
+  FiHome, FiActivity, FiMessageCircle, 
+  FiMenu, FiX, FiDroplet, FiTarget, FiArrowLeft, FiCheck, FiCheckCircle
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
-const MOCK_USER = {
-  name: 'Carolina Mendes',
-  plan: 'VIP Premium',
-  avatar: 'https://i.pravatar.cc/150?u=40'
-}
+// MOCK_USER removed to fix build
 
 const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState('overview')
