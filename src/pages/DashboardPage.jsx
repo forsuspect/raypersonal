@@ -15,10 +15,8 @@ const MOCK_USER = {
 
 const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState('overview')
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [userData, setUserData] = useState(null)
-  const [activeWorkout, setActiveWorkout] = useState(null)
   const [completedExercises, setCompletedExercises] = useState([])
+  const [isWorkoutFinished, setIsWorkoutFinished] = useState(false)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
@@ -59,6 +57,13 @@ const DashboardPage = () => {
 
         if (!workoutError && workoutData) {
           setActiveWorkout(workoutData)
+          
+          // Check if already finished today
+          const today = new Date().toDateString()
+          const finishedDate = localStorage.getItem(`finished_${userFromDb.id}`)
+          if (finishedDate === today) {
+            setIsWorkoutFinished(true)
+          }
         }
       } catch (err) {
         console.error("Error verifying user or fetching workout:", err)
@@ -70,6 +75,15 @@ const DashboardPage = () => {
 
     checkUser()
   }, [navigate])
+
+  useEffect(() => {
+    if (activeWorkout && completedExercises.length > 0 && completedExercises.length === activeWorkout.conteudo_treino?.exercises?.length) {
+      setIsWorkoutFinished(true)
+      if (userData) {
+        localStorage.setItem(`finished_${userData.id}`, new Date().toDateString())
+      }
+    }
+  }, [completedExercises, activeWorkout, userData])
 
   if (loading) return (
     <div className="min-h-screen bg-premium-light flex items-center justify-center">
@@ -182,9 +196,17 @@ const DashboardPage = () => {
                 className="space-y-8"
               >
                 {/* Header Welcome */}
-                <div>
-                  <h1 className="heading-md text-wine-950 mb-2">Olá, {userDisplay.name.split(' ')[0]} 👋</h1>
-                  <p className="text-wine-900/60">Pronta para o treino de hoje? Vamos juntas.</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="heading-md text-wine-950 mb-2">Olá, {userDisplay.name.split(' ')[0]} 👋</h1>
+                    <p className="text-wine-900/60">{isWorkoutFinished ? 'Missão cumprida por hoje! Aproveite seu descanso.' : 'Pronta para o treino de hoje? Vamos juntas.'}</p>
+                  </div>
+                  {isWorkoutFinished && (
+                    <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-2 text-emerald-600 font-bold text-xs">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      Treino Concluído
+                    </div>
+                  )}
                 </div>
 
                 {/* Quick Stats Grid */}
@@ -216,21 +238,32 @@ const DashboardPage = () => {
                   <div className="absolute top-0 right-0 w-64 h-64 bg-rose-soft/20 blur-3xl rounded-full" />
                   <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                   <div>
-                    <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4">Treino do Dia</span>
-                    <h2 className="text-3xl font-serif italic mb-2">{activeWorkout ? activeWorkout.titulo : 'Sem Treino Ativo'}</h2>
+                    <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 ${isWorkoutFinished ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-white/10'}`}>
+                      {isWorkoutFinished ? 'Meta Batida' : 'Treino do Dia'}
+                    </span>
+                    <h2 className="text-3xl font-serif italic mb-2">
+                      {isWorkoutFinished ? 'Treino Diário Concluído!' : (activeWorkout ? activeWorkout.titulo : 'Sem Treino Ativo')}
+                    </h2>
                     <p className="text-white/60 text-sm mb-6 max-w-md">
-                      {activeWorkout ? activeWorkout.descricao : 'Sua personal ainda não gerou seu ciclo de treinos personalizado.'}
+                      {isWorkoutFinished 
+                        ? 'Parabéns! Você finalizou todos os exercícios programados para hoje. Descanse bem e mantenha o foco!' 
+                        : (activeWorkout ? activeWorkout.descricao : 'Sua personal ainda não gerou seu ciclo de treinos personalizado.')}
                     </p>
-                    {activeWorkout && (
+                    {!isWorkoutFinished && activeWorkout && (
                       <button onClick={() => setActiveTab('workout')} className="btn-premium bg-white text-wine-950 px-8 py-3 w-fit text-sm">
                         Iniciar Treino
                       </button>
                     )}
+                    {isWorkoutFinished && (
+                       <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                         <FiCheckCircle /> Progresso de hoje: 100%
+                       </div>
+                    )}
                   </div>
                     {/* Abstract visual */}
                     <div className="w-32 h-32 rounded-full border-4 border-white/10 flex items-center justify-center">
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-bordeaux to-rose-soft animate-pulse flex items-center justify-center">
-                        <FiVideo size={32} />
+                      <div className={`w-24 h-24 rounded-full flex items-center justify-center animate-pulse ${isWorkoutFinished ? 'bg-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.4)]' : 'bg-gradient-to-tr from-bordeaux to-rose-soft'}`}>
+                        {isWorkoutFinished ? <FiCheck size={40} /> : <FiVideo size={32} />}
                       </div>
                     </div>
                   </div>
@@ -245,7 +278,21 @@ const DashboardPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
               >
-                <h1 className="heading-md text-wine-950 mb-6">{activeWorkout ? activeWorkout.titulo : 'Meu Treino Atual'}</h1>
+                <div className="flex items-center justify-between mb-6">
+                  <h1 className="heading-md text-wine-950">{isWorkoutFinished ? 'Treino Concluído ✅' : (activeWorkout ? activeWorkout.titulo : 'Meu Treino Atual')}</h1>
+                  {isWorkoutFinished && (
+                    <button 
+                      onClick={() => {
+                        setIsWorkoutFinished(false);
+                        setCompletedExercises([]);
+                        localStorage.removeItem(`finished_${userData?.id}`);
+                      }}
+                      className="text-[10px] font-black uppercase tracking-widest text-wine-900/40 hover:text-wine-900 transition-colors"
+                    >
+                      Refazer Treino
+                    </button>
+                  )}
+                </div>
                 {/* AI Plan Generation Area */}
                 <div className="bg-wine-50 p-6 rounded-3xl border border-wine-100 mb-8 flex items-center justify-between">
                    <div>
