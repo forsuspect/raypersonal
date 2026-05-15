@@ -60,7 +60,7 @@ const Navbar = () => {
               to="/login"
               className="hidden lg:block btn-premium py-2.5 px-6 text-sm whitespace-nowrap"
             >
-              Portal Aluna
+              Portal da Aluna
             </Link>
 
             <button
