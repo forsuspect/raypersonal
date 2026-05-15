@@ -145,7 +145,7 @@ const DashboardPage = () => {
                 border: activeTab === item.id ? '1px solid rgba(136,19,55,0.4)' : '1px solid transparent'
               }}
             >
-              <item.icon size={18} style={{ color: activeTab === item.id ? '#c0996a' : undefined }} />
+              <item.icon size={18} style={{ color: activeTab === item.id ? '#881337' : undefined }} />
               {item.label}
             </button>
           ))}
@@ -154,10 +154,10 @@ const DashboardPage = () => {
         <div className="pt-4 mt-auto space-y-1" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           {/* User card at bottom */}
           <div className="flex items-center gap-3 px-2 py-3 rounded-xl mb-2" style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}>
-            <img src={userDisplay.avatar} alt="Avatar" className="w-9 h-9 rounded-full object-cover border-2" style={{ borderColor: 'rgba(192,153,106,0.4)' }} />
+            <img src={userDisplay.avatar} alt="Avatar" className="w-9 h-9 rounded-full object-cover border-2" style={{ borderColor: 'rgba(136,19,55,0.4)' }} />
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-white truncate">{userDisplay.name}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: '#c0996a' }}>{userDisplay.plan}</p>
+              <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: '#881337' }}>{userDisplay.plan}</p>
             </div>
             <button
               onClick={() => { localStorage.removeItem('rm_user'); navigate('/login') }}
@@ -179,9 +179,9 @@ const DashboardPage = () => {
           <div className="flex items-center gap-3 px-4 py-2 rounded-2xl" style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div className="text-right">
               <p className="text-sm font-bold text-white leading-none mb-1">{userDisplay.name}</p>
-              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#c0996a' }}>{userDisplay.plan}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#881337' }}>{userDisplay.plan}</p>
             </div>
-            <img src={userDisplay.avatar} alt="Avatar" className="w-9 h-9 rounded-full object-cover border-2" style={{ borderColor: 'rgba(192,153,106,0.3)' }} />
+            <img src={userDisplay.avatar} alt="Avatar" className="w-9 h-9 rounded-full object-cover border-2" style={{ borderColor: 'rgba(136,19,55,0.3)' }} />
           </div>
         </header>
 
@@ -233,7 +233,7 @@ const DashboardPage = () => {
                   ].map((card, i) => (
                     <div key={i} className="p-5 rounded-3xl" style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
-                        <card.icon size={18} style={{ color: '#c0996a' }} />
+                        <card.icon size={18} style={{ color: '#881337' }} />
                       </div>
                       <p className="text-[10px] uppercase font-black tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{card.label}</p>
                       <p className="text-2xl font-bold" style={{ color: card.green ? '#34d399' : '#ffffff' }}>
@@ -289,7 +289,7 @@ const DashboardPage = () => {
                 exit={{ opacity: 0, y: -20 }}
               >
                 <div className="mb-10">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2" style={{ color: '#c0996a' }}>Planejamento Completo</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2" style={{ color: '#881337' }}>Planejamento Completo</p>
                   <h1 className="text-4xl md:text-5xl font-serif italic text-white mb-6">Meu Treino</h1>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {activeWorkout?.conteudo_treino?.workouts ? activeWorkout.conteudo_treino.workouts.map((w, idx) => (
@@ -417,8 +417,8 @@ const DashboardPage = () => {
                       value: userData?.data_cadastro
                         ? new Date(new Date(userData.data_cadastro).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
                         : '—',
-                      accent: 'text-amber-400',
-                      bg: 'bg-amber-500/10'
+                      accent: 'text-bordeaux',
+                      bg: 'bg-bordeaux/10'
                     },
                   ].map((item, i) => (
                     <div key={i} className="bg-white rounded-[2rem] p-6 border border-wine-50 shadow-premium">

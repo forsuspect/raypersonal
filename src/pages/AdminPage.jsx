@@ -634,7 +634,7 @@ const AdminPage = () => {
                     {[1, 2, 3].map(i => (
                       <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-wine-50/50">
                         <span className="text-xs font-bold">Aluna #00{i}</span>
-                        <span className="text-[10px] font-black text-amber-600">PENDENTE</span>
+                        <span className="text-[10px] font-black text-bordeaux">PENDENTE</span>
                       </div>
                     ))}
                   </div>
@@ -654,7 +654,7 @@ const AdminPage = () => {
                 ].map((n, i) => (
                   <div key={i} className={`p-6 rounded-3xl border flex items-center justify-between transition-all hover:bg-wine-50/20 ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-white border-wine-50 shadow-sm'}`}>
                     <div className="flex items-center gap-4">
-                      <div className={`w-2 h-2 rounded-full ${n.type === 'success' ? 'bg-emerald-500' : n.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}`} />
+                      <div className={`w-2 h-2 rounded-full ${n.type === 'success' ? 'bg-emerald-500' : n.type === 'warning' ? 'bg-bordeaux' : 'bg-blue-500'}`} />
                       <div>
                         <h4 className="font-bold text-sm">{n.title}</h4>
                         <p className="text-xs opacity-60">{n.desc}</p>
