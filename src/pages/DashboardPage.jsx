@@ -119,81 +119,82 @@ const DashboardPage = () => {
   ]
 
   return (
-    <div className="h-screen bg-premium-light flex overflow-hidden">
+    <div className="h-screen flex overflow-hidden" style={{ backgroundColor: '#141210' }}>
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-wine-100 p-6 h-full z-20">
+      <aside className="hidden lg:flex flex-col w-64 p-6 h-full z-20 border-r" style={{ backgroundColor: '#1c1916', borderColor: 'rgba(255,255,255,0.06)' }}>
         {/* Logo */}
-        <Link to="/" className="flex items-center mb-12">
-          <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-12 w-auto" />
+        <Link to="/" className="flex items-center mb-10">
+          <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-10 w-auto brightness-0 invert" />
         </Link>
 
+        <p className="text-[9px] font-black uppercase tracking-[0.25em] mb-3" style={{ color: 'rgba(255,255,255,0.25)' }}>Menu Principal</p>
         {/* Navigation */}
         <nav className="flex-1 space-y-2">
           {menuItems.map(item => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-                activeTab === item.id 
-                  ? 'bg-wine-50 text-wine-900 font-bold' 
-                  : 'text-wine-900/60 hover:bg-wine-50/50 hover:text-wine-900 font-medium'
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-bold ${
+                activeTab === item.id
+                  ? 'text-white'
+                  : 'hover:text-white font-medium'
               }`}
+              style={{
+                backgroundColor: activeTab === item.id ? 'rgba(136,19,55,0.2)' : 'transparent',
+                color: activeTab === item.id ? '#ffffff' : 'rgba(255,255,255,0.35)',
+                border: activeTab === item.id ? '1px solid rgba(136,19,55,0.4)' : '1px solid transparent'
+              }}
             >
-              <item.icon size={20} />
+              <item.icon size={18} style={{ color: activeTab === item.id ? '#c0996a' : undefined }} />
               {item.label}
             </button>
           ))}
         </nav>
 
-        {/* Footer Navigation */}
-        <div className="pt-6 border-t border-wine-100 mt-auto space-y-1">
-          <Link 
-            to="/" 
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-wine-900/60 hover:text-wine-900 hover:bg-wine-50/50 transition-all text-sm font-bold"
-          >
-            <div className="w-8 h-8 rounded-lg bg-wine-50 flex items-center justify-center">
-              <FiArrowLeft size={16} />
+        <div className="pt-4 mt-auto space-y-1" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          {/* User card at bottom */}
+          <div className="flex items-center gap-3 px-2 py-3 rounded-xl mb-2" style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}>
+            <img src={userDisplay.avatar} alt="Avatar" className="w-9 h-9 rounded-full object-cover border-2" style={{ borderColor: 'rgba(192,153,106,0.4)' }} />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-white truncate">{userDisplay.name}</p>
+              <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: '#c0996a' }}>{userDisplay.plan}</p>
             </div>
-            Voltar para o site
-          </Link>
-          <button 
-            onClick={() => {
-              localStorage.removeItem('rm_user')
-              navigate('/login')
-            }} 
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-wine-900/60 hover:text-red-600 hover:bg-red-50 transition-all text-sm font-bold"
-          >
-            <div className="w-8 h-8 rounded-lg bg-wine-50 group-hover:bg-red-100 flex items-center justify-center">
-              <FiLogOut size={16} />
-            </div>
-            Sair da conta
-          </button>
+            <button
+              onClick={() => { localStorage.removeItem('rm_user'); navigate('/login') }}
+              className="p-1.5 rounded-lg transition-colors"
+              style={{ color: 'rgba(255,255,255,0.3)' }}
+              title="Sair"
+            >
+              <FiLogOut size={14} />
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 h-full overflow-y-auto relative bg-premium-light">
+      <main className="flex-1 h-full overflow-y-auto relative" style={{ backgroundColor: '#141210' }}>
         {/* Desktop Header */}
-        <header className="hidden lg:flex items-center justify-end p-6 bg-white/50 backdrop-blur-md border-b border-wine-100 sticky top-0 z-30">
-          <div className="flex items-center gap-4 px-4 py-2 rounded-2xl bg-white border border-wine-50 shadow-sm">
+        <header className="hidden lg:flex items-center justify-between p-5 sticky top-0 z-30" style={{ backgroundColor: '#141210', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <div />
+          <div className="flex items-center gap-3 px-4 py-2 rounded-2xl" style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div className="text-right">
-              <p className="text-sm font-bold text-wine-950 leading-none mb-1">{userDisplay.name}</p>
-              <p className="text-[10px] text-bordeaux font-black uppercase tracking-widest">{userDisplay.plan}</p>
+              <p className="text-sm font-bold text-white leading-none mb-1">{userDisplay.name}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#c0996a' }}>{userDisplay.plan}</p>
             </div>
-            <img src={userDisplay.avatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover border-2 border-wine-100 shadow-inner" />
+            <img src={userDisplay.avatar} alt="Avatar" className="w-9 h-9 rounded-full object-cover border-2" style={{ borderColor: 'rgba(192,153,106,0.3)' }} />
           </div>
         </header>
 
         {/* Mobile Header */}
-        <div className="lg:hidden bg-white border-b border-wine-100 p-4 flex items-center justify-between sticky top-0 z-30">
+        <div className="lg:hidden p-4 flex items-center justify-between sticky top-0 z-30" style={{ backgroundColor: '#1c1916', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <Link to="/" className="flex items-center">
-            <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-10 w-auto" />
+            <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-8 w-auto brightness-0 invert" />
           </Link>
           <div className="flex items-center gap-3">
-             <img src={userDisplay.avatar} alt="Avatar" className="w-8 h-8 rounded-full border border-wine-100" />
-             <button onClick={() => setIsSidebarOpen(true)} className="text-wine-950 p-2">
-               <FiMenu size={24} />
-             </button>
+            <img src={userDisplay.avatar} alt="Avatar" className="w-8 h-8 rounded-full border" style={{ borderColor: 'rgba(255,255,255,0.2)' }} />
+            <button onClick={() => setIsSidebarOpen(true)} className="text-white p-2">
+              <FiMenu size={22} />
+            </button>
           </div>
         </div>
 
@@ -211,8 +212,8 @@ const DashboardPage = () => {
                 {/* Header Welcome */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <h1 className="heading-md text-wine-950 mb-2">Olá, {userDisplay.name.split(' ')[0]} 👋</h1>
-                    <p className="text-wine-900/60">{isWorkoutFinished ? 'Missão cumprida por hoje! Aproveite seu descanso.' : 'Pronta para o treino de hoje? Vamos juntas.'}</p>
+                    <h1 className="heading-md text-white mb-2">Olá, {userDisplay.name.split(' ')[0]} 👋</h1>
+                    <p style={{ color: 'rgba(255,255,255,0.4)' }}>{isWorkoutFinished ? 'Missão cumprida por hoje! Aproveite seu descanso.' : 'Pronta para o treino de hoje? Vamos juntas.'}</p>
                   </div>
                   {isWorkoutFinished && (
                     <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-2 text-emerald-600 font-bold text-xs">
@@ -224,26 +225,22 @@ const DashboardPage = () => {
 
                 {/* Quick Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-white p-5 rounded-3xl border border-wine-50 shadow-premium">
-                    <div className="w-10 h-10 rounded-xl bg-wine-50 flex items-center justify-center text-wine-900 mb-3"><FiTarget size={20} /></div>
-                    <p className="text-wine-900/40 text-[10px] uppercase font-bold tracking-widest mb-1">Treinos na Semana</p>
-                    <p className="text-2xl font-bold text-wine-950">4<span className="text-sm text-wine-900/40">/5</span></p>
-                  </div>
-                  <div className="bg-white p-5 rounded-3xl border border-wine-50 shadow-premium">
-                    <div className="w-10 h-10 rounded-xl bg-rose-light flex items-center justify-center text-rose-soft mb-3"><FiDroplet size={20} /></div>
-                    <p className="text-wine-900/40 text-[10px] uppercase font-bold tracking-widest mb-1">Água Hoje</p>
-                    <p className="text-2xl font-bold text-wine-950">2.1<span className="text-sm text-wine-900/40">L</span></p>
-                  </div>
-                  <div className="bg-white p-5 rounded-3xl border border-wine-50 shadow-premium">
-                    <div className="w-10 h-10 rounded-xl bg-wine-50 flex items-center justify-center text-wine-900 mb-3"><FiActivity size={20} /></div>
-                    <p className="text-wine-900/40 text-[10px] uppercase font-bold tracking-widest mb-1">Peso Atual</p>
-                    <p className="text-2xl font-bold text-wine-950">64.5<span className="text-sm text-wine-900/40">kg</span></p>
-                  </div>
-                  <div className="bg-white p-5 rounded-3xl border border-wine-50 shadow-premium">
-                    <div className="w-10 h-10 rounded-xl bg-wine-50 flex items-center justify-center text-wine-900 mb-3"><FiTrendingUp size={20} /></div>
-                    <p className="text-wine-900/40 text-[10px] uppercase font-bold tracking-widest mb-1">Evolução</p>
-                    <p className="text-2xl font-bold text-emerald-500">+2%<span className="text-sm text-wine-900/40"> MM</span></p>
-                  </div>
+                  {[
+                    { icon: FiTarget, label: 'Treinos na Semana', value: '4', sub: '/5' },
+                    { icon: FiDroplet, label: 'Água Hoje', value: '2.1', sub: 'L' },
+                    { icon: FiActivity, label: 'Peso Atual', value: '64.5', sub: 'kg' },
+                    { icon: FiTrendingUp, label: 'Evolução', value: '+2%', sub: ' MM', green: true },
+                  ].map((card, i) => (
+                    <div key={i} className="p-5 rounded-3xl" style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+                        <card.icon size={18} style={{ color: '#c0996a' }} />
+                      </div>
+                      <p className="text-[10px] uppercase font-black tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{card.label}</p>
+                      <p className="text-2xl font-bold" style={{ color: card.green ? '#34d399' : '#ffffff' }}>
+                        {card.value}<span className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>{card.sub}</span>
+                      </p>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Today's Workout Card */}
@@ -292,8 +289,8 @@ const DashboardPage = () => {
                 exit={{ opacity: 0, y: -20 }}
               >
                 <div className="mb-10">
-                  <p className="text-[10px] text-bordeaux font-black uppercase tracking-[0.3em] mb-2">Planejamento Completo</p>
-                  <h1 className="text-4xl md:text-5xl font-serif italic text-wine-950">Meu Treino</h1>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2" style={{ color: '#c0996a' }}>Planejamento Completo</p>
+                  <h1 className="text-4xl md:text-5xl font-serif italic text-white mb-6">Meu Treino</h1>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {activeWorkout?.conteudo_treino?.workouts ? activeWorkout.conteudo_treino.workouts.map((w, idx) => (
                     <motion.div 

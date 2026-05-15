@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { 
   FiHome, FiUsers, FiTarget, FiDollarSign, FiBarChart2,
-  FiBell, FiMenu, FiX, FiPlus, FiRefreshCw,
+  FiBell, FiMenu, FiX, FiPlus, FiRefreshCw, FiUser,
   FiSearch, FiTrendingUp, FiActivity,
-  FiEdit, FiTrash2, FiCheckCircle, FiChevronRight, FiArrowLeft, FiAlertCircle
+  FiEdit, FiTrash2, FiCheckCircle, FiChevronRight, FiArrowLeft, FiAlertCircle, FiLogOut
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
@@ -16,6 +16,7 @@ const adminLinks = [
   { icon: FiBarChart2, label: 'Evolução Global', id: 'analytics' },
   { icon: FiDollarSign, label: 'Financeiro', id: 'finance' },
   { icon: FiBell, label: 'Notificações', id: 'notifications' },
+  { icon: FiUser, label: 'Meu Perfil', id: 'profile' },
 ]
 
 
@@ -665,9 +666,68 @@ const AdminPage = () => {
               </div>
             </motion.div>
           )}
+          {activeTab === 'profile' && (
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2 text-bordeaux">Conta Admin</p>
+                <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white">Meu Perfil</h2>
+              </div>
+
+              {/* Identity Card */}
+              <div className="backdrop-blur-xl rounded-[32px] p-8 border border-white/5 bg-white/5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-bordeaux/10 blur-3xl rounded-full pointer-events-none" />
+                <div className="relative z-10 flex items-center gap-6">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center text-white font-black text-3xl shadow-2xl">
+                    A
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-white mb-1">Administrador</h3>
+                    <p className="text-bordeaux font-black text-xs uppercase tracking-[0.3em] mb-3">@admin</p>
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-bordeaux/20 border border-bordeaux/30">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-white font-black text-[10px] uppercase tracking-widest">Acesso Total</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="space-y-3">
+                <button
+                  onClick={() => navigate('/')}
+                  className="w-full flex items-center justify-between px-6 py-4 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                      <FiArrowLeft size={18} className="text-white/60" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-sm text-white">Voltar ao site</p>
+                      <p className="text-[10px] text-white/30 font-black uppercase tracking-widest">Página principal RM</p>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => { localStorage.removeItem('rm_user'); navigate('/login') }}
+                  className="w-full flex items-center justify-between px-6 py-4 rounded-2xl border border-red-500/10 bg-red-500/5 hover:bg-red-500/10 transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
+                      <FiLogOut size={18} className="text-red-400" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-sm text-red-400">Sair da conta</p>
+                      <p className="text-[10px] text-red-400/50 font-black uppercase tracking-widest">Encerrar sessão</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </motion.div>
+          )}
+
         </div>
       </main>
-      {/* User Creation Form Modal */}
       <AnimatePresence>
         {isCreatingUser && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
