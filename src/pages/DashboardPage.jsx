@@ -114,9 +114,9 @@ const DashboardPage = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-premium-light flex">
+    <div className="h-screen bg-premium-light flex overflow-hidden">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-wine-100 p-6 fixed h-full z-20">
+      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-wine-100 p-6 h-full z-20">
         {/* Logo */}
         <Link to="/" className="flex items-center mb-12">
           <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-12 w-auto" />
@@ -167,7 +167,7 @@ const DashboardPage = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 lg:ml-64 relative min-h-screen">
+      <main className="flex-1 h-full overflow-y-auto relative bg-premium-light">
         {/* Desktop Header */}
         <header className="hidden lg:flex items-center justify-end p-6 bg-white/50 backdrop-blur-md border-b border-wine-100 sticky top-0 z-30">
           <div className="flex items-center gap-4 px-4 py-2 rounded-2xl bg-white border border-wine-50 shadow-sm">
