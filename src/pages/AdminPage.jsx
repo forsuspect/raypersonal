@@ -29,6 +29,7 @@ const AdminPage = () => {
   const [generatedPassword, setGeneratedPassword] = useState('')
   const [newUserPlan, setNewUserPlan] = useState('Premium')
   const [isCreatingUser, setIsCreatingUser] = useState(false)
+  const [isSavingUser, setIsSavingUser] = useState(false)
   const [createError, setCreateError] = useState(null)
   const isDarkMode = true // Permanent Dark Theme
   const [studentsData, setStudentsData] = useState([])
@@ -750,7 +751,10 @@ const AdminPage = () => {
               
               <form onSubmit={async (e) => {
                 e.preventDefault();
+                setIsSavingUser(true);
+                setCreateError(null);
                 try {
+                  const wasEditing = !!editingUser;
                   if (editingUser) {
                     // Update existing
                     const { error } = await supabase
@@ -769,15 +773,17 @@ const AdminPage = () => {
                       usuario: generatedUser,
                       senha: generatedPassword,
                       role: newUserPlan === 'Administrador' ? 'admin' : 'aluna',
-                      plano: newUserPlan
+                      plano: newUserPlan,
+                      status: 'Ativo'
                     });
                     
                     if (error) {
-                      if (error.message.includes('unique constraint')) {
+                      if (error.message.includes('unique constraint') || error.message.includes('duplicate')) {
                         setCreateError('Este nome de usuário já está sendo usado. Por favor, escolha outro.');
                       } else {
                         setCreateError(`Erro ao salvar: ${error.message}`);
                       }
+                      setIsSavingUser(false);
                       return;
                     }
                   }
@@ -786,12 +792,14 @@ const AdminPage = () => {
                   setEditingUser(null);
                   setTimeout(() => {
                     setIsCreatingUser(false);
-                    if (!editingUser) setShowNewUserModal(true);
+                    setIsSavingUser(false);
+                    if (!wasEditing) setShowNewUserModal(true);
                   }, 500);
 
                 } catch (err) {
                   console.error("Erro ao salvar:", err);
                   setCreateError(`Atenção: Não foi possível salvar no banco de dados (${err.message || 'Erro Desconhecido'}).`);
+                  setIsSavingUser(false);
                 }
               }} className="space-y-6">
                 {createError && (
@@ -841,8 +849,8 @@ const AdminPage = () => {
                   </select>
                 </div>
 
-                <button type="submit" className="w-full py-5 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all mt-4">
-                  Confirmar e Criar Acesso
+                <button type="submit" disabled={isSavingUser} className="w-full py-5 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all mt-4 disabled:opacity-50 flex items-center justify-center gap-2">
+                  {isSavingUser ? <><FiRefreshCw className="animate-spin" /> Criando Acesso...</> : 'Confirmar e Criar Acesso'}
                 </button>
               </form>
             </motion.div>
