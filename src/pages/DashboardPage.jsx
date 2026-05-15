@@ -21,6 +21,10 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
+  // Funcionalidades de Stats
+  const [waterIntake, setWaterIntake] = useState(0)
+  const [currentWeight, setCurrentWeight] = useState(0)
+
   useEffect(() => {
     const checkUser = async () => {
       const storedUser = localStorage.getItem('rm_user')
@@ -97,6 +101,51 @@ const DashboardPage = () => {
       }
     }
   }, [completedExercises, activeWorkout, userData, isWorkoutFinished, activeWorkoutTab])
+
+  // Load stats from localStorage when userData is available
+  useEffect(() => {
+    if (userData) {
+      const today = new Date().toDateString()
+      const savedDate = localStorage.getItem(`water_date_${userData.id}`)
+      
+      if (savedDate === today) {
+        const savedWater = localStorage.getItem(`water_${userData.id}`)
+        if (savedWater) setWaterIntake(parseFloat(savedWater))
+      } else {
+        setWaterIntake(0)
+      }
+      
+      const savedWeight = localStorage.getItem(`weight_${userData.id}`)
+      if (savedWeight) {
+        setCurrentWeight(parseFloat(savedWeight))
+      } else {
+        setCurrentWeight(64.5) // default mockup weight
+      }
+    }
+  }, [userData])
+
+  const handleWaterClick = () => {
+    const val = window.prompt('Atualize a quantidade total de água bebida hoje (em Litros):', waterIntake.toString())
+    if (val !== null && !isNaN(parseFloat(val.replace(',','.')))) {
+      const num = parseFloat(val.replace(',','.')).toFixed(1)
+      setWaterIntake(num)
+      if (userData) {
+        localStorage.setItem(`water_${userData.id}`, num.toString())
+        localStorage.setItem(`water_date_${userData.id}`, new Date().toDateString())
+      }
+    }
+  }
+
+  const handleWeightClick = () => {
+    const val = window.prompt('Atualize seu peso atual (em kg):', currentWeight.toString())
+    if (val !== null && !isNaN(parseFloat(val.replace(',','.')))) {
+      const num = parseFloat(val.replace(',','.')).toFixed(1)
+      setCurrentWeight(num)
+      if (userData) {
+        localStorage.setItem(`weight_${userData.id}`, num.toString())
+      }
+    }
+  }
 
   if (loading) return (
     <div className="min-h-screen bg-premium-light flex items-center justify-center">
@@ -196,12 +245,18 @@ const DashboardPage = () => {
                 {/* Quick Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
-                    { icon: FiTarget, label: 'Treinos na Semana', value: '4', sub: '/5' },
-                    { icon: FiDroplet, label: 'Água Hoje', value: '2.1', sub: 'L' },
-                    { icon: FiActivity, label: 'Peso Atual', value: '64.5', sub: 'kg' },
-                    { icon: FiTrendingUp, label: 'Evolução', value: '+2%', sub: ' MM', green: true },
+                    { id: 'workouts', icon: FiTarget, label: 'Treinos na Semana', value: '4', sub: '/5' },
+                    { id: 'water', icon: FiDroplet, label: 'Água Hoje', value: waterIntake.toString(), sub: 'L', onClick: handleWaterClick },
+                    { id: 'weight', icon: FiActivity, label: 'Peso Atual', value: currentWeight.toString(), sub: 'kg', onClick: handleWeightClick },
+                    { id: 'evolution', icon: FiTrendingUp, label: 'Evolução', value: '+2%', sub: ' MM', green: true },
                   ].map((card, i) => (
-                    <div key={i} className="p-5 rounded-3xl" style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div 
+                      key={i} 
+                      onClick={card.onClick}
+                      className={`p-5 rounded-3xl ${card.onClick ? 'cursor-pointer hover:bg-white/10 transition-colors' : ''}`} 
+                      style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
+                      title={card.onClick ? 'Clique para atualizar' : ''}
+                    >
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
                         <card.icon size={18} style={{ color: '#881337' }} />
                       </div>
@@ -412,7 +467,7 @@ const DashboardPage = () => {
                       </div>
                       <div className="text-left">
                         <p className="font-bold text-sm text-white">Voltar ao site</p>
-                        <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>Página principal RM</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>Página principal</p>
                       </div>
                     </div>
                     <FiArrowLeft size={16} className="rotate-180" style={{ color: 'rgba(255,255,255,0.2)' }} />
