@@ -313,7 +313,7 @@ const AdminPage = () => {
 
 
   return (
-    <div className="h-screen bg-black text-white flex overflow-hidden">
+    <div className="h-[100dvh] bg-black text-white flex overflow-hidden">
       <AnimatePresence>
         {loading && (
           <motion.div 
@@ -343,8 +343,25 @@ const AdminPage = () => {
       </div>
       <div className="absolute inset-0 z-0 pointer-events-none bg-gradient-to-t from-black via-transparent to-black/80" />
 
-      <aside className="hidden lg:flex flex-col w-64 bg-black border-r border-white/10 p-6 h-full z-20">
-        <div className="mb-10">
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 bg-black/80 z-[100] lg:hidden backdrop-blur-sm"
+          />
+        )}
+      </AnimatePresence>
+
+      <motion.aside 
+        initial={false}
+        animate={{ x: sidebarOpen ? 0 : '-100%' }}
+        className={`fixed lg:static inset-y-0 left-0 flex flex-col w-64 bg-black/95 backdrop-blur-xl border-r border-white/10 p-6 h-full z-[110] transition-transform lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:transform-none'}`}
+      >
+        <div className="mb-10 flex justify-between items-center">
             <Link to="/" className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center">
                 <span className="text-white font-display font-black text-xl">RM</span>
@@ -354,9 +371,12 @@ const AdminPage = () => {
                 <span className="block text-[10px] tracking-[0.2em] uppercase text-bordeaux font-black">Admin Hub</span>
               </div>
             </Link>
+            <button className="lg:hidden text-white/40 hover:text-white" onClick={() => setSidebarOpen(false)}>
+              <FiX size={24} />
+            </button>
           </div>
 
-          <nav className="space-y-2 flex-1">
+          <nav className="space-y-2 flex-1 overflow-y-auto pr-2">
             {adminLinks.map((link) => (
               <button 
                 key={link.id} 
@@ -373,13 +393,21 @@ const AdminPage = () => {
             ))}
           </nav>
 
-          <button onClick={() => navigate('/')} className="mt-auto flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold transition-colors text-white/30 hover:text-white">
+          <button onClick={() => navigate('/')} className="mt-6 flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold transition-colors text-white/30 hover:text-white">
             <FiArrowLeft className="w-5 h-5" /> Voltar para o site
           </button>
-      </aside>
+      </motion.aside>
 
-      <main className="flex-1 h-full flex flex-col min-w-0 overflow-y-auto relative z-10">
-        <header className="hidden lg:flex items-center justify-end p-6 bg-black/50 backdrop-blur-md border-b border-white/10 sticky top-0 z-30">
+      <main className="flex-1 h-full flex flex-col min-w-0 overflow-y-auto relative z-10 bg-black">
+        <header className="flex lg:justify-end items-center justify-between p-4 lg:p-6 bg-black/80 backdrop-blur-xl border-b border-white/10 sticky top-0 z-30">
+          <div className="flex lg:hidden items-center gap-3">
+            <button onClick={() => setSidebarOpen(true)} className="p-2 text-white/60 hover:text-white transition-colors">
+              <FiMenu size={24} />
+            </button>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center">
+              <span className="text-white font-display font-black text-xs">RM</span>
+            </div>
+          </div>
           <div className="flex items-center gap-4 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 shadow-sm">
             <FiBell className="w-5 h-5 text-white/40" />
             <span className="w-4 h-4 rounded-full bg-bordeaux text-[9px] text-white flex items-center justify-center font-black">5</span>
