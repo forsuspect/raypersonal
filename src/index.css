@@ -18,15 +18,19 @@
   box-sizing: border-box;
 }
 
-html, body {
+html, body, #root {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100vw;
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--premium-light);
   color: var(--wine-950);
   scroll-behavior: smooth;
-  overflow-x: hidden;
+  overflow-x: hidden !important;
+  position: relative;
 }
 
 h1,
@@ -166,15 +170,24 @@ h6 {
 }
 
 /* Mouse Follower */
-.mouse-follower {
-  position: fixed;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(136, 19, 55, 0.1) 0%, rgba(136, 19, 55, 0) 70%);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 1;
-  transform: translate(-50%, -50%);
-  transition: transform 0.1s ease-out;
-  filter: blur(40px);
+@media (min-width: 768px) {
+  .mouse-follower {
+    display: block;
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(136, 19, 55, 0.1) 0%, rgba(136, 19, 55, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease-out;
+    filter: blur(40px);
+  }
+}
+
+@media (max-width: 767px) {
+  .mouse-follower {
+    display: none;
+  }
 }

@@ -15,6 +15,8 @@ const MouseFollower = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [])
 
+  if (typeof window !== 'undefined' && window.innerWidth < 1024) return null
+
   return <div ref={followerRef} className="mouse-follower hidden lg:block" />
 }
 

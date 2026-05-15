@@ -2,15 +2,17 @@ import React, { useMemo } from 'react'
 
 const ParticlesBackground = () => {
   const particles = useMemo(() => {
-    return Array.from({ length: 30 }, (_, i) => ({
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+    const count = isMobile ? 12 : 30
+    return Array.from({ length: count }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 15,
       duration: 10 + Math.random() * 20,
       size: 1 + Math.random() * 3,
       driftX: -50 + Math.random() * 100,
-      opacity: 0.2 + Math.random() * 0.4,
-      color: i % 3 === 0 ? 'rgba(168, 85, 247, VAR)' : i % 3 === 1 ? 'rgba(59, 130, 246, VAR)' : 'rgba(6, 182, 212, VAR)',
+      opacity: 0.1 + Math.random() * 0.3,
+      color: i % 3 === 0 ? 'rgba(168, 85, 247, VAR)' : i % 3 === 1 ? 'rgba(59, 130, 246, VAR)' : 'rgba(136, 19, 55, VAR)',
     }))
   }, [])
 

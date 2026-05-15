@@ -81,12 +81,20 @@ const DashboardPage = () => {
 
   useEffect(() => {
     if (activeWorkout && completedExercises.length > 0 && completedExercises.length === activeWorkout.conteudo_treino?.exercises?.length) {
-      setIsWorkoutFinished(true)
-      if (userData) {
-        localStorage.setItem(`finished_${userData.id}`, new Date().toDateString())
+      if (!isWorkoutFinished) {
+        setIsWorkoutFinished(true)
+        if (userData) {
+          localStorage.setItem(`finished_${userData.id}`, new Date().toDateString())
+        }
+        
+        // Auto switch to overview with a small delay for better UX
+        setTimeout(() => {
+          setActiveTab('overview')
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }, 800)
       }
     }
-  }, [completedExercises, activeWorkout, userData])
+  }, [completedExercises, activeWorkout, userData, isWorkoutFinished])
 
   if (loading) return (
     <div className="min-h-screen bg-premium-light flex items-center justify-center">
