@@ -16,6 +16,7 @@ const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState('overview')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [userData, setUserData] = useState(null)
+  const [activeWorkout, setActiveWorkout] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
@@ -29,23 +30,37 @@ const DashboardPage = () => {
 
       const user = JSON.parse(storedUser)
       
-      // Verify if user still exists in DB
+      // Verify if user still exists in DB and get latest workout
       try {
-        const { data, error } = await supabase
+        const { data: userFromDb, error: userError } = await supabase
           .from('usuarios')
           .select('*')
           .eq('usuario', user.usuario)
           .single()
 
-        if (error || !data) {
+        if (userError || !userFromDb) {
           localStorage.removeItem('rm_user')
           navigate('/login')
           return
         }
-        setUserData(data)
+        setUserData(userFromDb)
+
+        // Fetch latest workout
+        const { data: workoutData, error: workoutError } = await supabase
+          .from('planilhas_treino')
+          .select('*')
+          .eq('aluna_id', userFromDb.id)
+          .eq('ativo', true)
+          .order('data_criacao', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (!workoutError && workoutData) {
+          setActiveWorkout(workoutData)
+        }
       } catch (err) {
-        console.error("Error verifying user:", err)
-        setUserData(user) // Fallback to stored data
+        console.error("Error verifying user or fetching workout:", err)
+        setUserData(user)
       } finally {
         setLoading(false)
       }
@@ -182,14 +197,18 @@ const DashboardPage = () => {
                 <div className="bg-wine-950 rounded-[2.5rem] p-8 text-white shadow-wine relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-rose-soft/20 blur-3xl rounded-full" />
                   <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                    <div>
-                      <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4">Treino do Dia</span>
-                      <h2 className="text-3xl font-serif italic mb-2">Membros Inferiores (Foco Glúteo)</h2>
-                      <p className="text-white/60 text-sm mb-6 max-w-md">Treino de alta intensidade focado em densidade muscular. Tempo estimado: 55 min.</p>
+                  <div>
+                    <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4">Treino do Dia</span>
+                    <h2 className="text-3xl font-serif italic mb-2">{activeWorkout ? activeWorkout.titulo : 'Sem Treino Ativo'}</h2>
+                    <p className="text-white/60 text-sm mb-6 max-w-md">
+                      {activeWorkout ? activeWorkout.descricao : 'Sua personal ainda não gerou seu ciclo de treinos personalizado.'}
+                    </p>
+                    {activeWorkout && (
                       <button onClick={() => setActiveTab('workout')} className="btn-premium bg-white text-wine-950 px-8 py-3 w-fit text-sm">
                         Iniciar Treino
                       </button>
-                    </div>
+                    )}
+                  </div>
                     {/* Abstract visual */}
                     <div className="w-32 h-32 rounded-full border-4 border-white/10 flex items-center justify-center">
                       <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-bordeaux to-rose-soft animate-pulse flex items-center justify-center">
@@ -208,23 +227,24 @@ const DashboardPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
               >
-                <h1 className="heading-md text-wine-950 mb-6">Meu Treino Atual</h1>
+                <h1 className="heading-md text-wine-950 mb-6">{activeWorkout ? activeWorkout.titulo : 'Meu Treino Atual'}</h1>
                 {/* AI Plan Generation Area */}
                 <div className="bg-wine-50 p-6 rounded-3xl border border-wine-100 mb-8 flex items-center justify-between">
                    <div>
                      <h3 className="font-bold text-wine-950 mb-1">IA Fitness RM</h3>
-                     <p className="text-sm text-wine-900/60">Seu treino foi atualizado hoje com base no seu feedback de recuperação.</p>
+                     <p className="text-sm text-wine-900/60">
+                       {activeWorkout 
+                         ? `Seu treino foi atualizado em ${new Date(activeWorkout.data_criacao).toLocaleDateString('pt-BR')}.` 
+                         : 'Aguardando sua personal lançar seu primeiro ciclo de treinos IA.'}
+                     </p>
                    </div>
-                   <button className="text-xs font-bold uppercase tracking-widest bg-wine-900 text-white px-4 py-2 rounded-xl">Recalcular</button>
+                   {activeWorkout && (
+                     <button className="text-xs font-bold uppercase tracking-widest bg-wine-900 text-white px-4 py-2 rounded-xl">Detalhes</button>
+                   )}
                 </div>
 
                 <div className="space-y-4">
-                  {[
-                    { name: 'Agachamento Livre', sets: '4 séries', reps: '10-12 repetições', rest: '90s' },
-                    { name: 'Elevação Pélvica c/ Barra', sets: '4 séries', reps: '10 rep + 10s isometria', rest: '60s' },
-                    { name: 'Leg Press 45º', sets: '3 séries', reps: 'Até a falha', rest: '90s' },
-                    { name: 'Cadeira Abdutora', sets: '4 séries', reps: '15-20 repetições', rest: '45s' },
-                  ].map((ex, i) => (
+                  {activeWorkout?.conteudo_treino?.exercises ? activeWorkout.conteudo_treino.exercises.map((ex, i) => (
                     <div key={i} className="bg-white p-6 rounded-3xl border border-wine-50 shadow-premium flex flex-col md:flex-row md:items-center gap-6">
                        <div className="w-20 h-20 rounded-2xl bg-wine-100 flex items-center justify-center shrink-0 overflow-hidden">
                          <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=200&auto=format&fit=crop" alt="Ex" className="w-full h-full object-cover opacity-60 mix-blend-multiply" />
@@ -232,8 +252,8 @@ const DashboardPage = () => {
                        <div className="flex-1">
                          <h4 className="font-bold text-lg text-wine-950 mb-2">{ex.name}</h4>
                          <div className="flex flex-wrap gap-4 text-sm text-wine-900/60">
-                           <span className="flex items-center gap-1"><FiActivity className="text-bordeaux" /> {ex.sets}</span>
-                           <span className="flex items-center gap-1"><FiTarget className="text-bordeaux" /> {ex.reps}</span>
+                           <span className="flex items-center gap-1"><FiActivity className="text-bordeaux" /> {ex.sets} séries</span>
+                           <span className="flex items-center gap-1"><FiTarget className="text-bordeaux" /> {ex.reps} reps</span>
                            <span className="flex items-center gap-1"><FiDroplet className="text-bordeaux" /> Pausa: {ex.rest}</span>
                          </div>
                        </div>
@@ -244,7 +264,12 @@ const DashboardPage = () => {
                          </button>
                        </div>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="py-20 text-center bg-white rounded-[2.5rem] border border-dashed border-wine-200">
+                      <FiTarget className="w-12 h-12 text-wine-100 mx-auto mb-4" />
+                      <p className="text-wine-900/40 font-medium">Nenhum exercício listado para este ciclo.</p>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}

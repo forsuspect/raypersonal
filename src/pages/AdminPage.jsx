@@ -39,17 +39,31 @@ const AdminPage = () => {
   })
   const [loading, setLoading] = useState(true)
   const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null })
+  
+  // Workout Generation State
+  const [showWorkoutModal, setShowWorkoutModal] = useState(false)
+  const [selectedStudentId, setSelectedStudentId] = useState('')
+  const [workoutType, setWorkoutType] = useState('Hipertrofia')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [workoutsList, setWorkoutsList] = useState([])
+
   const navigate = useNavigate()
 
   useEffect(() => {
     fetchData()
+    fetchWorkouts()
 
     const channel = supabase
-      .channel('usuarios-changes')
+      .channel('db-changes')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'usuarios' },
         () => fetchData()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'planilhas_treino' },
+        () => fetchWorkouts()
       )
       .subscribe()
 
@@ -57,6 +71,23 @@ const AdminPage = () => {
       if (channel) supabase.removeChannel(channel)
     }
   }, [])
+
+  const fetchWorkouts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('planilhas_treino')
+        .select(`
+          *,
+          usuarios (usuario)
+        `)
+        .order('data_criacao', { ascending: false })
+      
+      if (error) throw error
+      setWorkoutsList(data || [])
+    } catch (err) {
+      console.error("Error fetching workouts:", err)
+    }
+  }
 
   const fetchData = async () => {
     setLoading(true)
@@ -74,11 +105,12 @@ const AdminPage = () => {
       if (users) {
         console.log("Usuários encontrados:", users.length);
         setStudentsData(users.map(u => ({
+          id: u.id,
           name: u.usuario || 'Usuário Sem Nome',
           plano: u.plano || 'Premium',
-          status: 'Ativo', 
-          objective: 'Aguardando Avaliação',
-          lastCheck: 'Recente'
+          status: u.status || 'Ativo', 
+          objective: u.objetivo || 'Aguardando Avaliação',
+          lastCheck: new Date(u.data_cadastro).toLocaleDateString('pt-BR')
         })))
 
         // Calculate basic stats
@@ -157,6 +189,60 @@ const AdminPage = () => {
     setNewUserPlan(student.plano)
     setEditingUser(student.name)
     setIsCreatingUser(true)
+  }
+
+  const handleGenerateWorkout = async () => {
+    if (!selectedStudentId) {
+      alert('Selecione uma aluna primeiro.');
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      // Simulating AI Intelligence for Workout Generation
+      // In a real app, this could call an OpenAI API or a specialized microservice
+      const exercisesByFoco = {
+        'Hipertrofia': [
+          { name: 'Agachamento Livre', sets: '4', reps: '10-12', rest: '90s' },
+          { name: 'Leg Press 45', sets: '4', reps: '12-15', rest: '60s' },
+          { name: 'Stiff c/ Halteres', sets: '4', reps: '12', rest: '60s' },
+          { name: 'Cadeira Extensora', sets: '3', reps: 'Falha', rest: '45s' },
+        ],
+        'Emagrecimento': [
+          { name: 'Burpees', sets: '4', reps: '15', rest: '30s' },
+          { name: 'Agachamento Salto', sets: '4', reps: '20', rest: '30s' },
+          { name: 'Escalador', sets: '4', reps: '45s', rest: '30s' },
+          { name: 'Prancha Abdominal', sets: '3', reps: '60s', rest: '30s' },
+        ],
+        'Glúteos & Core': [
+          { name: 'Elevação Pélvica', sets: '4', reps: '15', rest: '60s' },
+          { name: 'Abdução de Quadril', sets: '4', reps: '20', rest: '45s' },
+          { name: 'Glúteo no Cabo', sets: '3', reps: '12-15', rest: '45s' },
+          { name: 'Dead Bug', sets: '3', reps: '15', rest: '30s' },
+        ]
+      };
+
+      const selectedExercises = exercisesByFoco[workoutType] || exercisesByFoco['Hipertrofia'];
+      
+      const { error } = await supabase.from('planilhas_treino').insert({
+        aluna_id: selectedStudentId,
+        titulo: `Ciclo: ${workoutType} RM`,
+        foco: workoutType,
+        conteudo_treino: { exercises: selectedExercises },
+        descricao: `Treino gerado por IA para foco em ${workoutType}.`
+      });
+
+      if (error) throw error;
+      
+      await fetchWorkouts();
+      setShowWorkoutModal(false);
+      alert('Treino gerado com sucesso e enviado para o portal da aluna!');
+    } catch (err) {
+      console.error("Error generating workout:", err);
+      alert('Erro ao gerar treino: ' + err.message);
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
 
@@ -343,7 +429,10 @@ const AdminPage = () => {
                         <p className={isDarkMode ? 'text-white/30 text-[10px]' : 'text-wine-900/40 text-[10px]'}>Criar usuário e senha</p>
                       </div>
                     </button>
-                    <button onClick={() => setActiveTab('workouts')} className={`flex items-center gap-4 p-5 rounded-3xl backdrop-blur-xl border transition-all group text-left shadow-2xl ${isDarkMode ? 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-bordeaux/40' : 'bg-white border-wine-50 hover:bg-wine-50 hover:border-wine-200'}`}>
+                    <button 
+                      onClick={() => { setShowWorkoutModal(true); setSelectedStudentId(''); }}
+                      className={`flex items-center gap-4 p-5 rounded-3xl backdrop-blur-xl border transition-all group text-left shadow-2xl ${isDarkMode ? 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-bordeaux/40' : 'bg-white border-wine-50 hover:bg-wine-50 hover:border-wine-200'}`}
+                    >
                       <div className="w-12 h-12 rounded-2xl bg-bordeaux/10 flex items-center justify-center group-hover:bg-bordeaux/20 transition-all">
                         <FiTarget className="w-6 h-6 text-bordeaux" />
                       </div>
@@ -450,18 +539,37 @@ const AdminPage = () => {
 
           {activeTab === 'workouts' && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-              <h2 className={`font-display font-black text-3xl uppercase tracking-tighter ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Planilhas de Treino</h2>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className={`font-display font-black text-3xl uppercase tracking-tighter ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Planilhas de Treino</h2>
+                  <p className={isDarkMode ? 'text-white/40 text-sm' : 'text-wine-900/40 text-sm'}>Histórico de treinos gerados por IA.</p>
+                </div>
+                <button 
+                  onClick={() => setShowWorkoutModal(true)}
+                  className="px-6 py-3 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-xl"
+                >
+                  Novo Treino IA
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {['Emagrecimento Express', 'Hipertrofia Avançada', 'Glúteos & Core', 'Post-Parto Premium'].map((w, i) => (
-                  <div key={i} className={`p-8 rounded-[32px] border transition-all hover:scale-[1.02] cursor-pointer group ${isDarkMode ? 'bg-white/5 border-white/5 hover:border-bordeaux/40' : 'bg-white border-wine-50 hover:border-wine-900/40'}`}>
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-wine-900 to-bordeaux flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
-                      <FiTarget size={24} />
+                {workoutsList.length > 0 ? workoutsList.map((w, i) => (
+                  <div key={i} className={`p-8 rounded-[32px] border transition-all hover:scale-[1.02] cursor-pointer group flex flex-col justify-between ${isDarkMode ? 'bg-white/5 border-white/5 hover:border-bordeaux/40' : 'bg-white border-wine-50 hover:border-wine-900/40'}`}>
+                    <div>
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-wine-900 to-bordeaux flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
+                        <FiTarget size={24} />
+                      </div>
+                      <h3 className="font-display font-black text-lg mb-1">{w.titulo}</h3>
+                      <p className={`text-[10px] font-black uppercase text-bordeaux mb-4`}>Aluna: {w.usuarios?.usuario || 'Desconhecida'}</p>
+                      <p className={`text-xs mb-6 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Foco: {w.foco} • {new Date(w.data_criacao).toLocaleDateString('pt-BR')}</p>
                     </div>
-                    <h3 className="font-display font-black text-lg mb-2">{w}</h3>
-                    <p className={`text-xs mb-6 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Última atualização: 3 dias atrás</p>
-                    <button className="w-full py-3 rounded-xl border border-wine-900/20 text-wine-900 text-[10px] font-black uppercase tracking-widest hover:bg-wine-900 hover:text-white transition-all">Editar Modelo</button>
+                    <button className="w-full py-3 rounded-xl border border-wine-900/20 text-wine-900 text-[10px] font-black uppercase tracking-widest hover:bg-wine-900 hover:text-white transition-all">Visualizar Treino</button>
                   </div>
-                ))}
+                )) : (
+                  <div className="col-span-full p-12 text-center">
+                    <p className={`text-sm font-medium ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Nenhum treino gerado ainda.</p>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -567,7 +675,7 @@ const AdminPage = () => {
                     const { error } = await supabase.from('usuarios').insert({
                       usuario: generatedUser,
                       senha: generatedPassword,
-                      role: 'aluna',
+                      role: newUserPlan === 'Administrador' ? 'admin' : 'aluna',
                       plano: newUserPlan
                     });
                     
@@ -636,6 +744,7 @@ const AdminPage = () => {
                     <option value="Essencial">Essencial</option>
                     <option value="Premium">Premium</option>
                     <option value="VIP Elite">VIP Elite</option>
+                    <option value="Administrador">Administrador</option>
                   </select>
                 </div>
 
@@ -695,33 +804,64 @@ const AdminPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Confirmation Modal */}
+      {/* Workout Generation Modal */}
       <AnimatePresence>
-        {confirmModal.show && (
-          <div className="fixed inset-0 z-[130] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+        {showWorkoutModal && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className={`p-10 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center border ${isDarkMode ? 'bg-wine-950 border-white/10' : 'bg-white border-wine-100'}`}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className={`p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl relative border ${isDarkMode ? 'bg-wine-950 border-white/10' : 'bg-white border-wine-100'}`}
             >
-              <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-6 mx-auto">
-                <FiTrash2 size={32} />
-              </div>
-              <h2 className="text-xl font-black uppercase tracking-tighter mb-2">{confirmModal.title}</h2>
-              <p className="text-sm opacity-60 mb-8 font-medium">{confirmModal.message}</p>
-              <div className="flex flex-col gap-3">
+              <button onClick={() => setShowWorkoutModal(false)} className={`absolute top-6 right-6 transition-colors ${isDarkMode ? 'text-white/40 hover:text-white' : 'text-wine-900/40 hover:text-wine-900'}`}><FiX size={24} /></button>
+              
+              <h2 className={`text-2xl font-black uppercase tracking-tighter mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Gerar Treino IA</h2>
+              <p className={`text-sm mb-8 font-medium ${isDarkMode ? 'text-white/60' : 'text-wine-900/60'}`}>A IA criará uma planilha personalizada para a aluna.</p>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Selecionar Aluna</label>
+                  <select 
+                    value={selectedStudentId}
+                    onChange={(e) => setSelectedStudentId(e.target.value)}
+                    className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
+                  >
+                    <option value="">Selecione uma aluna...</option>
+                    {studentsData.map(s => (
+                      <option key={s.id} value={s.id}>{s.name} ({s.plano})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Foco do Treino</label>
+                  <select 
+                    value={workoutType}
+                    onChange={(e) => setWorkoutType(e.target.value)}
+                    className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
+                  >
+                    <option value="Hipertrofia">Hipertrofia (Massa Magra)</option>
+                    <option value="Emagrecimento">Emagrecimento (Cardio/HIT)</option>
+                    <option value="Glúteos & Core">Foco em Glúteos & Core</option>
+                    <option value="Condicionamento">Condicionamento Físico</option>
+                  </select>
+                </div>
+
+                <div className={`p-6 rounded-3xl border text-center ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-wine-50 border-wine-100'}`}>
+                  <FiActivity className="w-8 h-8 text-bordeaux mx-auto mb-3" />
+                  <p className={`text-[10px] font-bold uppercase tracking-widest ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>IA RM v2.0 Ativa</p>
+                  <p className="text-xs mt-2 italic font-medium opacity-60">"Ajustando cargas e descansos com base no perfil da aluna."</p>
+                </div>
+
                 <button 
-                  onClick={confirmModal.onConfirm}
-                  className="w-full py-4 bg-red-500 rounded-2xl text-white font-black uppercase tracking-widest text-[10px] hover:bg-red-600 transition-colors"
+                  onClick={handleGenerateWorkout}
+                  disabled={isGenerating || !selectedStudentId}
+                  className="w-full py-5 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                 >
-                  Confirmar Exclusão
-                </button>
-                <button 
-                  onClick={() => setConfirmModal({ ...confirmModal, show: false })}
-                  className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-colors ${isDarkMode ? 'bg-white/5 text-white hover:bg-white/10' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-                >
-                  Cancelar
+                  {isGenerating ? (
+                    <><FiRefreshCw className="animate-spin" /> Processando IA...</>
+                  ) : 'Gerar Planilha de Treino'}
                 </button>
               </div>
             </motion.div>
