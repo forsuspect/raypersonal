@@ -36,7 +36,7 @@ const Navbar = () => {
           {/* Logo (Left) */}
           <div className="flex w-1/4">
             <Link to="/" className="flex items-center group">
-              <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-10 sm:h-12 w-auto drop-shadow-md" />
+              <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-12 sm:h-14 md:h-16 w-auto drop-shadow-md" />
             </Link>
           </div>
 
@@ -80,13 +80,13 @@ const Navbar = () => {
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
             className="fixed inset-0 z-[100] bg-white lg:hidden h-screen w-full"
           >
             <div className="flex flex-col h-full p-8">
               <div className="flex justify-between items-center mb-12">
                 <Link to="/" className="flex items-center" onClick={() => setIsMobileOpen(false)}>
-                  <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-10 w-auto" />
+                  <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-12 w-auto" />
                 </Link>
                 <button onClick={() => setIsMobileOpen(false)} className="text-wine-900">
                   <HiX size={28} />
