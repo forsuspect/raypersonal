@@ -409,44 +409,8 @@ const AdminPage = () => {
                 ))}
               </div>
 
-              <div className="grid lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h2 className="font-display font-black text-lg uppercase tracking-tight text-white">Atividade das Alunas</h2>
-                    <button onClick={() => setActiveTab('students')} className="text-bordeaux text-xs font-black uppercase tracking-widest">Ver Tudo</button>
-                  </div>
-                  
-                  <div className="backdrop-blur-xl rounded-[32px] overflow-hidden border border-white/5 bg-white/5 shadow-2xl">
-                    <div className="space-y-1">
-                      {studentsData.length > 0 ? studentsData.map((s, i) => (
-                        <div key={i} className="flex items-center justify-between p-6 hover:bg-white/[0.03] transition-colors border-b border-white/5">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center text-white font-black">{s.name[0]}</div>
-                            <div>
-                              <p className="font-bold text-sm text-white">{s.name}</p>
-                              <p className="text-[10px] uppercase font-black tracking-widest text-white/30">{s.objective}</p>
-                            </div>
-                          </div>
-                          <div className="hidden md:block">
-                            <p className="text-[9px] font-black uppercase tracking-widest mb-1 text-white/30">Status</p>
-                            <span className="px-2 py-0.5 rounded-lg text-[9px] font-black border bg-emerald-500/10 border-emerald-500/20 text-emerald-400">{s.status}</span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <p className="text-[9px] font-black uppercase tracking-widest mb-1 text-white/30">Cadastro</p>
-                            <p className="font-bold text-xs text-white">{s.lastCheck}</p>
-                          </div>
-                          <button className="p-2 transition-colors text-white/20 hover:text-white"><FiChevronRight /></button>
-                        </div>
-                      )) : (
-                        <div className="p-12 text-center">
-                          <p className="text-sm font-medium text-white/40">Nenhuma atividade recente.</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-8">
+              <div className="grid lg:grid-cols-2 gap-8">
+                <div className="space-y-6">
                   <h2 className="font-display font-black text-lg uppercase tracking-tight text-white">Ações Rápidas</h2>
                   <div className="grid grid-cols-1 gap-4">
                     <button 
@@ -474,8 +438,11 @@ const AdminPage = () => {
                       </div>
                     </button>
                   </div>
+                </div>
 
-                  <div className="backdrop-blur-xl rounded-[32px] p-8 border border-white/5 bg-white/5 shadow-2xl">
+                <div className="space-y-6">
+                  <h2 className="font-display font-black text-lg uppercase tracking-tight text-white opacity-0 hidden lg:block">_</h2>
+                  <div className="backdrop-blur-xl rounded-[32px] p-8 border border-white/5 bg-white/5 shadow-2xl h-[calc(100%-3rem)]">
                     <h3 className="font-display font-black text-xs uppercase tracking-widest mb-6 text-white">Planos Ativos</h3>
                     <div className="space-y-4">
                       {[
@@ -523,25 +490,31 @@ const AdminPage = () => {
                   <input type="text" placeholder="Buscar por nome ou plano..." className="bg-transparent border-none outline-none flex-1 text-sm font-bold text-white" />
                 </div>
                 
-                <div className="hidden md:grid md:grid-cols-4 p-6 text-[10px] font-black uppercase tracking-widest border-b text-white/40 border-white/5">
+                <div className="hidden md:grid md:grid-cols-5 p-6 text-[10px] font-black uppercase tracking-widest border-b text-white/40 border-white/5">
                   <div>Aluna</div>
                   <div>Plano</div>
+                  <div>Cadastro</div>
                   <div>Status</div>
                   <div className="text-right">Ações</div>
                 </div>
 
                 <div className="divide-y divide-white/5">
                   {studentsData.map((s, i) => (
-                    <div key={i} className="grid grid-cols-1 md:grid-cols-4 items-center p-6 gap-4 md:gap-0 hover:bg-white/[0.02] transition-colors border-white/5">
+                    <div key={i} className="grid grid-cols-1 md:grid-cols-5 items-center p-6 gap-4 md:gap-0 hover:bg-white/[0.02] transition-colors border-white/5">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center text-white font-black text-xs shadow-lg">{s.name[0]}</div>
                         <div>
                           <span className="font-bold text-sm block text-white">{s.name}</span>
-                          <span className="md:hidden text-[9px] font-black uppercase tracking-widest opacity-40">{s.plano}</span>
+                          <span className="text-[9px] font-black uppercase tracking-widest opacity-40">{s.objective}</span>
                         </div>
                       </div>
 
                       <div className="hidden md:block text-sm font-bold opacity-80 text-white">{s.plano}</div>
+                      
+                      <div className="hidden md:flex flex-col">
+                        <span className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-0.5">Criado em</span>
+                        <span className="text-xs font-bold text-white">{s.lastCheck}</span>
+                      </div>
 
                       <div className="flex md:block items-center justify-between">
                         <span className="md:hidden text-[10px] font-black uppercase tracking-widest opacity-30">Status</span>
@@ -746,8 +719,8 @@ const AdminPage = () => {
             >
               <button onClick={() => setIsCreatingUser(false)} className={`absolute top-6 right-6 transition-colors ${isDarkMode ? 'text-white/40 hover:text-white' : 'text-wine-900/40 hover:text-wine-900'}`}><FiX size={24} /></button>
               
-              <h2 className={`text-2xl font-black uppercase tracking-tighter mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Gerar Novo Acesso</h2>
-              <p className={`text-sm mb-8 font-medium ${isDarkMode ? 'text-white/60' : 'text-wine-900/60'}`}>Preencha os dados da aluna para criar o login.</p>
+              <h2 className={`text-2xl font-black uppercase tracking-tighter mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>{editingUser ? 'Editar Acesso' : 'Gerar Novo Acesso'}</h2>
+              <p className={`text-sm mb-8 font-medium ${isDarkMode ? 'text-white/60' : 'text-wine-900/60'}`}>{editingUser ? 'Atualize os dados da aluna.' : 'Preencha os dados da aluna para criar o login.'}</p>
               
               <form onSubmit={async (e) => {
                 e.preventDefault();
@@ -825,13 +798,13 @@ const AdminPage = () => {
                   />
                 </div>
                 <div>
-                  <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Senha de Acesso</label>
+                  <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Senha de Acesso {editingUser && '(Deixe em branco para manter a atual)'}</label>
                   <input 
                     type="text" 
                     value={generatedPassword}
                     onChange={(e) => setGeneratedPassword(e.target.value)}
-                    placeholder="ex: ray123"
-                    required
+                    placeholder={editingUser ? "Nova senha (opcional)" : "ex: ray123"}
+                    required={!editingUser}
                     className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
                   />
                 </div>
@@ -850,9 +823,44 @@ const AdminPage = () => {
                 </div>
 
                 <button type="submit" disabled={isSavingUser} className="w-full py-5 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all mt-4 disabled:opacity-50 flex items-center justify-center gap-2">
-                  {isSavingUser ? <><FiRefreshCw className="animate-spin" /> Criando Acesso...</> : 'Confirmar e Criar Acesso'}
+                  {isSavingUser ? <><FiRefreshCw className="animate-spin" /> {editingUser ? 'Salvando...' : 'Criando Acesso...'}</> : (editingUser ? 'Salvar Alterações' : 'Confirmar e Criar Acesso')}
                 </button>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {confirmModal.show && (
+          <div className="fixed inset-0 z-[250] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className={`p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl relative border ${isDarkMode ? 'bg-wine-950 border-white/10' : 'bg-white border-wine-100'} text-center`}
+            >
+              <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-6 mx-auto">
+                <FiAlertCircle size={32} />
+              </div>
+              <h2 className={`text-xl font-black uppercase tracking-tighter mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>{confirmModal.title}</h2>
+              <p className={`text-sm mb-8 font-medium ${isDarkMode ? 'text-white/60' : 'text-wine-900/60'}`}>{confirmModal.message}</p>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  onClick={() => setConfirmModal(prev => ({ ...prev, show: false }))}
+                  className={`py-4 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all ${isDarkMode ? 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white' : 'bg-wine-50 text-wine-900/60 hover:bg-wine-100 hover:text-wine-900'}`}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={confirmModal.onConfirm}
+                  className="py-4 bg-red-500 hover:bg-red-600 rounded-xl text-white font-black uppercase tracking-widest text-[10px] transition-colors shadow-lg shadow-red-500/20"
+                >
+                  Confirmar
+                </button>
+              </div>
             </motion.div>
           </div>
         )}
