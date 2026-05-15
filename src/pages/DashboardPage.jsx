@@ -20,6 +20,9 @@ const DashboardPage = () => {
   const [activeWorkout, setActiveWorkout] = useState(null)
   const [completedExercises, setCompletedExercises] = useState([])
   const [isWorkoutFinished, setIsWorkoutFinished] = useState(false)
+  const [waterIntake, setWaterIntake] = useState(2.1)
+  const [currentWeight, setCurrentWeight] = useState(64.5)
+  const [weeklyTraining, setWeeklyTraining] = useState(4)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
@@ -214,23 +217,48 @@ const DashboardPage = () => {
 
                 {/* Quick Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-white p-5 rounded-3xl border border-wine-50 shadow-premium">
-                    <div className="w-10 h-10 rounded-xl bg-wine-50 flex items-center justify-center text-wine-900 mb-3"><FiTarget size={20} /></div>
+                  <div className="bg-white p-5 rounded-3xl border border-wine-50 shadow-premium group">
+                    <div className="w-10 h-10 rounded-xl bg-wine-50 flex items-center justify-center text-wine-900 mb-3 group-hover:scale-110 transition-transform"><FiTarget size={20} /></div>
                     <p className="text-wine-900/40 text-[10px] uppercase font-bold tracking-widest mb-1">Treinos na Semana</p>
-                    <p className="text-2xl font-bold text-wine-950">4<span className="text-sm text-wine-900/40">/5</span></p>
+                    <div className="flex items-end justify-between">
+                      <p className="text-2xl font-bold text-wine-950">{weeklyTraining}<span className="text-sm text-wine-900/40">/5</span></p>
+                      <div className="flex gap-1">
+                        <button onClick={() => setWeeklyTraining(Math.max(0, weeklyTraining - 1))} className="w-6 h-6 rounded-md bg-wine-50 text-wine-900 flex items-center justify-center text-xs">-</button>
+                        <button onClick={() => setWeeklyTraining(Math.min(7, weeklyTraining + 1))} className="w-6 h-6 rounded-md bg-wine-900 text-white flex items-center justify-center text-xs">+</button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="bg-white p-5 rounded-3xl border border-wine-50 shadow-premium">
-                    <div className="w-10 h-10 rounded-xl bg-rose-light flex items-center justify-center text-rose-soft mb-3"><FiDroplet size={20} /></div>
+                  <div className="bg-white p-5 rounded-3xl border border-wine-50 shadow-premium group">
+                    <div className="w-10 h-10 rounded-xl bg-rose-light flex items-center justify-center text-rose-soft mb-3 group-hover:scale-110 transition-transform"><FiDroplet size={20} /></div>
                     <p className="text-wine-900/40 text-[10px] uppercase font-bold tracking-widest mb-1">Água Hoje</p>
-                    <p className="text-2xl font-bold text-wine-950">2.1<span className="text-sm text-wine-900/40">L</span></p>
+                    <div className="flex items-end justify-between">
+                      <p className="text-2xl font-bold text-wine-950">{waterIntake.toFixed(1)}<span className="text-sm text-wine-900/40">L</span></p>
+                      <button 
+                        onClick={() => setWaterIntake(prev => prev + 0.3)}
+                        className="w-8 h-8 rounded-full bg-rose-soft text-white flex items-center justify-center shadow-lg hover:rotate-90 transition-transform"
+                      >
+                        <FiDroplet size={14} />
+                      </button>
+                    </div>
                   </div>
-                  <div className="bg-white p-5 rounded-3xl border border-wine-50 shadow-premium">
-                    <div className="w-10 h-10 rounded-xl bg-wine-50 flex items-center justify-center text-wine-900 mb-3"><FiActivity size={20} /></div>
+                  <div className="bg-white p-5 rounded-3xl border border-wine-50 shadow-premium group">
+                    <div className="w-10 h-10 rounded-xl bg-wine-50 flex items-center justify-center text-wine-900 mb-3 group-hover:scale-110 transition-transform"><FiActivity size={20} /></div>
                     <p className="text-wine-900/40 text-[10px] uppercase font-bold tracking-widest mb-1">Peso Atual</p>
-                    <p className="text-2xl font-bold text-wine-950">64.5<span className="text-sm text-wine-900/40">kg</span></p>
+                    <div className="flex items-end justify-between">
+                      <p className="text-2xl font-bold text-wine-950">{currentWeight}<span className="text-sm text-wine-900/40">kg</span></p>
+                      <button 
+                        onClick={() => {
+                          const newWeight = prompt("Digite seu peso atual:", currentWeight)
+                          if (newWeight && !isNaN(newWeight)) setCurrentWeight(parseFloat(newWeight))
+                        }}
+                        className="text-[10px] font-bold text-wine-900/40 hover:text-wine-900"
+                      >
+                        Editar
+                      </button>
+                    </div>
                   </div>
-                  <div className="bg-white p-5 rounded-3xl border border-wine-50 shadow-premium">
-                    <div className="w-10 h-10 rounded-xl bg-wine-50 flex items-center justify-center text-wine-900 mb-3"><FiTrendingUp size={20} /></div>
+                  <div className="bg-white p-5 rounded-3xl border border-wine-50 shadow-premium group">
+                    <div className="w-10 h-10 rounded-xl bg-wine-50 flex items-center justify-center text-wine-900 mb-3 group-hover:scale-110 transition-transform"><FiTrendingUp size={20} /></div>
                     <p className="text-wine-900/40 text-[10px] uppercase font-bold tracking-widest mb-1">Evolução</p>
                     <p className="text-2xl font-bold text-emerald-500">+2%<span className="text-sm text-wine-900/40"> MM</span></p>
                   </div>
