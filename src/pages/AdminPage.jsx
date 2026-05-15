@@ -209,35 +209,52 @@ const AdminPage = () => {
     try {
       // Simulating AI Intelligence for Workout Generation
       // In a real app, this could call an OpenAI API or a specialized microservice
-      const exercisesByFoco = {
-        'Hipertrofia': [
-          { name: 'Agachamento Livre', sets: '4', reps: '10-12', rest: '90s' },
-          { name: 'Leg Press 45', sets: '4', reps: '12-15', rest: '60s' },
-          { name: 'Stiff c/ Halteres', sets: '4', reps: '12', rest: '60s' },
-          { name: 'Cadeira Extensora', sets: '3', reps: 'Falha', rest: '45s' },
-        ],
-        'Emagrecimento': [
-          { name: 'Burpees', sets: '4', reps: '15', rest: '30s' },
-          { name: 'Agachamento Salto', sets: '4', reps: '20', rest: '30s' },
-          { name: 'Escalador', sets: '4', reps: '45s', rest: '30s' },
-          { name: 'Prancha Abdominal', sets: '3', reps: '60s', rest: '30s' },
-        ],
-        'Glúteos & Core': [
-          { name: 'Elevação Pélvica', sets: '4', reps: '15', rest: '60s' },
-          { name: 'Abdução de Quadril', sets: '4', reps: '20', rest: '45s' },
-          { name: 'Glúteo no Cabo', sets: '3', reps: '12-15', rest: '45s' },
-          { name: 'Dead Bug', sets: '3', reps: '15', rest: '30s' },
-        ]
-      };
+      // Generating a complete weekly cycle (ABC) following the user's preferred line
+      const weeklyCycle = [
+        {
+          title: `Treino A: Inferiores (Foco Quadríceps & Glúteo)`,
+          foco: 'Inferiores',
+          exercises: [
+            { exercise: "Agachamento Livre (Barra)", sets: "4 x 10", detail: "Foco em amplitude e controle" },
+            { exercise: "Leg Press 45°", sets: "3 x 12", detail: "Pés na base inferior para focar quadríceps" },
+            { exercise: "Cadeira Extensora", sets: "3 x 15", detail: "Pico de contração de 2 segundos" },
+            { exercise: "Afundo com Halteres", sets: "3 x 10 cada perna", detail: "Postura ereta e passada firme" },
+            { exercise: "Cadeira Abdutora", sets: "4 x 15", detail: "Tronco inclinado para frente" },
+            { exercise: "Panturrilha Sentada", sets: "4 x 20", detail: "Máxima amplitude de movimento" }
+          ]
+        },
+        {
+          title: `Treino B: Superiores & Core (Foco Definição)`,
+          foco: 'Superiores',
+          exercises: [
+            { exercise: "Puxada Aberta no Pulley", sets: "3 x 12", detail: "Foco em contrair as escápulas" },
+            { exercise: "Remada Baixa", sets: "3 x 15", detail: "Cotovelos rente ao corpo" },
+            { exercise: "Supino Reto c/ Halteres", sets: "3 x 12", detail: "Movimento controlado na descida" },
+            { exercise: "Desenvolvimento Ombro", sets: "3 x 12", detail: "Halteres na linha das orelhas" },
+            { exercise: "Tríceps Corda", sets: "3 x 15", detail: "Estender totalmente o braço" },
+            { exercise: "Prancha Abdominal", sets: "3 x 60s", detail: "Manter o core bem contraído" }
+          ]
+        },
+        {
+          title: `Treino C: Posterior & Glúteo (Foco Isquiotibiais)`,
+          foco: 'Posterior',
+          exercises: [
+            { exercise: "Stiff com Barra", sets: "4 x 12", detail: "Manter a coluna neutra" },
+            { exercise: "Mesa Flexora", sets: "3 x 15", detail: "Movimento cadenciado" },
+            { exercise: "Elevação Pélvica", sets: "4 x 10", detail: "Pico de contração no topo de 3s" },
+            { exercise: "Cadeira Flexora", sets: "3 x 12", detail: "Sentar bem atrás no banco" },
+            { exercise: "Glúteo no Cabo (Coiçe)", sets: "3 x 15 cada", detail: "Perna levemente rotacionada" },
+            { exercise: "Abdominal Infra", sets: "4 x 20", detail: "Controlar a descida das pernas" }
+          ]
+        }
+      ];
 
-      const selectedExercises = exercisesByFoco[workoutType] || exercisesByFoco['Hipertrofia'];
-      
       const { error } = await supabase.from('planilhas_treino').insert({
         aluna_id: selectedStudentId,
-        titulo: `Ciclo: ${workoutType} RM`,
+        titulo: `Ciclo Semanal IA: ${workoutType}`,
         foco: workoutType,
-        conteudo_treino: { exercises: selectedExercises },
-        descricao: `Treino gerado por IA para foco em ${workoutType}.`
+        conteudo_treino: { workouts: weeklyCycle },
+        descricao: `Plano semanal gerado por IA focado em ${workoutType}. Inclui treinos A, B e C.`
       });
 
       if (error) throw error;

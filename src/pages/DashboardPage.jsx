@@ -17,6 +17,7 @@ const DashboardPage = () => {
   const [activeWorkout, setActiveWorkout] = useState(null)
   const [completedExercises, setCompletedExercises] = useState([])
   const [isWorkoutFinished, setIsWorkoutFinished] = useState(false)
+  const [activeWorkoutTab, setActiveWorkoutTab] = useState(0)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
@@ -77,7 +78,11 @@ const DashboardPage = () => {
   }, [navigate])
 
   useEffect(() => {
-    if (activeWorkout && completedExercises.length > 0 && completedExercises.length === activeWorkout.conteudo_treino?.exercises?.length) {
+    const currentExercises = activeWorkout?.conteudo_treino?.workouts 
+      ? activeWorkout.conteudo_treino.workouts[activeWorkoutTab]?.exercises 
+      : activeWorkout?.conteudo_treino?.exercises;
+
+    if (activeWorkout && completedExercises.length > 0 && completedExercises.length === currentExercises?.length) {
       if (!isWorkoutFinished) {
         setIsWorkoutFinished(true)
         if (userData) {
@@ -286,8 +291,35 @@ const DashboardPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
               >
-                <div className="flex items-center justify-between mb-6">
-                  <h1 className="heading-md text-wine-950">{isWorkoutFinished ? 'Treino Concluído ✅' : (activeWorkout ? activeWorkout.titulo : 'Meu Treino Atual')}</h1>
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                  <div>
+                    <h1 className="heading-md text-wine-950">{isWorkoutFinished ? 'Treino Concluído ✅' : (activeWorkout ? activeWorkout.titulo : 'Meu Treino Atual')}</h1>
+                    {activeWorkout?.conteudo_treino?.workouts && (
+                      <p className="text-wine-900/40 text-xs font-black uppercase tracking-widest mt-1">
+                        {activeWorkout.conteudo_treino.workouts[activeWorkoutTab]?.title}
+                      </p>
+                    )}
+                  </div>
+                  {activeWorkout?.conteudo_treino?.workouts && !isWorkoutFinished && (
+                    <div className="flex bg-wine-50 p-1 rounded-2xl border border-wine-100">
+                      {activeWorkout.conteudo_treino.workouts.map((w, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setActiveWorkoutTab(idx)
+                            setCompletedExercises([])
+                          }}
+                          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                            activeWorkoutTab === idx 
+                              ? 'bg-wine-900 text-white shadow-wine' 
+                              : 'text-wine-900/40 hover:text-wine-900'
+                          }`}
+                        >
+                          Treino {String.fromCharCode(65 + idx)}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   {isWorkoutFinished && (
                     <button 
                       onClick={() => {
@@ -332,7 +364,39 @@ const DashboardPage = () => {
                         </div>
                       </div>
                     </motion.div>
-                  ) : activeWorkout?.conteudo_treino?.exercises ? activeWorkout.conteudo_treino.exercises.map((ex, i) => (
+                  ) : activeWorkout?.conteudo_treino?.workouts ? activeWorkout.conteudo_treino.workouts[activeWorkoutTab]?.exercises.map((ex, i) => (
+                    <div key={i} className="bg-white p-6 rounded-3xl border border-wine-50 shadow-premium flex flex-col md:flex-row md:items-center gap-6">
+                       <div className="w-16 h-16 rounded-2xl bg-wine-50 flex items-center justify-center shrink-0 overflow-hidden text-wine-950">
+                         <FiActivity size={24} />
+                       </div>
+                       <div className="flex-1">
+                         <h4 className="font-bold text-lg text-wine-950 mb-1">{ex.exercise}</h4>
+                         <p className="text-xs text-wine-900/60 mb-3">{ex.detail}</p>
+                         <div className="flex flex-wrap gap-4 text-[10px] font-black uppercase tracking-widest text-bordeaux">
+                           <span className="flex items-center gap-1 bg-wine-50 px-3 py-1 rounded-lg border border-wine-100">{ex.sets}</span>
+                         </div>
+                       </div>
+                       <div className="flex items-center gap-2">
+                         <input type="text" placeholder="Kg" className="w-16 h-12 bg-premium-light border border-wine-100 rounded-xl text-center font-bold text-wine-950 focus:outline-none focus:border-wine-900" />
+                         <button 
+                           onClick={() => {
+                             if (completedExercises.includes(i)) {
+                               setCompletedExercises(completedExercises.filter(item => item !== i))
+                             } else {
+                               setCompletedExercises([...completedExercises, i])
+                             }
+                           }}
+                           className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                             completedExercises.includes(i)
+                               ? 'bg-emerald-500 text-white shadow-lg scale-110'
+                               : 'bg-wine-950 text-white shadow-wine hover:bg-bordeaux'
+                           }`}
+                         >
+                           <FiCheck size={20} />
+                         </button>
+                       </div>
+                    </div>
+                  )) : activeWorkout?.conteudo_treino?.exercises ? activeWorkout.conteudo_treino.exercises.map((ex, i) => (
                     <div key={i} className="bg-white p-6 rounded-3xl border border-wine-50 shadow-premium flex flex-col md:flex-row md:items-center gap-6">
                        <div className="w-20 h-20 rounded-2xl bg-wine-100 flex items-center justify-center shrink-0 overflow-hidden">
                          <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=200&auto=format&fit=crop" alt="Ex" className="w-full h-full object-cover opacity-60 mix-blend-multiply" />
