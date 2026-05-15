@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import AdminPage from './pages/AdminPage'
-import LoadingScreen from './components/LoadingScreen'
 import MouseFollower from './components/MouseFollower'
 import ParticlesBackground from './components/ParticlesBackground'
 

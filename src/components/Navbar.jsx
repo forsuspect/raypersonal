@@ -24,7 +24,7 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const isLandingPage = location.pathname === '/'
+  // const isLandingPage = location.pathname === '/'
 
   return (
     <>
