@@ -209,52 +209,88 @@ const AdminPage = () => {
     try {
       // Simulating AI Intelligence for Workout Generation
       // In a real app, this could call an OpenAI API or a specialized microservice
-      // Generating a complete weekly cycle (ABC) following the user's preferred line
+      // Generating a full 6-day weekly cycle following the user's reference
       const weeklyCycle = [
         {
-          title: `Treino A: Inferiores (Foco Quadríceps & Glúteo)`,
-          foco: 'Inferiores',
+          day: "SEG",
+          title: "SEG: QUADRÍCEPS & PANTURRILHA",
           exercises: [
-            { exercise: "Agachamento Livre (Barra)", sets: "4 x 10", detail: "Foco em amplitude e controle" },
-            { exercise: "Leg Press 45°", sets: "3 x 12", detail: "Pés na base inferior para focar quadríceps" },
-            { exercise: "Cadeira Extensora", sets: "3 x 15", detail: "Pico de contração de 2 segundos" },
-            { exercise: "Afundo com Halteres", sets: "3 x 10 cada perna", detail: "Postura ereta e passada firme" },
-            { exercise: "Cadeira Abdutora", sets: "4 x 15", detail: "Tronco inclinado para frente" },
-            { exercise: "Panturrilha Sentada", sets: "4 x 20", detail: "Máxima amplitude de movimento" }
+            { exercise: "Cadeira Extensora", sets: "4 x 12", detail: "Foco em pico de contração" },
+            { exercise: "Panturrilha Sentado", sets: "4 x 12", detail: "Máxima amplitude" },
+            { exercise: "Leg Press 45º", sets: "4 x 12", detail: "Cadência controlada" },
+            { exercise: "Hack Machine", sets: "4 x 12", detail: "Foco em quadríceps" },
+            { exercise: "Leg Press Horizontal", sets: "4 x 12", detail: "Pés baixos na plataforma" },
+            { exercise: "CARDIO: Bicicleta", sets: "10-12 min", detail: "Intensidade moderada" }
           ]
         },
         {
-          title: `Treino B: Superiores & Core (Foco Definição)`,
-          foco: 'Superiores',
+          day: "TER",
+          title: "TER: PEITO & TRÍCEPS",
           exercises: [
-            { exercise: "Puxada Aberta no Pulley", sets: "3 x 12", detail: "Foco em contrair as escápulas" },
-            { exercise: "Remada Baixa", sets: "3 x 15", detail: "Cotovelos rente ao corpo" },
-            { exercise: "Supino Reto c/ Halteres", sets: "3 x 12", detail: "Movimento controlado na descida" },
-            { exercise: "Desenvolvimento Ombro", sets: "3 x 12", detail: "Halteres na linha das orelhas" },
-            { exercise: "Tríceps Corda", sets: "3 x 15", detail: "Estender totalmente o braço" },
-            { exercise: "Prancha Abdominal", sets: "3 x 60s", detail: "Manter o core bem contraído" }
+            { exercise: "Rosca Concentrada", sets: "4 x 12", detail: "Foco no pico do bíceps" },
+            { exercise: "Supino Inclinado", sets: "4 x 12", detail: "Halteres, foco em peitoral superior" },
+            { exercise: "Rosca Scott", sets: "4 x 12", detail: "Movimento completo" },
+            { exercise: "Flexão de Braços", sets: "4 x 12", detail: "Até a falha técnica" },
+            { exercise: "Crucifixo Reto", sets: "4 x 12", detail: "Halteres, alongamento controlado" },
+            { exercise: "CARDIO: Bicicleta", sets: "15-20 min", detail: "HIIT" }
           ]
         },
         {
-          title: `Treino C: Posterior & Glúteo (Foco Isquiotibiais)`,
-          foco: 'Posterior',
+          day: "QUA",
+          title: "QUA: COSTA & BÍCEPS",
           exercises: [
-            { exercise: "Stiff com Barra", sets: "4 x 12", detail: "Manter a coluna neutra" },
-            { exercise: "Mesa Flexora", sets: "3 x 15", detail: "Movimento cadenciado" },
-            { exercise: "Elevação Pélvica", sets: "4 x 10", detail: "Pico de contração no topo de 3s" },
-            { exercise: "Cadeira Flexora", sets: "3 x 12", detail: "Sentar bem atrás no banco" },
-            { exercise: "Glúteo no Cabo (Coiçe)", sets: "3 x 15 cada", detail: "Perna levemente rotacionada" },
-            { exercise: "Abdominal Infra", sets: "4 x 20", detail: "Controlar a descida das pernas" }
+            { exercise: "Remada Unilateral (Serrote)", sets: "4 x 12", detail: "Puxada em direção ao quadril" },
+            { exercise: "Remada Curvada", sets: "4 x 12", detail: "Barra, pegada pronada" },
+            { exercise: "Rosca Martelo", sets: "4 x 12", detail: "Halteres, pegada neutra" },
+            { exercise: "Rosca Concentrada", sets: "4 x 12", detail: "Sentado, isolamento total" },
+            { exercise: "Puxada Barra Fixa", sets: "4 x 12", detail: "Ou graviton se necessário" },
+            { exercise: "CARDIO: Esteira", sets: "15-20 min", detail: "Caminhada inclinada" }
+          ]
+        },
+        {
+          day: "QUI",
+          title: "QUI: OMBRO ISOLADO",
+          exercises: [
+            { exercise: "Elevação Frontal", sets: "4 x 12", detail: "Halteres, alternado" },
+            { exercise: "Remada Alta", sets: "4 x 12", detail: "Polia baixa, foco em trapézio" },
+            { exercise: "Elevação Lateral", sets: "4 x 12", detail: "Halteres, tronco levemente inclinado" },
+            { exercise: "Desenvolvimento Arnold", sets: "4 x 12", detail: "Rotação completa de punho" },
+            { exercise: "Elevação Lateral Inclinada", sets: "4 x 12", detail: "Deitado no banco inclinado" },
+            { exercise: "CARDIO: Bicicleta", sets: "15-20 min", detail: "Ritmo constante" }
+          ]
+        },
+        {
+          day: "SEX",
+          title: "SEX: GLÚTEOS & PANTURRILHA",
+          exercises: [
+            { exercise: "Levantamento Terra Sumô", sets: "4 x 12", detail: "Foco em glúteo e adutores" },
+            { exercise: "Adutora na Máquina", sets: "4 x 12", detail: "Pico de contração de 2s" },
+            { exercise: "Stiff com Barra", sets: "4 x 12", detail: "Alongar bem os posteriores" },
+            { exercise: "Agachamento Sumô", sets: "4 x 12", detail: "Kettlebell ou halter" },
+            { exercise: "Elevação Pélvica", sets: "4 x 12", detail: "Contração máxima no topo" },
+            { exercise: "CARDIO: Bicicleta", sets: "10-12 min", detail: "Baixa intensidade" }
+          ]
+        },
+        {
+          day: "SAB",
+          title: "SAB: FULL BODY ELITE",
+          exercises: [
+            { exercise: "Burpees Explosivos", sets: "4 x 12", detail: "Alta intensidade" },
+            { exercise: "Corrida Estacionária", sets: "4 x 12", detail: "Joelho alto" },
+            { exercise: "Mountain Climbers", sets: "4 x 12", detail: "Velocidade máxima" },
+            { exercise: "Polichinelos Intensos", sets: "4 x 12", detail: "Sem descanso entre séries" },
+            { exercise: "Salto Vertical", sets: "4 x 12", detail: "Amortecer bem a queda" },
+            { exercise: "CARDIO: Bicicleta", sets: "15-20 min", detail: "Giro livre" }
           ]
         }
       ];
 
       const { error } = await supabase.from('planilhas_treino').insert({
         aluna_id: selectedStudentId,
-        titulo: `Ciclo Semanal IA: ${workoutType}`,
+        titulo: `Planejamento Semanal RM: ${workoutType}`,
         foco: workoutType,
         conteudo_treino: { workouts: weeklyCycle },
-        descricao: `Plano semanal gerado por IA focado em ${workoutType}. Inclui treinos A, B e C.`
+        descricao: `Planejamento de elite gerado por IA focado em ${workoutType}. Cobertura total de SEG a SAB.`
       });
 
       if (error) throw error;

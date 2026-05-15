@@ -291,80 +291,50 @@ const DashboardPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
               >
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                  <div>
-                    <h1 className="heading-md text-wine-950">{isWorkoutFinished ? 'Treino Concluído ✅' : (activeWorkout ? activeWorkout.titulo : 'Meu Treino Atual')}</h1>
-                    {activeWorkout?.conteudo_treino?.workouts && (
-                      <p className="text-wine-900/40 text-xs font-black uppercase tracking-widest mt-1">
-                        {activeWorkout.conteudo_treino.workouts[activeWorkoutTab]?.title}
-                      </p>
-                    )}
-                  </div>
-                  {activeWorkout?.conteudo_treino?.workouts && !isWorkoutFinished && (
-                    <div className="flex bg-wine-50 p-1 rounded-2xl border border-wine-100">
-                      {activeWorkout.conteudo_treino.workouts.map((w, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => {
-                            setActiveWorkoutTab(idx)
-                            setCompletedExercises([])
-                          }}
-                          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                            activeWorkoutTab === idx 
-                              ? 'bg-wine-900 text-white shadow-wine' 
-                              : 'text-wine-900/40 hover:text-wine-900'
-                          }`}
-                        >
-                          Treino {String.fromCharCode(65 + idx)}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {isWorkoutFinished && (
-                    <button 
-                      onClick={() => {
-                        setIsWorkoutFinished(false);
-                        setCompletedExercises([]);
-                        localStorage.removeItem(`finished_${userData?.id}`);
-                      }}
-                      className="text-[10px] font-black uppercase tracking-widest text-wine-900/40 hover:text-wine-900 transition-colors"
-                    >
-                      Refazer Treino
-                    </button>
-                  )}
+                <div className="mb-10">
+                  <p className="text-[10px] text-bordeaux font-black uppercase tracking-[0.3em] mb-2">Planejamento Completo</p>
+                  <h1 className="text-4xl md:text-5xl font-serif italic text-wine-950">Meu Treino</h1>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
                 <div className="space-y-4">
-                  {isWorkoutFinished ? (
+                  {activeWorkout?.conteudo_treino?.workouts ? activeWorkout.conteudo_treino.workouts.map((w, idx) => (
                     <motion.div 
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="bg-wine-950 rounded-[2.5rem] p-12 text-white text-center shadow-wine relative overflow-hidden"
+                      key={idx}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="bg-wine-950 rounded-[2.5rem] p-8 md:p-10 text-white shadow-wine relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500"
                     >
-                      <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-3xl rounded-full" />
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl rounded-full" />
+                      
                       <div className="relative z-10">
-                        <div className="w-20 h-20 rounded-full bg-emerald-500 mx-auto flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(16,185,129,0.3)]">
-                          <FiCheck size={40} />
-                        </div>
-                        <h2 className="text-3xl font-serif italic mb-4">Treino de Hoje Concluído!</h2>
-                        <p className="text-white/60 mb-8 max-w-sm mx-auto">
-                          Você deu o seu melhor hoje. Agora é hora de recuperar as energias. Seu novo ciclo estará disponível amanhã.
-                        </p>
-                        <div className="flex flex-col gap-4 max-w-xs mx-auto">
-                          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
-                            <span className="text-white/40 text-xs font-bold uppercase tracking-widest">Status</span>
-                            <span className="text-emerald-400 font-bold">REGISTRADO</span>
+                        <div className="flex items-center justify-between mb-8">
+                          <h3 className="text-xl font-bold text-rose-soft/90 uppercase tracking-wider">{w.title}</h3>
+                          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-20 group-hover:opacity-100 transition-opacity">
+                            <FiTarget size={14} className="text-rose-soft" />
                           </div>
-                          <button 
-                            onClick={() => setActiveTab('overview')}
-                            className="bg-white text-wine-950 py-4 rounded-2xl font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform"
-                          >
-                            Voltar ao Início
-                          </button>
+                        </div>
+                        
+                        <div className="h-px w-full bg-white/10 mb-8" />
+                        
+                        <div className="space-y-6">
+                          {w.exercises.map((ex, i) => (
+                            <div key={i} className="flex items-start gap-4 group/ex">
+                              <div className="w-2 h-2 rounded-full bg-rose-soft mt-1.5 shrink-0 shadow-[0_0_8px_rgba(255,170,170,0.5)]" />
+                              <div>
+                                <p className="text-sm font-medium text-white/90 leading-tight mb-1">
+                                  {ex.exercise} <span className="text-rose-soft/70 ml-1">({ex.sets})</span>
+                                </p>
+                                <p className="text-[10px] text-white/30 font-black uppercase tracking-widest">{ex.detail}</p>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </motion.div>
-                  ) : activeWorkout?.conteudo_treino?.workouts ? activeWorkout.conteudo_treino.workouts[activeWorkoutTab]?.exercises.map((ex, i) => (
+                  )) : activeWorkout?.conteudo_treino?.exercises ? activeWorkout.conteudo_treino.exercises.map((ex, i) => (
                     <div key={i} className="bg-white p-6 rounded-3xl border border-wine-50 shadow-premium flex flex-col md:flex-row md:items-center gap-6">
                        <div className="w-16 h-16 rounded-2xl bg-wine-50 flex items-center justify-center shrink-0 overflow-hidden text-wine-950">
                          <FiActivity size={24} />
@@ -374,39 +344,6 @@ const DashboardPage = () => {
                          <p className="text-xs text-wine-900/60 mb-3">{ex.detail}</p>
                          <div className="flex flex-wrap gap-4 text-[10px] font-black uppercase tracking-widest text-bordeaux">
                            <span className="flex items-center gap-1 bg-wine-50 px-3 py-1 rounded-lg border border-wine-100">{ex.sets}</span>
-                         </div>
-                       </div>
-                       <div className="flex items-center gap-2">
-                         <input type="text" placeholder="Kg" className="w-16 h-12 bg-premium-light border border-wine-100 rounded-xl text-center font-bold text-wine-950 focus:outline-none focus:border-wine-900" />
-                         <button 
-                           onClick={() => {
-                             if (completedExercises.includes(i)) {
-                               setCompletedExercises(completedExercises.filter(item => item !== i))
-                             } else {
-                               setCompletedExercises([...completedExercises, i])
-                             }
-                           }}
-                           className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
-                             completedExercises.includes(i)
-                               ? 'bg-emerald-500 text-white shadow-lg scale-110'
-                               : 'bg-wine-950 text-white shadow-wine hover:bg-bordeaux'
-                           }`}
-                         >
-                           <FiCheck size={20} />
-                         </button>
-                       </div>
-                    </div>
-                  )) : activeWorkout?.conteudo_treino?.exercises ? activeWorkout.conteudo_treino.exercises.map((ex, i) => (
-                    <div key={i} className="bg-white p-6 rounded-3xl border border-wine-50 shadow-premium flex flex-col md:flex-row md:items-center gap-6">
-                       <div className="w-20 h-20 rounded-2xl bg-wine-100 flex items-center justify-center shrink-0 overflow-hidden">
-                         <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=200&auto=format&fit=crop" alt="Ex" className="w-full h-full object-cover opacity-60 mix-blend-multiply" />
-                       </div>
-                       <div className="flex-1">
-                         <h4 className="font-bold text-lg text-wine-950 mb-2">{ex.name}</h4>
-                         <div className="flex flex-wrap gap-4 text-sm text-wine-900/60">
-                           <span className="flex items-center gap-1"><FiActivity className="text-bordeaux" /> {ex.sets} séries</span>
-                           <span className="flex items-center gap-1"><FiTarget className="text-bordeaux" /> {ex.reps} reps</span>
-                           <span className="flex items-center gap-1"><FiDroplet className="text-bordeaux" /> Pausa: {ex.rest}</span>
                          </div>
                        </div>
                        <div className="flex items-center gap-2">
