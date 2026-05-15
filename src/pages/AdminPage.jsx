@@ -881,6 +881,58 @@ const AdminPage = () => {
           </div>
         )}
       </AnimatePresence>
+      {/* View Workout Details Modal */}
+      <AnimatePresence>
+        {selectedWorkout && (
+          <div className="fixed inset-0 z-[160] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className={`p-10 rounded-[2.5rem] w-full max-w-2xl shadow-2xl relative border max-h-[85vh] overflow-y-auto ${isDarkMode ? 'bg-wine-950 border-white/10' : 'bg-white border-wine-100'}`}
+            >
+              <button onClick={() => setSelectedWorkout(null)} className={`absolute top-6 right-6 transition-colors ${isDarkMode ? 'text-white/40 hover:text-white' : 'text-wine-900/40 hover:text-wine-900'}`}><FiX size={24} /></button>
+              
+              <div className="mb-8">
+                <span className="inline-block px-3 py-1 bg-bordeaux/10 text-bordeaux rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border border-bordeaux/20">Detalhamento IA</span>
+                <h2 className={`text-3xl font-black uppercase tracking-tighter mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>{selectedWorkout.titulo}</h2>
+                <p className={`text-sm font-medium ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>
+                  Para: <span className="text-bordeaux font-bold">{selectedWorkout.usuarios?.usuario}</span> • Foco: <span className="font-bold">{selectedWorkout.foco}</span>
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 mb-8">
+                {selectedWorkout.conteudo_treino?.exercises ? selectedWorkout.conteudo_treino.exercises.map((ex, i) => (
+                  <div key={i} className={`p-5 rounded-3xl border flex items-center justify-between ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-wine-50/50 border-wine-50'}`}>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-wine-900/20 flex items-center justify-center text-wine-900 font-black">
+                        {i + 1}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm">{ex.name}</h4>
+                        <p className="text-[10px] opacity-60 uppercase font-black tracking-widest">{ex.sets} séries • {ex.reps} reps</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[9px] font-black opacity-30 uppercase">Pausa</p>
+                      <p className="font-bold text-xs">{ex.rest}</p>
+                    </div>
+                  </div>
+                )) : (
+                  <p className="text-center py-10 opacity-40">Nenhum exercício cadastrado.</p>
+                )}
+              </div>
+
+              <button 
+                onClick={() => setSelectedWorkout(null)}
+                className="w-full py-4 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all"
+              >
+                Fechar Visualização
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       {/* Notification Toast */}
       <AnimatePresence>
         {notification.show && (
