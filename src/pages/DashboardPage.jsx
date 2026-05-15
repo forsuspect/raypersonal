@@ -336,11 +336,11 @@ const DashboardPage = () => {
                 {/* Header */}
                 <div>
                   <p className="text-[10px] text-bordeaux font-black uppercase tracking-[0.3em] mb-2">Conta</p>
-                  <h1 className="text-4xl md:text-5xl font-serif italic text-wine-950">Meu Perfil</h1>
+                  <h1 className="text-4xl md:text-5xl font-serif italic text-white">Meu Perfil</h1>
                 </div>
 
                 {/* Avatar + Identity */}
-                <div className="bg-wine-950 rounded-[2.5rem] p-8 md:p-10 text-white shadow-wine relative overflow-hidden">
+                <div className="backdrop-blur-xl rounded-[2.5rem] p-8 md:p-10 border border-white/5 bg-white/5 shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-bordeaux/10 blur-3xl rounded-full pointer-events-none" />
                   <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-8">
                     <div className="relative shrink-0">
@@ -353,11 +353,7 @@ const DashboardPage = () => {
                     </div>
                     <div className="text-center md:text-left">
                       <h2 className="text-3xl font-bold text-white mb-1">{userDisplay.name}</h2>
-                      <p className="text-bordeaux font-black text-xs uppercase tracking-[0.3em] mb-4">@{userData?.usuario}</p>
-                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-bordeaux/20 border border-bordeaux/30">
-                        <FiShield size={14} className="text-bordeaux" />
-                        <span className="text-white font-black text-xs uppercase tracking-widest">{userDisplay.plan}</span>
-                      </div>
+                      <p className="text-bordeaux font-black text-xs uppercase tracking-[0.3em]">@{userData?.usuario}</p>
                     </div>
                   </div>
                 </div>
@@ -391,12 +387,12 @@ const DashboardPage = () => {
                       bg: 'bg-bordeaux/10'
                     },
                   ].map((item, i) => (
-                    <div key={i} className="bg-white rounded-[2rem] p-6 border border-wine-50 shadow-premium">
-                      <div className={`w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center mb-4`}>
-                        <item.icon size={18} className={item.accent} />
+                    <div key={i} className="rounded-[1.5rem] p-5" style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: 'rgba(136,19,55,0.15)' }}>
+                        <item.icon size={18} style={{ color: '#881337' }} />
                       </div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-wine-900/40 mb-1">{item.label}</p>
-                      <p className="font-bold text-wine-950 text-sm leading-tight">{item.value}</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>{item.label}</p>
+                      <p className="font-bold text-white text-base leading-tight">{item.value}</p>
                     </div>
                   ))}
                 </div>
@@ -405,18 +401,21 @@ const DashboardPage = () => {
                 <div className="space-y-3">
                   <button
                     onClick={() => navigate('/')}
-                    className="w-full flex items-center justify-between px-6 py-4 bg-white rounded-2xl border border-wine-100 hover:border-wine-900/20 hover:shadow-md transition-all group"
+                    className="w-full flex items-center justify-between px-6 py-4 rounded-2xl transition-all group"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.09)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-wine-50 flex items-center justify-center group-hover:bg-wine-100 transition-colors">
-                        <FiArrowLeft size={18} className="text-wine-900" />
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.07)' }}>
+                        <FiArrowLeft size={18} className="text-white" />
                       </div>
                       <div className="text-left">
-                        <p className="font-bold text-sm text-wine-950">Voltar ao site</p>
-                        <p className="text-[10px] text-wine-900/40 font-black uppercase tracking-widest">Página principal RM</p>
+                        <p className="font-bold text-sm text-white">Voltar ao site</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>Página principal RM</p>
                       </div>
                     </div>
-                    <FiTarget size={16} className="text-wine-900/20 group-hover:text-wine-900/60 transition-colors" />
+                    <FiArrowLeft size={16} className="rotate-180" style={{ color: 'rgba(255,255,255,0.2)' }} />
                   </button>
 
                   <button
@@ -424,18 +423,21 @@ const DashboardPage = () => {
                       localStorage.removeItem('rm_user')
                       navigate('/login')
                     }}
-                    className="w-full flex items-center justify-between px-6 py-4 bg-red-50 rounded-2xl border border-red-100 hover:bg-red-100 hover:border-red-200 transition-all group"
+                    className="w-full flex items-center justify-between px-6 py-4 rounded-2xl transition-all group"
+                    style={{ backgroundColor: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)' }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.14)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.08)'}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
-                        <FiLogOut size={18} className="text-red-500" />
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(239,68,68,0.12)' }}>
+                        <FiLogOut size={18} className="text-red-400" />
                       </div>
                       <div className="text-left">
-                        <p className="font-bold text-sm text-red-600">Sair da conta</p>
-                        <p className="text-[10px] text-red-400 font-black uppercase tracking-widest">Encerrar sessão</p>
+                        <p className="font-bold text-sm text-red-400">Sair da conta</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'rgba(239,68,68,0.5)' }}>Encerrar sessão</p>
                       </div>
                     </div>
-                    <FiTarget size={16} className="text-red-300 group-hover:text-red-500 transition-colors" />
+                    <FiLogOut size={16} className="text-red-400/30" />
                   </button>
                 </div>
               </motion.div>
@@ -450,12 +452,12 @@ const DashboardPage = () => {
                 exit={{ opacity: 0, y: -20 }}
                 className="flex flex-col items-center justify-center py-20 text-center"
               >
-                <div className="w-24 h-24 rounded-full bg-wine-50 text-wine-900 flex items-center justify-center text-4xl mb-6">
-                  {activeTab === 'evolution' && <FiTrendingUp />}
-                  {activeTab === 'chat' && <FiMessageCircle />}
+                <div className="w-24 h-24 rounded-full flex items-center justify-center text-4xl mb-6" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                  {activeTab === 'evolution' && <FiTrendingUp style={{ color: '#881337' }} />}
+                  {activeTab === 'chat' && <FiMessageCircle style={{ color: '#881337' }} />}
                 </div>
-                <h2 className="heading-md text-wine-950 mb-4 capitalize">Em construção</h2>
-                <p className="text-wine-900/60 max-w-md">Esta área do portal premium está sendo personalizada para sua conta.</p>
+                <h2 className="heading-md text-white mb-4 capitalize">Em construção</h2>
+                <p style={{ color: 'rgba(255,255,255,0.4)' }} className="max-w-md">Esta área do portal premium está sendo personalizada para sua conta.</p>
               </motion.div>
             )}
           </AnimatePresence>

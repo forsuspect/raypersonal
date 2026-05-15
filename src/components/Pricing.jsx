@@ -8,100 +8,81 @@ const plans = [
     name: 'Mensal',
     price: '297',
     desc: 'O início da sua jornada fitness.',
-    features: [
-      'Treino personalizado mensal',
-      'Plano alimentar flexível',
-      'Suporte via App',
-      'Acesso ao portal da aluna',
-      'Análise biomecânica básica'
-    ],
+    features: ['Treino personalizado', 'Plano alimentar flexível', 'Suporte via App', 'Portal da aluna', 'Análise biomecânica'],
     highlight: false
   },
   {
     name: 'VIP Premium',
     price: '497',
     desc: 'Acompanhamento total para resultados rápidos.',
-    features: [
-      'Tudo do plano Mensal',
-      'Ajustes semanais de carga',
-      'Suporte prioritário 24/7',
-      'Calls de alinhamento mensais',
-      'Protocolos específicos intensivos',
-      'Comunidade VIP Exclusiva'
-    ],
+    features: ['Tudo do plano Mensal', 'Ajustes semanais de carga', 'Suporte prioritário 24/7', 'Calls de alinhamento mensais', 'Protocolos intensivos', 'Comunidade VIP'],
     highlight: true
   },
   {
     name: 'Trimestral',
     price: '797',
     desc: 'Compromisso com a sua transformação.',
-    features: [
-      'Mesmos benefícios do VIP',
-      'Desconto no valor total',
-      'Planejamento de longo prazo',
-      'E-books exclusivos inclusos',
-      'Avaliação física completa'
-    ],
+    features: ['Benefícios VIP completos', 'Desconto no valor total', 'Planejamento de longo prazo', 'E-books exclusivos', 'Avaliação física completa'],
     highlight: false
   }
 ]
 
 const Pricing = () => {
-  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 })
+  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 })
 
   return (
-    <section id="planos" className="section-padding bg-white">
-      <div ref={ref} className="max-w-7xl mx-auto px-6 text-center">
-        <div className="mb-16">
-          <span className="text-bordeaux font-bold text-xs uppercase tracking-[0.4em] mb-4 block">Invista em Você</span>
-          <h2 className="heading-lg text-wine-950">Planos <span className="text-wine-gradient italic serif">Premium</span></h2>
+    <section id="planos" className="relative bg-white overflow-hidden" style={{ height: '100dvh' }}>
+      <div ref={ref} className="h-full max-w-7xl mx-auto px-6 flex flex-col justify-center gap-6">
+        <div className="text-center">
+          <span className="text-bordeaux font-bold text-[10px] uppercase tracking-[0.4em] mb-2 block">Invista em Você</span>
+          <h2 className="font-black leading-tight text-wine-950" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)' }}>
+            Planos <span className="text-wine-gradient italic">Premium</span>
+          </h2>
         </div>
 
-        <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-12 md:pb-0 px-4 md:px-0 md:grid md:grid-cols-3 md:gap-8 max-w-6xl mx-auto" style={{ scrollbarWidth: 'none' }}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto w-full">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className={`relative p-8 rounded-[40px] border-2 transition-all duration-500 flex flex-col min-w-[85vw] md:min-w-0 snap-center shrink-0 ${
-                plan.highlight 
-                  ? 'border-wine-900 bg-white shadow-premium-lg md:scale-105 z-10' 
-                  : 'border-wine-100 bg-premium-light hover:border-wine-900/30'
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className={`relative p-6 rounded-[2rem] border-2 flex flex-col ${
+                plan.highlight
+                  ? 'border-wine-900 bg-white shadow-premium-lg md:scale-105 z-10'
+                  : 'border-wine-100 bg-premium-light hover:border-wine-900/30 transition-colors'
               }`}
             >
               {plan.highlight && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-wine-900 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-wine-900 text-white px-4 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest">
                   Mais escolhido
                 </div>
               )}
 
-              <h3 className="text-2xl font-bold text-wine-950 mb-2">{plan.name}</h3>
-              <p className="text-wine-900/50 text-sm mb-8 leading-relaxed">{plan.desc}</p>
-              
-              <div className="mb-10 flex items-baseline gap-1 justify-center">
-                <span className="text-wine-900/40 text-xl font-bold">R$</span>
-                <span className="text-wine-950 font-display font-black text-6xl tracking-tighter">{plan.price}</span>
-                <span className="text-wine-900/40 text-sm font-medium">/mês</span>
+              <h3 className="text-lg font-bold text-wine-950 mb-1">{plan.name}</h3>
+              <p className="text-wine-900/50 text-xs mb-4">{plan.desc}</p>
+
+              <div className="mb-4 flex items-baseline gap-1">
+                <span className="text-wine-900/40 text-sm font-bold">R$</span>
+                <span className="text-wine-950 font-black tracking-tighter" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>{plan.price}</span>
+                <span className="text-wine-900/40 text-xs">/mês</span>
               </div>
 
-              <div className="space-y-4 mb-10 flex-1">
+              <div className="space-y-2 mb-5 flex-1">
                 {plan.features.map(feature => (
-                  <div key={feature} className="flex items-center gap-3 text-left">
-                    <div className="w-5 h-5 rounded-full bg-wine-900/10 flex items-center justify-center shrink-0">
-                      <FiCheck className="text-wine-900 text-xs" />
+                  <div key={feature} className="flex items-center gap-2 text-left">
+                    <div className="w-4 h-4 rounded-full bg-wine-900/10 flex items-center justify-center shrink-0">
+                      <FiCheck className="text-wine-900 text-[10px]" />
                     </div>
-                    <span className="text-wine-900/70 text-sm">{feature}</span>
+                    <span className="text-wine-900/70 text-xs">{feature}</span>
                   </div>
                 ))}
               </div>
 
-              <button className={`w-full py-4 rounded-2xl font-bold text-sm uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 ${
-                plan.highlight 
-                  ? 'btn-premium' 
-                  : 'btn-outline border-wine-100 text-wine-900/60 hover:border-wine-900'
+              <button className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${
+                plan.highlight ? 'btn-premium' : 'btn-outline border-wine-100 text-wine-900/60 hover:border-wine-900'
               }`}>
-                Assinar Agora <FiArrowRight />
+                Assinar Agora <FiArrowRight size={13} />
               </button>
             </motion.div>
           ))}

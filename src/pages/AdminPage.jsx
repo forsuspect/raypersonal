@@ -682,11 +682,7 @@ const AdminPage = () => {
                   </div>
                   <div>
                     <h3 className="text-2xl font-black text-white mb-1">Administrador</h3>
-                    <p className="text-bordeaux font-black text-xs uppercase tracking-[0.3em] mb-3">@admin</p>
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-bordeaux/20 border border-bordeaux/30">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-white font-black text-[10px] uppercase tracking-widest">Acesso Total</span>
-                    </div>
+                    <p className="text-bordeaux font-black text-xs uppercase tracking-[0.3em]">@admin</p>
                   </div>
                 </div>
               </div>
