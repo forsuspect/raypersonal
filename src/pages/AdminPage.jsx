@@ -105,10 +105,12 @@ const AdminPage = () => {
         try {
           const { error } = await supabase.from('usuarios').delete().eq('role', 'aluna')
           if (error) throw error
+          await fetchData() // Refresh data after reset
           setConfirmModal(prev => ({ ...prev, show: false }))
         } catch (err) {
+          console.error("Erro ao resetar:", err)
           setConfirmModal(prev => ({ ...prev, show: false }))
-          setCreateError('Erro ao resetar: ' + err.message)
+          alert('Erro ao resetar: ' + err.message)
         }
       }
     })
@@ -117,6 +119,10 @@ const AdminPage = () => {
   const [editingUser, setEditingUser] = useState(null)
 
   const handleDeleteStudent = async (username) => {
+    if (username === 'admin') {
+      alert('O usuário administrador não pode ser excluído.');
+      return;
+    }
     setConfirmModal({
       show: true,
       title: 'Remover Aluna',
@@ -125,12 +131,21 @@ const AdminPage = () => {
         try {
           console.log("Tentando excluir usuário:", username)
           const { error } = await supabase.from('usuarios').delete().eq('usuario', username)
-          if (error) throw error
+          
+          if (error) {
+            console.error("Erro retornado pelo Supabase:", error)
+            throw error
+          }
+          
+          // Re-fetch to ensure UI is updated immediately
+          await fetchData()
+          
           setConfirmModal(prev => ({ ...prev, show: false }))
         } catch (err) {
-          console.error("Erro ao excluir:", err)
+          console.error("Erro capturado ao excluir:", err)
           setConfirmModal(prev => ({ ...prev, show: false }))
-          setCreateError('Erro ao excluir: ' + err.message)
+          // Using alert for immediate feedback on deletion errors
+          alert(`Erro ao excluir "${username}": ${err.message}\n\nDica: Verifique se as políticas de DELETE estão ativadas no Supabase.`);
         }
       }
     })

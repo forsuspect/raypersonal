@@ -37,8 +37,10 @@ const LoginPage = () => {
 
       // Use the returned data to determine navigation
       if (data.role === 'admin' || email.trim() === 'admin') {
+        localStorage.setItem('rm_user', JSON.stringify({ ...data, usuario: email.trim() }))
         navigate('/admin')
       } else {
+        localStorage.setItem('rm_user', JSON.stringify(data))
         navigate('/dashboard')
       }
     } catch (err) {

@@ -15,6 +15,56 @@ const MOCK_USER = {
 const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState('overview')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [userData, setUserData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const storedUser = localStorage.getItem('rm_user')
+      if (!storedUser) {
+        navigate('/login')
+        return
+      }
+
+      const user = JSON.parse(storedUser)
+      
+      // Verify if user still exists in DB
+      try {
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('*')
+          .eq('usuario', user.usuario)
+          .single()
+
+        if (error || !data) {
+          localStorage.removeItem('rm_user')
+          navigate('/login')
+          return
+        }
+        setUserData(data)
+      } catch (err) {
+        console.error("Error verifying user:", err)
+        setUserData(user) // Fallback to stored data
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkUser()
+  }, [navigate])
+
+  if (loading) return (
+    <div className="min-h-screen bg-premium-light flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-wine-900"></div>
+    </div>
+  )
+
+  const userDisplay = {
+    name: userData?.nome || userData?.usuario || 'Aluna RM',
+    plan: userData?.plano || 'VIP Premium',
+    avatar: userData?.avatar || `https://ui-avatars.com/api/?name=${userData?.usuario || 'RM'}&background=4A0E0E&color=fff`
+  }
 
   const menuItems = [
     { id: 'overview', icon: FiHome, label: 'Visão Geral' },
@@ -54,18 +104,24 @@ const DashboardPage = () => {
         {/* User Mini Profile */}
         <div className="pt-6 border-t border-wine-100 mt-auto">
           <div className="flex items-center gap-3 mb-4">
-            <img src={MOCK_USER.avatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover border-2 border-wine-100" />
+            <img src={userDisplay.avatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover border-2 border-wine-100" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-wine-950 truncate">{MOCK_USER.name}</p>
-              <p className="text-xs text-bordeaux font-bold uppercase tracking-widest truncate">{MOCK_USER.plan}</p>
+              <p className="text-sm font-bold text-wine-950 truncate">{userDisplay.name}</p>
+              <p className="text-xs text-bordeaux font-bold uppercase tracking-widest truncate">{userDisplay.plan}</p>
             </div>
           </div>
           <Link to="/" className="flex items-center gap-2 text-wine-900/50 hover:text-wine-900 text-sm font-bold transition-colors w-full mb-2">
             <FiArrowLeft /> Voltar para o site
           </Link>
-          <Link to="/login" className="flex items-center gap-2 text-wine-900/50 hover:text-wine-900 text-sm font-bold transition-colors w-full">
+          <button 
+            onClick={() => {
+              localStorage.removeItem('rm_user')
+              navigate('/login')
+            }} 
+            className="flex items-center gap-2 text-wine-900/50 hover:text-wine-900 text-sm font-bold transition-colors w-full"
+          >
             <FiLogOut /> Sair da conta
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -94,7 +150,7 @@ const DashboardPage = () => {
               >
                 {/* Header Welcome */}
                 <div>
-                  <h1 className="heading-md text-wine-950 mb-2">Olá, {MOCK_USER.name.split(' ')[0]} 👋</h1>
+                  <h1 className="heading-md text-wine-950 mb-2">Olá, {userDisplay.name.split(' ')[0]} 👋</h1>
                   <p className="text-wine-900/60">Pronta para o treino de hoje? Vamos juntas.</p>
                 </div>
 
