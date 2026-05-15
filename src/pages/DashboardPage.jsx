@@ -301,20 +301,6 @@ const DashboardPage = () => {
                     </button>
                   )}
                 </div>
-                {/* AI Plan Generation Area */}
-                <div className="bg-wine-50 p-6 rounded-3xl border border-wine-100 mb-8 flex items-center justify-between">
-                   <div>
-                     <h3 className="font-bold text-wine-950 mb-1">IA Fitness RM</h3>
-                     <p className="text-sm text-wine-900/60">
-                       {activeWorkout 
-                         ? `Seu treino foi atualizado em ${new Date(activeWorkout.data_criacao).toLocaleDateString('pt-BR')}.` 
-                         : 'Aguardando sua personal lançar seu primeiro ciclo de treinos IA.'}
-                     </p>
-                   </div>
-                   {activeWorkout && (
-                     <button className="text-xs font-bold uppercase tracking-widest bg-wine-900 text-white px-4 py-2 rounded-xl">Detalhes</button>
-                   )}
-                </div>
 
                 <div className="space-y-4">
                   {isWorkoutFinished ? (
