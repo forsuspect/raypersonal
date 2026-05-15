@@ -506,7 +506,14 @@ const AdminPage = () => {
                   <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white">Gestão de Alunas</h2>
                   <p className="text-white/40 text-sm">Gerencie todos os acessos e perfis ativos.</p>
                 </div>
-                <button onClick={() => setIsCreatingUser(true)} className="px-6 py-3 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-xl">Nova Aluna</button>
+                <button onClick={() => {
+                  setGeneratedUser('')
+                  setGeneratedPassword('')
+                  setNewUserPlan('Premium')
+                  setEditingUser(null)
+                  setCreateError(null)
+                  setIsCreatingUser(true)
+                }} className="px-6 py-3 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-xl">Nova Aluna</button>
               </div>
 
               <div className="backdrop-blur-xl rounded-[32px] overflow-hidden border border-white/5 bg-white/5 shadow-2xl">
@@ -902,7 +909,7 @@ const AdminPage = () => {
             >
               <button onClick={() => setShowWorkoutModal(false)} className={`absolute top-6 right-6 transition-colors ${isDarkMode ? 'text-white/40 hover:text-white' : 'text-wine-900/40 hover:text-wine-900'}`}><FiX size={24} /></button>
               
-              <h2 className={`text-2xl font-black uppercase tracking-tighter mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Gerar Treino IA</h2>
+              <h2 className={`text-2xl font-black uppercase tracking-tighter mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Gerar Treino</h2>
               <p className={`text-sm mb-8 font-medium ${isDarkMode ? 'text-white/60' : 'text-wine-900/60'}`}>A IA criará uma planilha personalizada para a aluna.</p>
               
               <div className="space-y-6">
@@ -974,24 +981,56 @@ const AdminPage = () => {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 mb-8">
-                {selectedWorkout.conteudo_treino?.exercises ? selectedWorkout.conteudo_treino.exercises.map((ex, i) => (
-                  <div key={i} className={`p-5 rounded-3xl border flex items-center justify-between ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-wine-50/50 border-wine-50'}`}>
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-wine-900/20 flex items-center justify-center text-wine-900 font-black">
-                        {i + 1}
+              <div className="grid grid-cols-1 gap-6 mb-8">
+                {selectedWorkout.conteudo_treino?.workouts ? (
+                  <div className="space-y-6">
+                    {selectedWorkout.conteudo_treino.workouts.map((day, dIdx) => (
+                      <div key={dIdx} className="space-y-3">
+                        <h3 className={`font-black uppercase tracking-widest text-sm pb-2 border-b ${isDarkMode ? 'text-bordeaux border-white/10' : 'text-wine-900 border-wine-100'}`}>
+                          {day.title}
+                        </h3>
+                        <div className="space-y-2">
+                          {day.exercises.map((ex, i) => (
+                            <div key={i} className={`p-4 rounded-2xl border flex items-center justify-between ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-wine-50/50 border-wine-50'}`}>
+                              <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-wine-900/20 flex items-center justify-center text-bordeaux font-black text-xs shrink-0">
+                                  {i + 1}
+                                </div>
+                                <div>
+                                  <h4 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>{ex.exercise || ex.name}</h4>
+                                  <p className={`text-[10px] opacity-60 uppercase font-black tracking-widest ${isDarkMode ? 'text-white' : 'text-wine-900'}`}>{ex.detail}</p>
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <span className="inline-block px-3 py-1 bg-white/10 rounded-lg text-[10px] font-black tracking-widest uppercase text-white">
+                                  {ex.sets}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-bold text-sm">{ex.name}</h4>
-                        <p className="text-[10px] opacity-60 uppercase font-black tracking-widest">{ex.sets} séries • {ex.reps} reps</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[9px] font-black opacity-30 uppercase">Pausa</p>
-                      <p className="font-bold text-xs">{ex.rest}</p>
-                    </div>
+                    ))}
                   </div>
-                )) : (
+                ) : selectedWorkout.conteudo_treino?.exercises ? (
+                  selectedWorkout.conteudo_treino.exercises.map((ex, i) => (
+                    <div key={i} className={`p-5 rounded-3xl border flex items-center justify-between ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-wine-50/50 border-wine-50'}`}>
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-wine-900/20 flex items-center justify-center text-wine-900 font-black">
+                          {i + 1}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm">{ex.name}</h4>
+                          <p className="text-[10px] opacity-60 uppercase font-black tracking-widest">{ex.sets} séries • {ex.reps} reps</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] font-black opacity-30 uppercase">Pausa</p>
+                        <p className="font-bold text-xs">{ex.rest}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
                   <p className="text-center py-10 opacity-40">Nenhum exercício cadastrado.</p>
                 )}
               </div>
