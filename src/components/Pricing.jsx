@@ -30,6 +30,7 @@ const plans = [
 const Pricing = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 })
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const animatedInView = isMobile ? true : inView
 
   return (
     <section id="planos" className="relative bg-premium-light overflow-hidden py-16 md:py-24">
@@ -45,9 +46,9 @@ const Pricing = () => {
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
-              initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: isMobile ? 0 : i * 0.1 }}
+              initial={isMobile ? false : { opacity: 0, y: 20 }}
+              animate={animatedInView ? { opacity: 1, y: 0 } : {}}
+              transition={isMobile ? { duration: 0 } : { duration: 0.5, delay: i * 0.1 }}
               className={`relative p-6 rounded-[2rem] border flex flex-col shrink-0 w-[85vw] sm:w-[300px] md:w-auto snap-center ${
                 plan.highlight
                   ? 'border-bordeaux bg-white shadow-premium-lg md:scale-105 z-10'

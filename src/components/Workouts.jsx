@@ -13,6 +13,7 @@ const features = [
 const Workouts = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 })
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const animatedInView = isMobile ? true : inView
 
   return (
     <section id="treinos" className="relative bg-white overflow-hidden flex items-center py-16 md:py-24">
@@ -22,9 +23,9 @@ const Workouts = () => {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           
           <motion.div
-            initial={isMobile ? { opacity: 0 } : { opacity: 0, x: -30 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6 }}
+            initial={isMobile ? false : { opacity: 0, x: -30 }}
+            animate={animatedInView ? { opacity: 1, x: 0 } : {}}
+            transition={isMobile ? { duration: 0 } : { duration: 0.6 }}
           >
             <span className="text-bordeaux font-bold text-[10px] uppercase tracking-[0.4em] mb-2 block italic">Plataforma VIP</span>
             <h2 className="font-black text-wine-950 mb-4 leading-tight" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)' }}>

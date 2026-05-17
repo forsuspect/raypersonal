@@ -17,6 +17,7 @@ const objectives = [
 const Services = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 })
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const animatedInView = isMobile ? true : inView
 
   return (
     <section id="objetivos" className="relative bg-premium-light overflow-hidden py-16 md:py-24">
@@ -32,10 +33,10 @@ const Services = () => {
           {objectives.map((obj, i) => (
             <motion.div
               key={obj.title}
-              initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
+              initial={isMobile ? false : { opacity: 0, y: 30 }}
+              animate={animatedInView ? { opacity: 1, y: 0 } : {}}
               transition={isMobile 
-                ? { duration: 0.4, delay: i * 0.04 } 
+                ? { duration: 0 } 
                 : { duration: 0.6, delay: i * 0.08, type: "spring", stiffness: 100 }
               }
               className="group relative rounded-2xl md:rounded-[2rem] overflow-hidden cursor-pointer shadow-xl hover:shadow-wine/30 transition-all duration-500 w-full aspect-[3/4] md:aspect-auto"

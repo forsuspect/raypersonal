@@ -34,7 +34,6 @@ const DashboardPage = () => {
   const [completedExercises, setCompletedExercises] = useState([])
   const [isWorkoutFinished, setIsWorkoutFinished] = useState(false)
   const [activeWorkoutTab, setActiveWorkoutTab] = useState(0)
-  const [selectedDayOverride, setSelectedDayOverride] = useState(null)
   const [isDoingWorkout, setIsDoingWorkout] = useState(false)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
@@ -208,7 +207,7 @@ const DashboardPage = () => {
   const dayNames = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
   const currentDayIndex = new Date().getDay();
   const currentDayName = dayNames[currentDayIndex];
-  const activeDayName = selectedDayOverride || currentDayName;
+  const activeDayName = currentDayName;
   const todayWorkout = activeWorkout?.conteudo_treino?.workouts?.find(w => w.day === activeDayName);
 
   const menuItems = [
@@ -365,37 +364,7 @@ const DashboardPage = () => {
                           )}
                         </div>
 
-                        {/* Weekday Switcher */}
-                        {activeWorkout?.conteudo_treino?.workouts?.length > 0 && (
-                          <div className="pt-6 border-t border-white/5 w-full">
-                            <div className="flex items-center justify-between mb-3">
-                              <p className="text-[9px] uppercase font-black tracking-widest text-white/30">Mudar o dia do treino:</p>
-                              {selectedDayOverride && (
-                                <button 
-                                  onClick={() => setSelectedDayOverride(null)}
-                                  className="text-[9px] uppercase font-black tracking-widest text-rose-soft/70 hover:text-rose-soft transition-colors"
-                                >
-                                  Resetar para Hoje ({currentDayName})
-                                </button>
-                              )}
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {activeWorkout.conteudo_treino.workouts.map(w => (
-                                <button
-                                  key={w.day}
-                                  onClick={() => setSelectedDayOverride(w.day)}
-                                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all border ${
-                                    activeDayName === w.day
-                                      ? 'bg-rose-900 border-rose-700 text-white shadow-lg'
-                                      : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white'
-                                  }`}
-                                >
-                                  {w.day} {currentDayName === w.day ? '•' : ''}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+
 
                       </div>
                     </div>

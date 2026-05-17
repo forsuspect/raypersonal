@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 import { FiArrowRight, FiCheckCircle } from 'react-icons/fi'
 
 const Hero = () => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+
   return (
     <section
       id="hero"
@@ -19,9 +21,9 @@ const Hero = () => {
 
         {/* ── Text Column ── */}
         <motion.div
-          initial={{ opacity: 0, x: -40 }}
+          initial={isMobile ? false : { opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.9 }}
+          transition={isMobile ? { duration: 0 } : { duration: 0.9 }}
           className="w-full lg:w-[54%] flex flex-col justify-center text-center lg:text-left"
         >
           {/* Eyebrow */}

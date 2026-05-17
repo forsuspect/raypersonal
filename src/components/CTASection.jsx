@@ -5,6 +5,8 @@ import { FiArrowRight, FiCheckCircle } from 'react-icons/fi'
 
 const CTASection = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 })
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const animatedInView = isMobile ? true : inView
 
   return (
     <section className="relative overflow-hidden bg-wine-900 text-white flex items-center justify-center" style={{ height: '70dvh', maxHeight: '600px' }}>
@@ -16,9 +18,9 @@ const CTASection = () => {
 
       <div ref={ref} className="relative z-10 w-full max-w-4xl mx-auto px-6 text-center">
         <motion.div 
-          initial={{ opacity: 0, y: 30 }} 
-          animate={inView ? { opacity: 1, y: 0 } : {}} 
-          transition={{ duration: 0.6 }}
+          initial={isMobile ? false : { opacity: 0, y: 30 }} 
+          animate={animatedInView ? { opacity: 1, y: 0 } : {}} 
+          transition={isMobile ? { duration: 0 } : { duration: 0.6 }}
           className="glass-dark p-8 md:p-12 rounded-[2.5rem] border border-white/10 shadow-premium-lg"
         >
           <span className="text-rose-soft font-bold text-[10px] uppercase tracking-[0.4em] mb-4 block italic">Vagas Limitadas</span>

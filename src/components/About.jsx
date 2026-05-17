@@ -6,6 +6,7 @@ import { FiAward, FiSettings, FiTrendingUp, FiHeart } from 'react-icons/fi'
 const About = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 })
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const animatedInView = isMobile ? true : inView
 
   return (
     <section id="sobre" className="relative bg-white overflow-hidden py-16 md:py-24">
@@ -14,9 +15,9 @@ const About = () => {
 
           {/* Image */}
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.9 }}
+            initial={isMobile ? false : { opacity: 0, x: -40 }}
+            animate={animatedInView ? { opacity: 1, x: 0 } : {}}
+            transition={isMobile ? { duration: 0 } : { duration: 0.9 }}
             className="relative hidden lg:block"
           >
             <div className="rounded-2xl overflow-hidden shadow-premium-lg" style={{ height: '70dvh', maxHeight: '520px' }}>
@@ -30,9 +31,9 @@ const About = () => {
 
           {/* Text */}
           <motion.div
-            initial={isMobile ? { opacity: 0 } : { opacity: 0, x: 40 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.9, delay: isMobile ? 0 : 0.15 }}
+            initial={isMobile ? false : { opacity: 0, x: 40 }}
+            animate={animatedInView ? { opacity: 1, x: 0 } : {}}
+            transition={isMobile ? { duration: 0 } : { duration: 0.9, delay: 0.15 }}
           >
             <span className="text-bordeaux font-black text-[10px] uppercase tracking-[0.4em] mb-3 block">Elegância & Saúde</span>
             <h2 className="font-black leading-tight tracking-tight text-wine-950 mb-4" style={{ fontSize: 'clamp(1.6rem, 3vw, 2.5rem)' }}>
