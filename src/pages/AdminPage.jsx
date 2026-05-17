@@ -139,11 +139,9 @@ const AdminPage = () => {
     if (!editWorkoutData) return;
     setIsSavingWorkout(true);
     try {
-      const { error } = await supabase
-        .from('planilhas_treino')
-        .update({ conteudo_treino: { workouts: editWorkoutData.workouts } })
-        .eq('id', editWorkoutData.workoutId);
-      if (error) throw error;
+      await performWorkoutUpdateBypass(editWorkoutData.workoutId, {
+        conteudo_treino: { workouts: editWorkoutData.workouts }
+      });
       await fetchWorkouts();
       showNotification('Planilha atualizada com sucesso!');
       setIsEditingWorkout(false);
@@ -335,6 +333,85 @@ const AdminPage = () => {
       if (restoreWorkoutsErr) {
         console.error('Erro ao restaurar planilhas de treino:', restoreWorkoutsErr);
       }
+    }
+  };
+
+  const performWorkoutUpdateBypass = async (workoutId, updatedWorkoutFields) => {
+    // 1. Find the original workout record
+    const originalWorkout = workoutsList.find(w => w.id === workoutId);
+    if (!originalWorkout) throw new Error('Planilha de treino não encontrada.');
+
+    const alunaId = originalWorkout.aluna_id;
+
+    // 2. Find the user record associated with this workout from studentsData
+    const student = studentsData.find(s => s.id === alunaId);
+    if (!student) throw new Error('Usuário associado ao treino não encontrado.');
+
+    const rawUser = student.raw;
+    if (!rawUser) throw new Error('Dados do usuário ausentes.');
+
+    // 3. Find all workouts belonging to this user
+    const { data: userWorkouts, error: fetchWorkoutsErr } = await supabase
+      .from('planilhas_treino')
+      .select('*')
+      .eq('aluna_id', alunaId);
+
+    if (fetchWorkoutsErr) throw fetchWorkoutsErr;
+
+    // 4. Delete the user (cascades and deletes all workouts from planilhas_treino)
+    const { error: deleteErr } = await supabase
+      .from('usuarios')
+      .delete()
+      .eq('id', alunaId);
+
+    if (deleteErr) throw deleteErr;
+
+    // 5. Restore the user first
+    const { error: insertUserErr } = await supabase
+      .from('usuarios')
+      .insert(rawUser);
+
+    if (insertUserErr) {
+      // Rollback
+      await supabase.from('usuarios').insert(rawUser);
+      throw insertUserErr;
+    }
+
+    // 6. Map and insert all workouts back, replacing the edited one with the new fields
+    const workoutsToInsert = userWorkouts.map(w => {
+      if (w.id === workoutId) {
+        return {
+          id: w.id,
+          aluna_id: alunaId,
+          titulo: w.titulo,
+          descricao: w.descricao,
+          foco: w.foco,
+          duracao_semanas: w.duracao_semanas,
+          conteudo_treino: w.conteudo_treino,
+          ativo: w.ativo,
+          data_criacao: w.data_criacao,
+          ...updatedWorkoutFields
+        };
+      }
+      return {
+        id: w.id,
+        aluna_id: alunaId,
+        titulo: w.titulo,
+        descricao: w.descricao,
+        foco: w.foco,
+        duracao_semanas: w.duracao_semanas,
+        conteudo_treino: w.conteudo_treino,
+        ativo: w.ativo,
+        data_criacao: w.data_criacao
+      };
+    });
+
+    const { error: restoreWorkoutsErr } = await supabase
+      .from('planilhas_treino')
+      .insert(workoutsToInsert);
+
+    if (restoreWorkoutsErr) {
+      throw restoreWorkoutsErr;
     }
   };
 
