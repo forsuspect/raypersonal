@@ -275,7 +275,8 @@ const AdminPage = () => {
   const [editingUser, setEditingUser] = useState(null)
 
   const handleDeleteStudent = async (username) => {
-    if (username === 'admin') {
+    // Only block deleting 'admin' if the user is NOT a developer
+    if (username === 'admin' && !isDeveloper) {
       showNotification('O usuário administrador não pode ser excluído.', 'error');
       return;
     }
@@ -819,7 +820,7 @@ const AdminPage = () => {
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-end gap-3 border-t md:border-t-0 pt-4 md:pt-0 border-white/5">
+                      <div className="flex flex-wrap items-center justify-end gap-3 border-t md:border-t-0 pt-4 md:pt-0 border-white/5">
                         {s.status === 'Inativo' ? (
                           <button
                             onClick={() => handleToggleStatus(s)}
