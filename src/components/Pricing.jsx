@@ -31,7 +31,7 @@ const Pricing = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 })
 
   return (
-    <section id="planos" className="relative bg-white overflow-hidden py-24" style={{ minHeight: '100dvh' }}>
+    <section id="planos" className="relative bg-white overflow-hidden py-16 md:py-24">
       <div ref={ref} className="h-full max-w-7xl mx-auto px-6 flex flex-col justify-center gap-12">
         <div className="text-center">
           <span className="text-bordeaux font-bold text-[10px] uppercase tracking-[0.4em] mb-2 block">Invista em Você</span>

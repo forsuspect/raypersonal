@@ -7,7 +7,7 @@ const About = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 })
 
   return (
-    <section id="sobre" className="relative bg-white overflow-hidden" style={{ height: '100dvh' }}>
+    <section id="sobre" className="relative bg-white overflow-hidden py-16 md:py-24">
       <div ref={ref} className="h-full max-w-7xl mx-auto px-6 flex items-center">
         <div className="grid lg:grid-cols-2 gap-10 items-center w-full">
 

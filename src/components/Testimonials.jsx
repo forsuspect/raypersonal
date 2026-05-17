@@ -31,7 +31,7 @@ const Transformations = () => {
   const prev = () => setCurrentIndex((prev) => (prev - 1 + transformations.length) % transformations.length)
 
   return (
-    <section id="transformacoes" className="relative bg-wine-950 text-white overflow-hidden py-16 md:py-24" style={{ minHeight: '80dvh' }}>
+    <section id="transformacoes" className="relative bg-wine-950 text-white overflow-hidden py-16 md:py-24">
       <div className="absolute top-0 right-0 w-1/2 h-full bg-bordeaux/10 blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-1/3 h-full bg-wine-900/20 blur-[100px] pointer-events-none" />
 
