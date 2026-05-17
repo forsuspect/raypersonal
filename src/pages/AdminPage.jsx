@@ -83,6 +83,78 @@ const AdminPage = () => {
 
   const navigate = useNavigate()
 
+  // ── Edit workout helpers (component-level, no stale closure) ──────────
+  const editUpdateExercise = (dayIdx, exIdx, field, val) => {
+    setEditWorkoutData(prev => {
+      if (!prev) return prev;
+      const workouts = prev.workouts.map((w, i) =>
+        i !== dayIdx ? w : {
+          ...w,
+          exercises: w.exercises.map((ex, j) =>
+            j !== exIdx ? ex : { ...ex, [field]: val }
+          )
+        }
+      );
+      return { ...prev, workouts };
+    });
+  };
+
+  const editAddExercise = (dayIdx) => {
+    setEditWorkoutData(prev => {
+      if (!prev) return prev;
+      const workouts = prev.workouts.map((w, i) =>
+        i !== dayIdx ? w : {
+          ...w,
+          exercises: [...w.exercises, { exercise: '', sets: '', detail: '' }]
+        }
+      );
+      return { ...prev, workouts };
+    });
+  };
+
+  const editRemoveExercise = (dayIdx, exIdx) => {
+    setEditWorkoutData(prev => {
+      if (!prev) return prev;
+      const workouts = prev.workouts.map((w, i) =>
+        i !== dayIdx ? w : {
+          ...w,
+          exercises: w.exercises.filter((_, j) => j !== exIdx)
+        }
+      );
+      return { ...prev, workouts };
+    });
+  };
+
+  const editUpdateDayTitle = (dayIdx, val) => {
+    setEditWorkoutData(prev => {
+      if (!prev) return prev;
+      const workouts = prev.workouts.map((w, i) =>
+        i !== dayIdx ? w : { ...w, title: val }
+      );
+      return { ...prev, workouts };
+    });
+  };
+
+  const handleSaveWorkout = async () => {
+    if (!editWorkoutData) return;
+    setIsSavingWorkout(true);
+    try {
+      const { error } = await supabase
+        .from('planilhas_treino')
+        .update({ conteudo_treino: { workouts: editWorkoutData.workouts } })
+        .eq('id', editWorkoutData.workoutId);
+      if (error) throw error;
+      await fetchWorkouts();
+      showNotification('Planilha atualizada com sucesso!');
+      setIsEditingWorkout(false);
+      setEditWorkoutData(null);
+    } catch (err) {
+      showNotification('Erro ao salvar: ' + err.message, 'error');
+    } finally {
+      setIsSavingWorkout(false);
+    }
+  };
+
   useEffect(() => {
     // Dynamic matching of body background to prevent light gaps on mobile scrolling rubberbanding
     const originalBg = document.body.style.backgroundColor;
@@ -1233,62 +1305,10 @@ const AdminPage = () => {
       {/* ─── Workout Edit Modal ─────────────────────────────────── */}
       <AnimatePresence>
         {isEditingWorkout && editWorkoutData && (() => {
-          const currentDay = editWorkoutData.workouts.find(w => w.day === editDayTab) || editWorkoutData.workouts[0];
+          // Derive from state on each render — no stale closure
           const currentDayIndex = editWorkoutData.workouts.findIndex(w => w.day === editDayTab);
-
-          const updateExercise = (dayIdx, exIdx, field, val) => {
-            setEditWorkoutData(prev => {
-              const next = { ...prev, workouts: prev.workouts.map((w, i) => i !== dayIdx ? w : {
-                ...w, exercises: w.exercises.map((ex, j) => j !== exIdx ? ex : { ...ex, [field]: val })
-              })};
-              return next;
-            });
-          };
-
-          const addExercise = (dayIdx) => {
-            setEditWorkoutData(prev => ({
-              ...prev,
-              workouts: prev.workouts.map((w, i) => i !== dayIdx ? w : {
-                ...w, exercises: [...w.exercises, { exercise: '', sets: '', detail: '' }]
-              })
-            }));
-          };
-
-          const removeExercise = (dayIdx, exIdx) => {
-            setEditWorkoutData(prev => ({
-              ...prev,
-              workouts: prev.workouts.map((w, i) => i !== dayIdx ? w : {
-                ...w, exercises: w.exercises.filter((_, j) => j !== exIdx)
-              })
-            }));
-          };
-
-          const updateDayTitle = (dayIdx, val) => {
-            setEditWorkoutData(prev => ({
-              ...prev,
-              workouts: prev.workouts.map((w, i) => i !== dayIdx ? w : { ...w, title: val })
-            }));
-          };
-
-          const handleSave = async () => {
-            setIsSavingWorkout(true);
-            try {
-              const { error } = await supabase
-                .from('planilhas_treino')
-                .update({ conteudo_treino: { workouts: editWorkoutData.workouts } })
-                .eq('id', editWorkoutData.workoutId);
-              if (error) throw error;
-              await fetchWorkouts();
-              showNotification('Planilha atualizada com sucesso!');
-              setIsEditingWorkout(false);
-              setEditWorkoutData(null);
-            } catch (err) {
-              showNotification('Erro ao salvar: ' + err.message, 'error');
-            } finally {
-              setIsSavingWorkout(false);
-            }
-          };
-
+          const safeIdx = currentDayIndex >= 0 ? currentDayIndex : 0;
+          const currentDay = editWorkoutData.workouts[safeIdx];
           return (
             <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
               <motion.div
@@ -1302,9 +1322,9 @@ const AdminPage = () => {
                 <div className="flex items-center justify-between px-8 py-6 border-b border-white/8 shrink-0">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-bordeaux mb-1">Modo Edição</p>
-                    <h2 className="text-xl font-black text-white">Editar Planilha</h2>
+                    <h2 className="text-xl font-black text-white">Editar Planilha — {currentDay?.day}</h2>
                   </div>
-                  <button onClick={() => { setIsEditingWorkout(false); setEditWorkoutData(null); }} className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition-all">
+                  <button onClick={() => { setIsEditingWorkout(false); setEditWorkoutData(null); }} className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition-all cursor-pointer">
                     <FiX size={20} />
                   </button>
                 </div>
@@ -1315,7 +1335,7 @@ const AdminPage = () => {
                     <button
                       key={w.day}
                       onClick={() => setEditDayTab(w.day)}
-                      className={`px-3.5 py-2 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all border cursor-pointer ${editDayTab === w.day ? 'bg-bordeaux border-bordeaux text-white' : 'bg-white/5 border-white/5 text-white/50 hover:bg-white/10 hover:text-white'}`}
+                      className={`px-3.5 py-2 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all border cursor-pointer ${w.day === editDayTab ? 'bg-bordeaux border-bordeaux text-white shadow-md' : 'bg-white/5 border-white/5 text-white/50 hover:bg-white/10 hover:text-white'}`}
                     >
                       {w.day}
                     </button>
@@ -1329,7 +1349,7 @@ const AdminPage = () => {
                     <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-2">Título do Dia</label>
                     <input
                       value={currentDay?.title || ''}
-                      onChange={(e) => updateDayTitle(currentDayIndex, e.target.value)}
+                      onChange={(e) => editUpdateDayTitle(safeIdx, e.target.value)}
                       className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/8 text-white text-sm outline-none focus:border-bordeaux/60 transition-all"
                       placeholder={`${editDayTab}: Título do treino`}
                     />
@@ -1342,33 +1362,33 @@ const AdminPage = () => {
                       <div key={exIdx} className="p-4 rounded-2xl bg-white/4 border border-white/6 space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Exercício {exIdx + 1}</span>
-                          <button onClick={() => removeExercise(currentDayIndex, exIdx)} className="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-all cursor-pointer">
+                          <button onClick={() => editRemoveExercise(safeIdx, exIdx)} className="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-all cursor-pointer">
                             <FiTrash2 size={13} />
                           </button>
                         </div>
                         <input
                           value={ex.exercise}
-                          onChange={(e) => updateExercise(currentDayIndex, exIdx, 'exercise', e.target.value)}
+                          onChange={(e) => editUpdateExercise(safeIdx, exIdx, 'exercise', e.target.value)}
                           placeholder="Nome do exercício"
                           className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/8 text-white text-sm outline-none focus:border-bordeaux/60 transition-all"
                         />
                         <div className="grid grid-cols-2 gap-2">
                           <input
                             value={ex.sets}
-                            onChange={(e) => updateExercise(currentDayIndex, exIdx, 'sets', e.target.value)}
+                            onChange={(e) => editUpdateExercise(safeIdx, exIdx, 'sets', e.target.value)}
                             placeholder="Séries (ex: 4x12)"
                             className="px-3 py-2 rounded-xl bg-white/5 border border-white/8 text-white text-sm outline-none focus:border-bordeaux/60 transition-all"
                           />
                           <input
                             value={ex.detail}
-                            onChange={(e) => updateExercise(currentDayIndex, exIdx, 'detail', e.target.value)}
+                            onChange={(e) => editUpdateExercise(safeIdx, exIdx, 'detail', e.target.value)}
                             placeholder="Detalhe (ex: 60s rest)"
                             className="px-3 py-2 rounded-xl bg-white/5 border border-white/8 text-white text-sm outline-none focus:border-bordeaux/60 transition-all"
                           />
                         </div>
                       </div>
                     ))}
-                    <button onClick={() => addExercise(currentDayIndex)} className="w-full py-3 rounded-xl border border-dashed border-white/15 text-white/40 hover:text-white hover:border-bordeaux/50 text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <button onClick={() => editAddExercise(safeIdx)} className="w-full py-3 rounded-xl border border-dashed border-white/15 text-white/40 hover:text-white hover:border-bordeaux/50 text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer">
                       <FiPlus size={14} /> Adicionar Exercício
                     </button>
                   </div>
@@ -1379,7 +1399,7 @@ const AdminPage = () => {
                   <button onClick={() => { setIsEditingWorkout(false); setEditWorkoutData(null); }} className="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/8 text-white font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all cursor-pointer">
                     Cancelar
                   </button>
-                  <button onClick={handleSave} disabled={isSavingWorkout} className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-wine-900 to-bordeaux text-white font-black text-xs uppercase tracking-widest shadow-wine hover:shadow-lg transition-all cursor-pointer disabled:opacity-60">
+                  <button onClick={handleSaveWorkout} disabled={isSavingWorkout} className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-wine-900 to-bordeaux text-white font-black text-xs uppercase tracking-widest shadow-wine hover:shadow-lg transition-all cursor-pointer disabled:opacity-60">
                     {isSavingWorkout ? 'Salvando...' : 'Salvar Alterações'}
                   </button>
                 </div>
@@ -1388,6 +1408,7 @@ const AdminPage = () => {
           );
         })()}
       </AnimatePresence>
+
 
       <AnimatePresence>
         {isCreatingUser && (
