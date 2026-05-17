@@ -68,6 +68,10 @@ const AdminPage = () => {
   // New States for inspecting student workouts
   const [selectedInspectStudent, setSelectedInspectStudent] = useState(null)
   const [inspectDayTab, setInspectDayTab] = useState('SEG')
+  const [isEditingWorkout, setIsEditingWorkout] = useState(false)
+  const [editWorkoutData, setEditWorkoutData] = useState(null) // { workoutId, workouts: [...] }
+  const [editDayTab, setEditDayTab] = useState('SEG')
+  const [isSavingWorkout, setIsSavingWorkout] = useState(false)
 
   const navigate = useNavigate()
 
@@ -816,6 +820,18 @@ const AdminPage = () => {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => {
+                                  // Open edit modal pre-filled with current workout
+                                  const workoutsClone = JSON.parse(JSON.stringify(studentWorkout.conteudo_treino?.workouts || []));
+                                  setEditWorkoutData({ workoutId: studentWorkout.id, workouts: workoutsClone });
+                                  setEditDayTab(workoutsClone[0]?.day || 'SEG');
+                                  setIsEditingWorkout(true);
+                                }}
+                                className="px-4 py-2 bg-gradient-to-r from-wine-900 to-bordeaux text-white rounded-xl text-[10px] font-black uppercase tracking-wider shadow-md hover:shadow-wine transition-all cursor-pointer"
+                              >
+                                Editar Planilha
+                              </button>
+                              <button
+                                onClick={() => {
                                   setSelectedStudentId(selectedInspectStudent.id);
                                   setSelectedWorkout(studentWorkout);
                                 }}
@@ -1138,6 +1154,166 @@ const AdminPage = () => {
 
         </div>
       </main>
+
+      {/* ─── Workout Edit Modal ─────────────────────────────────── */}
+      <AnimatePresence>
+        {isEditingWorkout && editWorkoutData && (() => {
+          const currentDay = editWorkoutData.workouts.find(w => w.day === editDayTab) || editWorkoutData.workouts[0];
+          const currentDayIndex = editWorkoutData.workouts.findIndex(w => w.day === editDayTab);
+
+          const updateExercise = (dayIdx, exIdx, field, val) => {
+            setEditWorkoutData(prev => {
+              const next = { ...prev, workouts: prev.workouts.map((w, i) => i !== dayIdx ? w : {
+                ...w, exercises: w.exercises.map((ex, j) => j !== exIdx ? ex : { ...ex, [field]: val })
+              })};
+              return next;
+            });
+          };
+
+          const addExercise = (dayIdx) => {
+            setEditWorkoutData(prev => ({
+              ...prev,
+              workouts: prev.workouts.map((w, i) => i !== dayIdx ? w : {
+                ...w, exercises: [...w.exercises, { exercise: '', sets: '', detail: '' }]
+              })
+            }));
+          };
+
+          const removeExercise = (dayIdx, exIdx) => {
+            setEditWorkoutData(prev => ({
+              ...prev,
+              workouts: prev.workouts.map((w, i) => i !== dayIdx ? w : {
+                ...w, exercises: w.exercises.filter((_, j) => j !== exIdx)
+              })
+            }));
+          };
+
+          const updateDayTitle = (dayIdx, val) => {
+            setEditWorkoutData(prev => ({
+              ...prev,
+              workouts: prev.workouts.map((w, i) => i !== dayIdx ? w : { ...w, title: val })
+            }));
+          };
+
+          const handleSave = async () => {
+            setIsSavingWorkout(true);
+            try {
+              const { error } = await supabase
+                .from('planilhas_treino')
+                .update({ conteudo_treino: { workouts: editWorkoutData.workouts } })
+                .eq('id', editWorkoutData.workoutId);
+              if (error) throw error;
+              await fetchWorkouts();
+              showNotification('Planilha atualizada com sucesso!');
+              setIsEditingWorkout(false);
+              setEditWorkoutData(null);
+            } catch (err) {
+              showNotification('Erro ao salvar: ' + err.message, 'error');
+            } finally {
+              setIsSavingWorkout(false);
+            }
+          };
+
+          return (
+            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden"
+                style={{ background: '#0d0d0d' }}
+              >
+                {/* Header */}
+                <div className="flex items-center justify-between px-8 py-6 border-b border-white/8 shrink-0">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-bordeaux mb-1">Modo Edição</p>
+                    <h2 className="text-xl font-black text-white">Editar Planilha</h2>
+                  </div>
+                  <button onClick={() => { setIsEditingWorkout(false); setEditWorkoutData(null); }} className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition-all">
+                    <FiX size={20} />
+                  </button>
+                </div>
+
+                {/* Day tabs */}
+                <div className="flex gap-2 px-8 pt-5 shrink-0 flex-wrap">
+                  {editWorkoutData.workouts.map((w) => (
+                    <button
+                      key={w.day}
+                      onClick={() => setEditDayTab(w.day)}
+                      className={`px-3.5 py-2 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all border cursor-pointer ${editDayTab === w.day ? 'bg-bordeaux border-bordeaux text-white' : 'bg-white/5 border-white/5 text-white/50 hover:bg-white/10 hover:text-white'}`}
+                    >
+                      {w.day}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Scrollable content */}
+                <div className="flex-1 overflow-y-auto px-8 py-5 space-y-4">
+                  {/* Day title */}
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-2">Título do Dia</label>
+                    <input
+                      value={currentDay?.title || ''}
+                      onChange={(e) => updateDayTitle(currentDayIndex, e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/8 text-white text-sm outline-none focus:border-bordeaux/60 transition-all"
+                      placeholder={`${editDayTab}: Título do treino`}
+                    />
+                  </div>
+
+                  {/* Exercises */}
+                  <div className="space-y-3">
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Exercícios</label>
+                    {(currentDay?.exercises || []).map((ex, exIdx) => (
+                      <div key={exIdx} className="p-4 rounded-2xl bg-white/4 border border-white/6 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Exercício {exIdx + 1}</span>
+                          <button onClick={() => removeExercise(currentDayIndex, exIdx)} className="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-all cursor-pointer">
+                            <FiTrash2 size={13} />
+                          </button>
+                        </div>
+                        <input
+                          value={ex.exercise}
+                          onChange={(e) => updateExercise(currentDayIndex, exIdx, 'exercise', e.target.value)}
+                          placeholder="Nome do exercício"
+                          className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/8 text-white text-sm outline-none focus:border-bordeaux/60 transition-all"
+                        />
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            value={ex.sets}
+                            onChange={(e) => updateExercise(currentDayIndex, exIdx, 'sets', e.target.value)}
+                            placeholder="Séries (ex: 4x12)"
+                            className="px-3 py-2 rounded-xl bg-white/5 border border-white/8 text-white text-sm outline-none focus:border-bordeaux/60 transition-all"
+                          />
+                          <input
+                            value={ex.detail}
+                            onChange={(e) => updateExercise(currentDayIndex, exIdx, 'detail', e.target.value)}
+                            placeholder="Detalhe (ex: 60s rest)"
+                            className="px-3 py-2 rounded-xl bg-white/5 border border-white/8 text-white text-sm outline-none focus:border-bordeaux/60 transition-all"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    <button onClick={() => addExercise(currentDayIndex)} className="w-full py-3 rounded-xl border border-dashed border-white/15 text-white/40 hover:text-white hover:border-bordeaux/50 text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer">
+                      <FiPlus size={14} /> Adicionar Exercício
+                    </button>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex gap-3 px-8 py-5 border-t border-white/8 shrink-0">
+                  <button onClick={() => { setIsEditingWorkout(false); setEditWorkoutData(null); }} className="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/8 text-white font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all cursor-pointer">
+                    Cancelar
+                  </button>
+                  <button onClick={handleSave} disabled={isSavingWorkout} className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-wine-900 to-bordeaux text-white font-black text-xs uppercase tracking-widest shadow-wine hover:shadow-lg transition-all cursor-pointer disabled:opacity-60">
+                    {isSavingWorkout ? 'Salvando...' : 'Salvar Alterações'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          );
+        })()}
+      </AnimatePresence>
+
       <AnimatePresence>
         {isCreatingUser && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
