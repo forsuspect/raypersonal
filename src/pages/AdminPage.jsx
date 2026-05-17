@@ -509,10 +509,6 @@ const AdminPage = () => {
           ))}
         </nav>
 
-        <button onClick={() => navigate('/')} className="mt-6 flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold transition-colors text-white/30 hover:text-white">
-          <FiArrowLeft className="w-5 h-5" /> Voltar para o site
-        </button>
-
         {/* Footer info inside Admin sidebar */}
         <div className="pt-4 border-t border-white/10 flex flex-col gap-2 mt-auto">
           <a
@@ -929,50 +925,64 @@ const AdminPage = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Quick financial stats */}
-                <div className="p-6 rounded-[32px] border border-white/5 bg-white/5 shadow-premium flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-black uppercase text-white/40 tracking-wider">Assinaturas Ativas</span>
-                    <h3 className="text-2xl font-black text-white mt-1">
-                      {studentsData.filter(s => s.status === 'Ativo').length} Alunas
-                    </h3>
+                {/* Card: Assinaturas Ativas */}
+                <div className="relative p-6 rounded-[2rem] overflow-hidden border border-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.08)]" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(255,255,255,0.03) 100%)' }}>
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/60 to-transparent rounded-t-[2rem]" />
+                  <div className="absolute top-4 right-4 w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center">
+                    <FiUsers size={20} className="text-emerald-400" />
                   </div>
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                    <FiUsers size={20} />
+                  <div>
+                    <span className="text-[10px] font-black uppercase text-emerald-400/70 tracking-[0.25em]">Assinaturas Ativas</span>
+                    <h3 className="text-4xl font-black text-white mt-2 mb-1">
+                      {studentsData.filter(s => s.status === 'Ativo').length}
+                    </h3>
+                    <p className="text-sm text-white/40 font-medium">alunas ativas no plano</p>
                   </div>
                 </div>
 
-                <div className="p-6 rounded-[32px] border border-white/5 bg-white/5 shadow-premium flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-black uppercase text-white/40 tracking-wider">A vencer (próx 7 dias)</span>
-                    <h3 className="text-2xl font-black text-white mt-1">
-                      {studentsData.filter(s => {
-                        if (!s.expirationDate) return false;
-                        const expDate = new Date(s.expirationDate);
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
-                        return diffDays >= 0 && diffDays <= 7;
-                      }).length} Pendentes
-                    </h3>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
-                    <FiAlertCircle size={20} />
-                  </div>
-                </div>
+                {/* Card: A Vencer */}
+                {(() => {
+                  const expiringCount = studentsData.filter(s => {
+                    if (!s.expirationDate) return false;
+                    const expDate = new Date(s.expirationDate);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+                    return diffDays >= 0 && diffDays <= 7;
+                  }).length;
+                  return (
+                    <div className="relative p-6 rounded-[2rem] overflow-hidden border border-amber-500/20 shadow-[0_0_40px_rgba(245,158,11,0.08)]" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(255,255,255,0.03) 100%)' }}>
+                      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500/60 to-transparent rounded-t-[2rem]" />
+                      <div className="absolute top-4 right-4 w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/20 flex items-center justify-center">
+                        <FiAlertCircle size={20} className={expiringCount > 0 ? 'text-amber-400 animate-pulse' : 'text-amber-400'} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black uppercase text-amber-400/70 tracking-[0.25em]">A Vencer (próx 7 dias)</span>
+                        <h3 className={`text-4xl font-black mt-2 mb-1 ${expiringCount > 0 ? 'text-amber-400' : 'text-white'}`}>
+                          {expiringCount}
+                        </h3>
+                        <p className="text-sm text-white/40 font-medium">planos a vencer em breve</p>
+                      </div>
+                    </div>
+                  );
+                })()}
 
-                <div className="p-6 rounded-[32px] border border-white/5 bg-white/5 shadow-premium flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-black uppercase text-white/40 tracking-wider">Assinaturas Inativas</span>
-                    <h3 className="text-2xl font-black text-white mt-1">
-                      {studentsData.filter(s => s.status === 'Inativo').length} Contas
-                    </h3>
+                {/* Card: Assinaturas Inativas */}
+                <div className="relative p-6 rounded-[2rem] overflow-hidden border border-red-500/20 shadow-[0_0_40px_rgba(239,68,68,0.08)]" style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(255,255,255,0.03) 100%)' }}>
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-500/60 to-transparent rounded-t-[2rem]" />
+                  <div className="absolute top-4 right-4 w-12 h-12 rounded-2xl bg-red-500/15 border border-red-500/20 flex items-center justify-center">
+                    <FiX size={20} className="text-red-400" />
                   </div>
-                  <div className="w-12 h-12 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center">
-                    <FiX size={20} />
+                  <div>
+                    <span className="text-[10px] font-black uppercase text-red-400/70 tracking-[0.25em]">Assinaturas Inativas</span>
+                    <h3 className="text-4xl font-black text-white mt-2 mb-1">
+                      {studentsData.filter(s => s.status === 'Inativo').length}
+                    </h3>
+                    <p className="text-sm text-white/40 font-medium">contas desativadas</p>
                   </div>
                 </div>
               </div>
+
 
               {/* Invoices table / list */}
               <div className="backdrop-blur-xl rounded-[32px] overflow-hidden border border-white/5 bg-white/5 shadow-2xl">

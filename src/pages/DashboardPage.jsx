@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
-import { 
+import {
   FiHome, FiActivity, FiMessageCircle, FiUser,
   FiMenu, FiX, FiDroplet, FiTarget, FiArrowLeft, FiCheck, FiCheckCircle,
   FiTrendingUp, FiSettings, FiLogOut, FiVideo, FiCalendar, FiShield
@@ -12,17 +12,17 @@ const isDateInCurrentWeek = (dateStr) => {
   if (!dateStr) return false;
   const date = new Date(dateStr);
   const now = new Date();
-  
+
   // Monday as first day of week in Portuguese calendar
   const day = now.getDay();
   const diff = now.getDate() - day + (day === 0 ? -6 : 1);
   const currentMonday = new Date(now.setDate(diff));
   currentMonday.setHours(0, 0, 0, 0);
-  
+
   const currentSunday = new Date(currentMonday);
   currentSunday.setDate(currentMonday.getDate() + 6);
   currentSunday.setHours(23, 59, 59, 999);
-  
+
   return date >= currentMonday && date <= currentSunday;
 };
 
@@ -54,9 +54,9 @@ const DashboardPage = () => {
   const toggleConfirmDay = (day) => {
     const val = confirmedDays[day];
     const isCurrentlyConfirmed = val && (val === true || isDateInCurrentWeek(val));
-    const newDays = { 
-      ...confirmedDays, 
-      [day]: isCurrentlyConfirmed ? null : new Date().toISOString().split('T')[0] 
+    const newDays = {
+      ...confirmedDays,
+      [day]: isCurrentlyConfirmed ? null : new Date().toISOString().split('T')[0]
     };
     setConfirmedDays(newDays);
     localStorage.setItem('rm_confirmed_days', JSON.stringify(newDays));
@@ -84,7 +84,7 @@ const DashboardPage = () => {
       }
 
       const user = JSON.parse(storedUser)
-      
+
       // Verify if user still exists in DB and get latest workout
       try {
         const { data, error: userError } = await supabase
@@ -114,14 +114,14 @@ const DashboardPage = () => {
 
         if (!workoutError && workoutData) {
           setActiveWorkout(workoutData)
-          
+
           // Auto-select today's workout tab index
           const todayDayNames = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
           const todayName = todayDayNames[new Date().getDay()];
           const workouts = workoutData?.conteudo_treino?.workouts || [];
           const todayIdx = workouts.findIndex(w => w.day === todayName);
           if (todayIdx >= 0) setActiveWorkoutTab(todayIdx);
-          
+
           // Check if already finished today
           const today = new Date().toDateString()
           const finishedDate = localStorage.getItem(`finished_${userFromDb.id}`)
@@ -141,8 +141,8 @@ const DashboardPage = () => {
   }, [navigate])
 
   useEffect(() => {
-    const currentExercises = activeWorkout?.conteudo_treino?.workouts 
-      ? activeWorkout.conteudo_treino.workouts[activeWorkoutTab]?.exercises 
+    const currentExercises = activeWorkout?.conteudo_treino?.workouts
+      ? activeWorkout.conteudo_treino.workouts[activeWorkoutTab]?.exercises
       : activeWorkout?.conteudo_treino?.exercises;
 
     if (activeWorkout && completedExercises.length > 0 && completedExercises.length === currentExercises?.length) {
@@ -151,7 +151,7 @@ const DashboardPage = () => {
         if (userData) {
           localStorage.setItem(`finished_${userData.id}`, new Date().toDateString())
         }
-        
+
         // Auto switch to overview with a small delay for better UX
         setTimeout(() => {
           setActiveTab('overview')
@@ -166,14 +166,14 @@ const DashboardPage = () => {
     if (userData) {
       const today = new Date().toDateString()
       const savedDate = localStorage.getItem(`water_date_${userData.id}`)
-      
+
       if (savedDate === today) {
         const savedWater = localStorage.getItem(`water_${userData.id}`)
         if (savedWater) setWaterIntake(parseFloat(savedWater))
       } else {
         setWaterIntake(0)
       }
-      
+
       const savedWeight = localStorage.getItem(`weight_${userData.id}`)
       if (savedWeight) {
         setCurrentWeight(parseFloat(savedWeight))
@@ -185,8 +185,8 @@ const DashboardPage = () => {
 
   const handleWaterClick = () => {
     const val = window.prompt('Atualize a quantidade total de água bebida hoje (em Litros):', waterIntake.toString())
-    if (val !== null && !isNaN(parseFloat(val.replace(',','.')))) {
-      const num = parseFloat(val.replace(',','.')).toFixed(1)
+    if (val !== null && !isNaN(parseFloat(val.replace(',', '.')))) {
+      const num = parseFloat(val.replace(',', '.')).toFixed(1)
       setWaterIntake(num)
       if (userData) {
         localStorage.setItem(`water_${userData.id}`, num.toString())
@@ -197,8 +197,8 @@ const DashboardPage = () => {
 
   const handleWeightClick = () => {
     const val = window.prompt('Atualize seu peso atual (em kg):', currentWeight.toString())
-    if (val !== null && !isNaN(parseFloat(val.replace(',','.')))) {
-      const num = parseFloat(val.replace(',','.')).toFixed(1)
+    if (val !== null && !isNaN(parseFloat(val.replace(',', '.')))) {
+      const num = parseFloat(val.replace(',', '.')).toFixed(1)
       setCurrentWeight(num)
       if (userData) {
         localStorage.setItem(`weight_${userData.id}`, num.toString())
@@ -254,11 +254,10 @@ const DashboardPage = () => {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-bold ${
-                activeTab === item.id
-                  ? 'text-white'
-                  : 'hover:text-white font-medium'
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-bold ${activeTab === item.id
+                ? 'text-white'
+                : 'hover:text-white font-medium'
+                }`}
               style={{
                 backgroundColor: activeTab === item.id ? 'rgba(136,19,55,0.2)' : 'transparent',
                 color: activeTab === item.id ? '#ffffff' : 'rgba(255,255,255,0.35)',
@@ -273,10 +272,10 @@ const DashboardPage = () => {
 
         {/* Footer info at bottom of sidebar */}
         <div className="pt-4 border-t border-white/5 flex flex-col gap-2 mt-auto">
-          <a 
-            href="https://automize-one.vercel.app/" 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <a
+            href="https://automize-one.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-[10px] text-white/30 hover:text-white/60 font-bold transition-all text-center flex items-center justify-center gap-1 bg-white/5 py-2 rounded-xl cursor-pointer"
           >
             Desenvolvido por <span className="text-rose-soft">Automize</span>
@@ -332,10 +331,10 @@ const DashboardPage = () => {
                     { id: 'weight', icon: FiActivity, label: 'Peso Atual', value: currentWeight.toString(), sub: 'kg', onClick: handleWeightClick },
                     { id: 'evolution', icon: FiTrendingUp, label: 'Evolução', value: '+2%', sub: ' MM', green: true },
                   ].map((card, i) => (
-                    <div 
-                      key={i} 
+                    <div
+                      key={i}
                       onClick={card.onClick}
-                      className={`p-5 rounded-3xl ${card.onClick ? 'cursor-pointer hover:bg-white/10 transition-colors' : ''}`} 
+                      className={`p-5 rounded-3xl ${card.onClick ? 'cursor-pointer hover:bg-white/10 transition-colors' : ''}`}
                       style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
                       title={card.onClick ? 'Clique para atualizar' : ''}
                     >
@@ -363,22 +362,22 @@ const DashboardPage = () => {
                         <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border ${isWorkoutFinished ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-white/80 border-white/10'}`}>
                           {isWorkoutFinished ? 'Meta Batida' : (todayWorkout ? `Treino de ${activeDayName}` : 'Descanso Programado')}
                         </span>
-                        
+
                         <h2 className="text-2xl md:text-3xl font-serif italic mb-3 text-white">
-                          {isWorkoutFinished 
-                            ? 'Treino Diário Concluído!' 
-                            : (todayWorkout 
-                              ? todayWorkout.title 
+                          {isWorkoutFinished
+                            ? 'Treino Diário Concluído!'
+                            : (todayWorkout
+                              ? todayWorkout.title
                               : (activeWorkout ? '🧘‍♀️ Dia de Descanso' : 'Sem Treino Ativo'))}
                         </h2>
-                        
+
                         <p className="text-white/50 text-sm mb-6 max-w-md leading-relaxed">
-                          {isWorkoutFinished 
-                            ? 'Parabéns! Você finalizou todos os exercícios programados para hoje. Descanse bem e mantenha o foco!' 
-                            : (todayWorkout 
-                              ? `Treino planejado para o seu objetivo. Foco de hoje: ${todayWorkout.title.split(':')[1] || 'Treinar Forte'}.` 
-                              : (activeWorkout 
-                                ? 'Hoje é seu dia de descanso programado. Aproveite para regenerar a musculatura, hidratar-se e fazer um cardio leve regenerativo se desejar!' 
+                          {isWorkoutFinished
+                            ? 'Parabéns! Você finalizou todos os exercícios programados para hoje. Descanse bem e mantenha o foco!'
+                            : (todayWorkout
+                              ? `Treino planejado para o seu objetivo. Foco de hoje: ${todayWorkout.title.split(':')[1] || 'Treinar Forte'}.`
+                              : (activeWorkout
+                                ? 'Hoje é seu dia de descanso programado. Aproveite para regenerar a musculatura, hidratar-se e fazer um cardio leve regenerativo se desejar!'
                                 : 'Sua personal ainda não gerou seu ciclo de treinos personalizado.'))}
                         </p>
 
@@ -389,9 +388,9 @@ const DashboardPage = () => {
                             </button>
                           )}
                           {isWorkoutFinished && (
-                             <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm bg-emerald-500/5 w-fit px-4 py-2 rounded-xl border border-emerald-500/10">
-                               <FiCheckCircle size={16} /> Progresso de hoje: 100%
-                             </div>
+                            <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm bg-emerald-500/5 w-fit px-4 py-2 rounded-xl border border-emerald-500/10">
+                              <FiCheckCircle size={16} /> Progresso de hoje: 100%
+                            </div>
                           )}
                         </div>
 
@@ -418,8 +417,8 @@ const DashboardPage = () => {
                         {todayWorkout?.exercises?.map((ex, i) => {
                           const isChecked = completedExercises.includes(ex.exercise);
                           return (
-                            <div 
-                              key={i} 
+                            <div
+                              key={i}
                               onClick={() => {
                                 if (isChecked) {
                                   setCompletedExercises(prev => prev.filter(item => item !== ex.exercise));
@@ -427,11 +426,10 @@ const DashboardPage = () => {
                                   setCompletedExercises(prev => [...prev, ex.exercise]);
                                 }
                               }}
-                              className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 ${
-                                isChecked 
-                                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' 
-                                  : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
-                              }`}
+                              className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 ${isChecked
+                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                                : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                                }`}
                             >
                               <div className="flex items-center gap-3">
                                 <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${isChecked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-white/30 text-transparent'}`}>
@@ -449,24 +447,24 @@ const DashboardPage = () => {
                       </div>
 
                       <div className="flex gap-3 mt-4">
-                        <button 
+                        <button
                           onClick={() => setIsDoingWorkout(false)}
                           className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl text-xs uppercase tracking-widest transition-all border border-white/10"
                         >
                           Voltar
                         </button>
-                        <button 
+                        <button
                           onClick={() => {
                             setIsWorkoutFinished(true);
                             setIsDoingWorkout(false);
                             if (userData) {
                               localStorage.setItem(`finished_${userData.id}`, new Date().toDateString());
                             }
-                            
+
                             if (todayWorkout) {
-                              const newDays = { 
-                                ...confirmedDays, 
-                                [todayWorkout.day]: new Date().toISOString().split('T')[0] 
+                              const newDays = {
+                                ...confirmedDays,
+                                [todayWorkout.day]: new Date().toISOString().split('T')[0]
                               };
                               setConfirmedDays(newDays);
                               localStorage.setItem('rm_confirmed_days', JSON.stringify(newDays));
@@ -480,7 +478,7 @@ const DashboardPage = () => {
                     </div>
                   </div>
                 )
-              }
+                }
               </motion.div>
             )}
 
@@ -495,109 +493,108 @@ const DashboardPage = () => {
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2" style={{ color: '#881337' }}>Planejamento Completo</p>
                   <h1 className="text-4xl md:text-5xl font-serif italic text-white mb-6">Meu Treino</h1>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {activeWorkout?.conteudo_treino?.workouts ? (() => {
-                    // Sort so today's workout appears first
-                    const workouts = activeWorkout.conteudo_treino.workouts;
-                    const todayIdx = workouts.findIndex(w => w.day === currentDayName);
-                    const sorted = todayIdx >= 0
-                      ? [workouts[todayIdx], ...workouts.filter((_, i) => i !== todayIdx)]
-                      : workouts;
-                    return sorted.map((w, idx) => {
-                    const isToday = w.day === currentDayName;
-                    return (
-                    <motion.div 
-                      key={w.day}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.1 }}
-                      className={`rounded-[2.5rem] p-8 md:p-10 text-white relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500 flex flex-col justify-between ${isToday ? 'shadow-[0_0_40px_rgba(136,19,55,0.4)]' : 'shadow-wine'}`}
-                      style={{ backgroundColor: isToday ? '#1a0510' : '#0a0507', border: isToday ? '1px solid rgba(136,19,55,0.5)' : '1px solid rgba(255,255,255,0.05)' }}
-                    >
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl rounded-full" />
-                      {isToday && <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-bordeaux via-rose-soft to-bordeaux opacity-60 rounded-t-[2.5rem]" />}
-                      
-                      <div className="relative z-10 flex-1 flex flex-col justify-between">
-                        <div>
-                          <div className="flex items-center justify-between mb-8">
-                            <div className="flex items-center gap-3">
-                              <h3 className="text-xl font-bold text-rose-soft/90 uppercase tracking-wider">{w.title}</h3>
-                              {isToday && (
-                                <span className="px-2 py-0.5 bg-bordeaux/30 border border-bordeaux/50 text-rose-soft text-[9px] font-black uppercase tracking-widest rounded-full animate-pulse">
-                                  Hoje
-                                </span>
-                              )}
+                    {activeWorkout?.conteudo_treino?.workouts ? (() => {
+                      // Sort so today's workout appears first
+                      const workouts = activeWorkout.conteudo_treino.workouts;
+                      const todayIdx = workouts.findIndex(w => w.day === currentDayName);
+                      const sorted = todayIdx >= 0
+                        ? [workouts[todayIdx], ...workouts.filter((_, i) => i !== todayIdx)]
+                        : workouts;
+                      return sorted.map((w, idx) => {
+                        const isToday = w.day === currentDayName;
+                        return (
+                          <motion.div
+                            key={w.day}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.1 }}
+                            className={`rounded-[2.5rem] p-8 md:p-10 text-white relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500 flex flex-col justify-between ${isToday ? 'shadow-[0_0_40px_rgba(136,19,55,0.4)]' : 'shadow-wine'}`}
+                            style={{ backgroundColor: isToday ? '#1a0510' : '#0a0507', border: isToday ? '1px solid rgba(136,19,55,0.5)' : '1px solid rgba(255,255,255,0.05)' }}
+                          >
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl rounded-full" />
+                            {isToday && <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-bordeaux via-rose-soft to-bordeaux opacity-60 rounded-t-[2.5rem]" />}
+
+                            <div className="relative z-10 flex-1 flex flex-col justify-between">
+                              <div>
+                                <div className="flex items-center justify-between mb-8">
+                                  <div className="flex items-center gap-3">
+                                    <h3 className="text-xl font-bold text-rose-soft/90 uppercase tracking-wider">{w.title}</h3>
+                                    {isToday && (
+                                      <span className="px-2 py-0.5 bg-bordeaux/30 border border-bordeaux/50 text-rose-soft text-[9px] font-black uppercase tracking-widest rounded-full animate-pulse">
+                                        Hoje
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-20 group-hover:opacity-100 transition-opacity">
+                                    <FiTarget size={14} className="text-rose-soft" />
+                                  </div>
+                                </div>
+
+                                <div className="h-px w-full bg-white/10 mb-8" />
+
+                                <div className="space-y-6 text-left">
+                                  {w.exercises.map((ex, i) => (
+                                    <div key={i} className="flex items-start gap-4 group/ex">
+                                      <div className="w-2 h-2 rounded-full bg-rose-soft mt-1.5 shrink-0 shadow-[0_0_8px_rgba(255,170,170,0.5)]" />
+                                      <div>
+                                        <p className="text-sm font-medium text-white/90 leading-tight mb-1">
+                                          {ex.exercise} <span className="text-rose-soft/70 ml-1">({ex.sets})</span>
+                                        </p>
+                                        <p className="text-[10px] text-white/30 font-black uppercase tracking-widest">{ex.detail}</p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div>
+                                <div className="h-px w-full bg-white/10 my-8" />
+
+                                {(() => {
+                                  const isDayConfirmed = confirmedDays[w.day] && (confirmedDays[w.day] === true || isDateInCurrentWeek(confirmedDays[w.day]));
+                                  return (
+                                    <button
+                                      onClick={() => toggleConfirmDay(w.day)}
+                                      className={`w-full py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 ${isDayConfirmed
+                                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
+                                        : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                                        }`}
+                                    >
+                                      <FiCheckCircle size={14} />
+                                      {isDayConfirmed ? 'Treino Confirmado!' : `Confirmar treino de ${w.day}`}
+                                    </button>
+                                  );
+                                })()}
+                              </div>
                             </div>
-                            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-20 group-hover:opacity-100 transition-opacity">
-                              <FiTarget size={14} className="text-rose-soft" />
-                            </div>
-                          </div>
-                          
-                          <div className="h-px w-full bg-white/10 mb-8" />
-                          
-                          <div className="space-y-6 text-left">
-                            {w.exercises.map((ex, i) => (
-                              <div key={i} className="flex items-start gap-4 group/ex">
-                                <div className="w-2 h-2 rounded-full bg-rose-soft mt-1.5 shrink-0 shadow-[0_0_8px_rgba(255,170,170,0.5)]" />
-                                <div>
-                                  <p className="text-sm font-medium text-white/90 leading-tight mb-1">
-                                    {ex.exercise} <span className="text-rose-soft/70 ml-1">({ex.sets})</span>
-                                  </p>
-                                  <p className="text-[10px] text-white/30 font-black uppercase tracking-widest">{ex.detail}</p>
+                          </motion.div>
+                        );
+                      });
+                    })() : activeWorkout?.conteudo_treino?.exercises ? (
+                          <div className="col-span-full space-y-4">
+                            {activeWorkout.conteudo_treino.exercises.map((ex, i) => (
+                              <div key={i} className="bg-white p-6 rounded-3xl border border-wine-50 shadow-premium flex flex-col md:flex-row md:items-center gap-6">
+                                <div className="w-16 h-16 rounded-2xl bg-wine-50 flex items-center justify-center shrink-0 overflow-hidden text-wine-950">
+                                  <FiActivity size={24} />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-bold text-lg text-wine-950 mb-1">{ex.exercise || ex.name}</h4>
+                                  <p className="text-xs text-wine-900/60 mb-3">{ex.detail}</p>
+                                  <div className="flex flex-wrap gap-4 text-[10px] font-black uppercase tracking-widest text-bordeaux">
+                                    <span className="flex items-center gap-1 bg-wine-50 px-3 py-1 rounded-lg border border-wine-100">{ex.sets}</span>
+                                  </div>
                                 </div>
                               </div>
                             ))}
                           </div>
-                        </div>
-
-                        <div>
-                          <div className="h-px w-full bg-white/10 my-8" />
-                          
-                          {(() => {
-                            const isDayConfirmed = confirmedDays[w.day] && (confirmedDays[w.day] === true || isDateInCurrentWeek(confirmedDays[w.day]));
-                            return (
-                              <button 
-                                onClick={() => toggleConfirmDay(w.day)}
-                                className={`w-full py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 ${
-                                  isDayConfirmed
-                                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
-                                    : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
-                                }`}
-                              >
-                                <FiCheckCircle size={14} />
-                                {isDayConfirmed ? 'Treino Confirmado!' : `Confirmar treino de ${w.day}`}
-                              </button>
-                            );
-                          })()}
-                        </div>
+                        ) : (
+                      <div className="col-span-full py-20 text-center bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-dashed border-white/10">
+                        <FiTarget className="w-12 h-12 text-bordeaux mx-auto mb-4 animate-pulse" />
+                        <p className="text-white/60 text-sm font-medium">Nenhum exercício listado para este ciclo.</p>
                       </div>
-                    </motion.div>
-                    );
-                  });
-                  })() : activeWorkout?.conteudo_treino?.exercises ? (
-                    <div className="col-span-full space-y-4">
-                      {activeWorkout.conteudo_treino.exercises.map((ex, i) => (
-                        <div key={i} className="bg-white p-6 rounded-3xl border border-wine-50 shadow-premium flex flex-col md:flex-row md:items-center gap-6">
-                           <div className="w-16 h-16 rounded-2xl bg-wine-50 flex items-center justify-center shrink-0 overflow-hidden text-wine-950">
-                             <FiActivity size={24} />
-                           </div>
-                           <div className="flex-1">
-                             <h4 className="font-bold text-lg text-wine-950 mb-1">{ex.exercise || ex.name}</h4>
-                             <p className="text-xs text-wine-900/60 mb-3">{ex.detail}</p>
-                             <div className="flex flex-wrap gap-4 text-[10px] font-black uppercase tracking-widest text-bordeaux">
-                               <span className="flex items-center gap-1 bg-wine-50 px-3 py-1 rounded-lg border border-wine-100">{ex.sets}</span>
-                             </div>
-                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="col-span-full py-20 text-center bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-dashed border-white/10">
-                      <FiTarget className="w-12 h-12 text-bordeaux mx-auto mb-4 animate-pulse" />
-                      <p className="text-white/60 text-sm font-medium">Nenhum exercício listado para este ciclo.</p>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
               </motion.div>
             )}
 
@@ -741,7 +738,7 @@ const DashboardPage = () => {
       </main>
 
       {/* Mobile Sidebar Overlay */}
-      <div 
+      <div
         className={`fixed inset-0 bg-wine-950/70 z-40 lg:hidden backdrop-blur-sm transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsSidebarOpen(false)}
       >
@@ -761,11 +758,10 @@ const DashboardPage = () => {
               <button
                 key={item.id}
                 onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false) }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-                  activeTab === item.id 
-                    ? 'bg-white/5 border border-white/10 text-white font-bold' 
-                    : 'text-white/50 hover:bg-white/[0.02] hover:text-white font-medium'
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === item.id
+                  ? 'bg-white/5 border border-white/10 text-white font-bold'
+                  : 'text-white/50 hover:bg-white/[0.02] hover:text-white font-medium'
+                  }`}
               >
                 <item.icon size={20} />
                 {item.label}
@@ -775,10 +771,10 @@ const DashboardPage = () => {
 
           {/* Footer info at bottom of sidebar */}
           <div className="pt-4 border-t border-white/5 flex flex-col gap-2 mt-auto">
-            <a 
-              href="https://automize-one.vercel.app/" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a
+              href="https://automize-one.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-[10px] text-white/30 hover:text-white/60 font-bold transition-all text-center flex items-center justify-center gap-1 bg-white/5 py-2 rounded-xl"
             >
               Desenvolvido por <span className="text-rose-soft">Automize</span>
