@@ -15,8 +15,8 @@ const Workouts = () => {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   return (
-    <section id="treinos" className="relative bg-[#0a0507] overflow-hidden flex items-center py-16 md:py-24">
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-bordeaux/10 to-transparent -skew-x-12 translate-x-1/2 pointer-events-none" />
+    <section id="treinos" className="relative bg-white overflow-hidden flex items-center py-16 md:py-24">
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-bordeaux/5 to-transparent -skew-x-12 translate-x-1/2 pointer-events-none" />
 
       <div ref={ref} className="w-full max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
@@ -27,22 +27,22 @@ const Workouts = () => {
             transition={{ duration: 0.6 }}
           >
             <span className="text-bordeaux font-bold text-[10px] uppercase tracking-[0.4em] mb-2 block italic">Plataforma VIP</span>
-            <h2 className="font-black text-white mb-4 leading-tight" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)' }}>
+            <h2 className="font-black text-wine-950 mb-4 leading-tight" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)' }}>
               Sua <span className="text-wine-gradient italic">Evolução</span> com Tecnologia
             </h2>
-            <p className="text-white/60 mb-6 text-sm leading-relaxed max-w-md">
+            <p className="text-wine-900/60 mb-6 text-sm leading-relaxed max-w-md">
               Ambiente digital projetado para maximizar seus resultados. O seu treino guiado passo a passo.
             </p>
 
             <div className="grid grid-cols-2 gap-4">
               {features.map((feature, i) => (
                 <div key={i} className="flex gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                    <feature.icon className="text-rose-soft text-lg" />
+                  <div className="w-10 h-10 rounded-xl bg-premium-light border border-wine-50 flex items-center justify-center shrink-0">
+                    <feature.icon className="text-bordeaux text-lg" />
                   </div>
                   <div>
-                    <h4 className="text-white font-bold text-xs mb-0.5">{feature.title}</h4>
-                    <p className="text-white/50 text-[10px] leading-tight">{feature.desc}</p>
+                    <h4 className="text-wine-950 font-bold text-xs mb-0.5">{feature.title}</h4>
+                    <p className="text-wine-900/55 text-[10px] leading-tight">{feature.desc}</p>
                   </div>
                 </div>
               ))}
@@ -55,7 +55,7 @@ const Workouts = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative hidden lg:block"
           >
-            <div className="relative mx-auto w-full max-w-[280px] aspect-[1/2] bg-wine-950 rounded-[2.5rem] p-2.5 shadow-premium-lg border-4 border-white/15" style={{ maxHeight: '65dvh' }}>
+            <div className="relative mx-auto w-full max-w-[280px] aspect-[1/2] bg-wine-950 rounded-[2.5rem] p-2.5 shadow-premium-lg border-4 border-wine-900/10" style={{ maxHeight: '65dvh' }}>
               <div className="w-full h-full bg-[#050203] rounded-[2rem] overflow-hidden relative flex flex-col">
                 <div className="bg-wine-950 text-white p-5 pb-6 rounded-b-2xl relative shadow-wine">
                   <div className="flex justify-between items-center mb-4">

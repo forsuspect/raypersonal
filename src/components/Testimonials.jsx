@@ -31,20 +31,20 @@ const Transformations = () => {
   const prev = () => setCurrentIndex((prev) => (prev - 1 + transformations.length) % transformations.length)
 
   return (
-    <section id="transformacoes" className="relative bg-wine-950 text-white overflow-hidden py-16 md:py-24">
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-bordeaux/10 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-1/3 h-full bg-wine-900/20 blur-[100px] pointer-events-none" />
+    <section id="transformacoes" className="relative bg-white text-wine-950 overflow-hidden py-16 md:py-24">
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-bordeaux/5 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-1/3 h-full bg-wine-900/5 blur-[100px] pointer-events-none" />
 
       <div ref={ref} className="h-full max-w-7xl mx-auto px-6 flex flex-col justify-center gap-5 relative z-10">
         <div className="text-center">
-          <span className="text-rose-soft font-bold text-[10px] uppercase tracking-[0.4em] mb-2 block italic">Casos de Sucesso</span>
-          <h2 className="font-black leading-tight" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)' }}>
-            A <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-soft to-premium-white italic">Excelência</span> em Resultados
+          <span className="text-bordeaux font-bold text-[10px] uppercase tracking-[0.4em] mb-2 block italic">Casos de Sucesso</span>
+          <h2 className="font-black leading-tight text-wine-950" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)' }}>
+            A <span className="text-wine-gradient italic">Excelência</span> em Resultados
           </h2>
         </div>
 
         <div className="max-w-4xl mx-auto w-full relative">
-          <div className="glass-dark rounded-[2rem] p-5 md:p-8 border border-white/10 shadow-premium-lg">
+          <div className="bg-premium-light rounded-[2rem] p-5 md:p-8 border border-wine-50 shadow-premium-lg">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
@@ -57,8 +57,8 @@ const Transformations = () => {
                 {/* Images */}
                 <div className="flex gap-3">
                   <div className="w-1/2 relative">
-                    <span className="absolute top-3 left-3 z-10 bg-wine-950/80 text-white px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border border-white/10">Antes</span>
-                    <div className="aspect-[3/4] rounded-xl overflow-hidden border-2 border-white/5 opacity-60">
+                    <span className="absolute top-3 left-3 z-10 bg-white/80 text-wine-950 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border border-wine-950/10">Antes</span>
+                    <div className="aspect-[3/4] rounded-xl overflow-hidden border-2 border-wine-50 opacity-60">
                       <img src={transformations[currentIndex].before} alt="Antes" className="w-full h-full object-cover grayscale" />
                     </div>
                   </div>
@@ -72,19 +72,19 @@ const Transformations = () => {
 
                 {/* Text */}
                 <div className="flex flex-col justify-center">
-                  <div className="flex text-rose-soft mb-4">
-                    {[1,2,3,4,5].map(s => <FiStar key={s} className="fill-rose-soft" size={14} />)}
+                  <div className="flex text-bordeaux mb-4">
+                    {[1,2,3,4,5].map(s => <FiStar key={s} className="fill-bordeaux text-bordeaux" size={14} />)}
                   </div>
-                  <blockquote className="text-base md:text-lg font-serif italic text-white/90 mb-5 leading-relaxed">
+                  <blockquote className="text-base md:text-lg font-serif italic text-wine-900/80 mb-5 leading-relaxed">
                     "{transformations[currentIndex].text}"
                   </blockquote>
-                  <div className="border-t border-white/10 pt-4 flex items-center justify-between">
+                  <div className="border-t border-wine-100 pt-4 flex items-center justify-between">
                     <div>
-                      <h4 className="font-bold text-base">{transformations[currentIndex].name}</h4>
-                      <p className="text-white/40 text-xs">{transformations[currentIndex].time} de consultoria</p>
+                      <h4 className="font-bold text-base text-wine-950">{transformations[currentIndex].name}</h4>
+                      <p className="text-wine-900/50 text-xs">{transformations[currentIndex].time} de consultoria</p>
                     </div>
-                    <div className="bg-white/5 px-4 py-2 rounded-xl border border-white/10 text-center">
-                      <span className="block text-rose-soft font-black text-lg leading-none">{transformations[currentIndex].result}</span>
+                    <div className="bg-wine-50 px-4 py-2 rounded-xl border border-wine-100 text-center">
+                      <span className="block text-bordeaux font-black text-lg leading-none">{transformations[currentIndex].result}</span>
                     </div>
                   </div>
                 </div>
@@ -93,12 +93,12 @@ const Transformations = () => {
 
             {/* Controls */}
             <div className="absolute top-1/2 -translate-y-1/2 -left-5">
-              <button onClick={prev} className="w-10 h-10 rounded-full bg-white text-wine-950 flex items-center justify-center shadow-lg hover:bg-premium-light transition-colors">
+              <button onClick={prev} className="w-10 h-10 rounded-full bg-white text-wine-950 flex items-center justify-center shadow-lg hover:bg-premium-light transition-colors border border-wine-50">
                 <FiChevronLeft size={20} />
               </button>
             </div>
             <div className="absolute top-1/2 -translate-y-1/2 -right-5">
-              <button onClick={next} className="w-10 h-10 rounded-full bg-white text-wine-950 flex items-center justify-center shadow-lg hover:bg-premium-light transition-colors">
+              <button onClick={next} className="w-10 h-10 rounded-full bg-white text-wine-950 flex items-center justify-center shadow-lg hover:bg-premium-light transition-colors border border-wine-50">
                 <FiChevronRight size={20} />
               </button>
             </div>
@@ -107,7 +107,7 @@ const Transformations = () => {
           <div className="flex justify-center gap-2 mt-4">
             {transformations.map((_, i) => (
               <button key={i} onClick={() => setCurrentIndex(i)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${i === currentIndex ? 'w-8 bg-rose-soft' : 'w-4 bg-white/20'}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${i === currentIndex ? 'w-8 bg-bordeaux' : 'w-4 bg-wine-200'}`}
               />
             ))}
           </div>
