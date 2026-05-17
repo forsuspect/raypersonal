@@ -528,50 +528,39 @@ const DashboardPage = () => {
       </main>
 
       {/* Mobile Sidebar Overlay */}
-      <AnimatePresence>
-        {isSidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-wine-950/50 z-40 lg:hidden backdrop-blur-sm"
-            onClick={() => setIsSidebarOpen(false)}
-          >
-            <motion.aside
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="w-64 bg-white h-full p-6 flex flex-col"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-center mb-12">
-                <div className="flex items-center gap-2">
-                  <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-8 w-auto" />
-                </div>
-                <button onClick={() => setIsSidebarOpen(false)} className="text-wine-950 p-2"><FiX size={24} /></button>
-              </div>
+      <div 
+        className={`fixed inset-0 bg-wine-950/50 z-40 lg:hidden backdrop-blur-sm transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setIsSidebarOpen(false)}
+      >
+        <aside
+          className={`w-64 bg-white h-full p-6 flex flex-col transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-12">
+            <div className="flex items-center gap-2">
+              <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-8 w-auto" />
+            </div>
+            <button onClick={() => setIsSidebarOpen(false)} className="text-wine-950 p-2"><FiX size={24} /></button>
+          </div>
 
-              <nav className="flex-1 space-y-2">
-                {menuItems.map(item => (
-                  <button
-                    key={item.id}
-                    onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false) }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-                      activeTab === item.id 
-                        ? 'bg-wine-50 text-wine-900 font-bold' 
-                        : 'text-wine-900/60 hover:bg-wine-50/50 hover:text-wine-900 font-medium'
-                    }`}
-                  >
-                    <item.icon size={20} />
-                    {item.label}
-                  </button>
-                ))}
-              </nav>
-            </motion.aside>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <nav className="flex-1 space-y-2">
+            {menuItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false) }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                  activeTab === item.id 
+                    ? 'bg-wine-50 text-wine-900 font-bold' 
+                    : 'text-wine-900/60 hover:bg-wine-50/50 hover:text-wine-900 font-medium'
+                }`}
+              >
+                <item.icon size={20} />
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        </aside>
+      </div>
     </div>
   )
 }

@@ -355,10 +355,8 @@ const AdminPage = () => {
         )}
       </AnimatePresence>
 
-      <motion.aside 
-        initial={false}
-        animate={{ x: sidebarOpen ? 0 : '-100%' }}
-        className={`fixed lg:static inset-y-0 left-0 flex flex-col w-64 bg-black/95 backdrop-blur-xl border-r border-white/10 p-6 h-full z-[110] transition-transform lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:transform-none'}`}
+      <aside 
+        className={`fixed lg:static inset-y-0 left-0 flex flex-col w-64 bg-black/95 backdrop-blur-xl border-r border-white/10 p-6 h-full z-[110] transition-transform duration-300 ease-in-out lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="mb-10 flex justify-between items-center">
             <Link to="/" className="flex items-center gap-3">
@@ -395,7 +393,7 @@ const AdminPage = () => {
           <button onClick={() => navigate('/')} className="mt-6 flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold transition-colors text-white/30 hover:text-white">
             <FiArrowLeft className="w-5 h-5" /> Voltar para o site
           </button>
-      </motion.aside>
+      </aside>
 
       <main className="flex-1 h-full flex flex-col min-w-0 overflow-y-auto relative z-10 bg-black">
         <header className="flex lg:justify-end items-center justify-between p-4 lg:p-6 bg-black/80 backdrop-blur-xl border-b border-white/10 sticky top-0 z-30">
