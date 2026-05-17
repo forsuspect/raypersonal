@@ -28,6 +28,7 @@ const AdminPage = () => {
   const [newUserPlan, setNewUserPlan] = useState('Premium')
   const [newUserStatus, setNewUserStatus] = useState('Ativo')
   const [newUserExpiration, setNewUserExpiration] = useState('')
+  const [newUserContact, setNewUserContact] = useState('')
   const [isCreatingUser, setIsCreatingUser] = useState(false)
   const [isSavingUser, setIsSavingUser] = useState(false)
   const [createError, setCreateError] = useState(null)
@@ -70,7 +71,11 @@ const AdminPage = () => {
 
   const navigate = useNavigate()
 
-  useEffect(() => {
+   useEffect(() => {
+    // Dynamic matching of body background to prevent light gaps on mobile scrolling rubberbanding
+    const originalBg = document.body.style.backgroundColor;
+    document.body.style.backgroundColor = '#000000';
+
     fetchData()
     fetchWorkouts()
 
@@ -89,6 +94,7 @@ const AdminPage = () => {
       .subscribe()
 
     return () => {
+      document.body.style.backgroundColor = originalBg;
       if (channel) supabase.removeChannel(channel)
     }
   }, [])
@@ -130,6 +136,8 @@ const AdminPage = () => {
 
       if (users) {
         console.log("Usuários encontrados:", users.length);
+        const storedVencimentos = JSON.parse(localStorage.getItem('rm_vencimentos') || '{}');
+        const storedContatos = JSON.parse(localStorage.getItem('rm_contatos') || '{}');
         setStudentsData(users.map(u => ({
           id: u.id,
           name: u.usuario || 'Usuário Sem Nome',
@@ -137,7 +145,8 @@ const AdminPage = () => {
           status: u.status || 'Ativo', 
           objective: u.objetivo || 'Aguardando Avaliação',
           lastCheck: new Date(u.data_cadastro).toLocaleDateString('pt-BR'),
-          expirationDate: u.vencimento || '',
+          expirationDate: u.vencimento || storedVencimentos[u.usuario] || '',
+          contact: storedContatos[u.usuario] || '',
           raw: u
         })))
 
@@ -218,6 +227,7 @@ const AdminPage = () => {
     setNewUserPlan(student.plano)
     setNewUserStatus(student.status || 'Ativo')
     setNewUserExpiration(student.expirationDate || '')
+    setNewUserContact(student.contact || '')
     setEditingUser(student.name)
     setIsCreatingUser(true)
   }
@@ -230,9 +240,6 @@ const AdminPage = () => {
 
     setIsGenerating(true);
     try {
-      // Simulating AI Intelligence for Workout Generation
-      // In a real app, this could call an OpenAI API or a specialized microservice
-      // Generating a full 6-day weekly cycle following the user's reference
       const templates = {
         'Hipertrofia': [
           { day: "SEG", title: "SEG: QUADRÍCEPS & PANTURRILHA", exercises: [ { exercise: "Cadeira Extensora", sets: "4 x 12", detail: "Foco em pico de contração" }, { exercise: "Panturrilha Sentado", sets: "4 x 12", detail: "Máxima amplitude" }, { exercise: "Leg Press 45º", sets: "4 x 12", detail: "Cadência controlada" }, { exercise: "Hack Machine", sets: "4 x 12", detail: "Foco em quadríceps" } ] },
@@ -309,7 +316,6 @@ const AdminPage = () => {
       const selectedStudent = studentsData.find(s => s.id === selectedStudentId);
       const studentName = selectedStudent ? selectedStudent.name : 'Desconhecida';
 
-      // Filter out empty exercises to make sure only real data is saved
       const cleanedWorkouts = manualWorkouts.map(w => ({
         ...w,
         exercises: w.exercises.filter(ex => ex.exercise.trim() !== '')
@@ -328,7 +334,6 @@ const AdminPage = () => {
       await fetchWorkouts();
       setShowWorkoutModal(false);
       
-      // Reset form
       setManualTitle('');
       setManualFocus('Hipertrofia');
       setManualWorkouts([
@@ -528,6 +533,7 @@ const AdminPage = () => {
                         setNewUserPlan('Premium');
                         setNewUserStatus('Ativo');
                         setNewUserExpiration('');
+                        setNewUserContact('');
                         setCreateError(null); 
                         setIsCreatingUser(true); 
                       }}
@@ -596,6 +602,7 @@ const AdminPage = () => {
                   setNewUserPlan('Premium')
                   setNewUserStatus('Ativo')
                   setNewUserExpiration('')
+                  setNewUserContact('')
                   setEditingUser(null)
                   setCreateError(null)
                   setIsCreatingUser(true)
@@ -623,7 +630,15 @@ const AdminPage = () => {
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center text-white font-black text-xs shadow-lg">{s.name[0]}</div>
                         <div>
                           <span className="font-bold text-sm block text-white">{s.name}</span>
-                          <span className="text-[9px] font-black uppercase tracking-widest opacity-40">{s.objective}</span>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[9px] font-black uppercase tracking-widest opacity-40">{s.objective}</span>
+                            {s.contact && (
+                              <>
+                                <span className="w-1 h-1 rounded-full bg-white/10" />
+                                <span className="text-[9px] text-emerald-400 font-black">{s.contact}</span>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -646,7 +661,13 @@ const AdminPage = () => {
 
                       <div className="flex md:block items-center justify-between">
                         <span className="md:hidden text-[10px] font-black uppercase tracking-widest opacity-30">Status</span>
-                        <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 shadow-sm">Ativo</span>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${
+                          s.status === 'Inativo' 
+                            ? 'bg-red-500/10 text-red-500 border-red-500/20' 
+                            : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                        }`}>
+                          {s.status || 'Ativo'}
+                        </span>
                       </div>
 
                       <div className="flex items-center justify-end gap-3 border-t md:border-t-0 pt-4 md:pt-0 border-white/5">
@@ -943,7 +964,14 @@ const AdminPage = () => {
                     
                     // Predefined customized friendly reminder message
                     const reminderMsg = `Olá, ${student.name}! 🌟 Passando para lembrar que a sua assinatura da consultoria Rayana Maria vence em breve (${student.expirationDate ? new Date(student.expirationDate).toLocaleDateString('pt-BR') : ''}). Vamos renovar para continuar firmes nos seus treinos e evolução? Qualquer dúvida estou por aqui!`;
-                    const whatsappBillingUrl = `https://wa.me/5500000000000?text=${encodeURIComponent(reminderMsg)}`;
+                    
+                    const rawContact = student.contact ? student.contact.replace(/\D/g, '') : '';
+                    const formattedContact = rawContact.length > 0
+                      ? (rawContact.startsWith('55') ? rawContact : '55' + rawContact)
+                      : '';
+                    const whatsappBillingUrl = formattedContact
+                      ? `https://wa.me/${formattedContact}?text=${encodeURIComponent(reminderMsg)}`
+                      : `https://wa.me/5500000000000?text=${encodeURIComponent(reminderMsg)}`;
 
                     return (
                       <div key={student.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white-[0.02] transition-colors">
@@ -960,7 +988,13 @@ const AdminPage = () => {
                                 {student.status}
                               </span>
                             </div>
-                            <p className="text-white/40 text-xs mt-0.5">Plano: {student.plano}</p>
+                            <p className="text-white/40 text-xs mt-1 flex flex-wrap items-center gap-2">
+                              <span>Plano: {student.plano}</span>
+                              <span className="w-1 h-1 rounded-full bg-white/10 hidden sm:inline" />
+                              <span className={student.contact ? 'text-white/50' : 'text-amber-400/80 font-bold'}>
+                                {student.contact ? `WhatsApp: ${student.contact}` : '⚠️ Sem WhatsApp'}
+                              </span>
+                            </p>
                           </div>
                         </div>
 
@@ -1069,14 +1103,30 @@ const AdminPage = () => {
                       .from('usuarios')
                       .update({
                         usuario: generatedUser,
-                        senha: generatedPassword || undefined, // Only update password if provided
+                        senha: generatedPassword || undefined,
                         plano: newUserPlan,
-                        status: newUserStatus,
-                        vencimento: newUserExpiration || null
+                        status: newUserStatus
                       })
-                      .eq('usuario', editingUser)
+                      .eq('usuario', editingUser);
                     
-                    if (error) throw error
+                    if (error) throw error;
+
+                    // Update in local storage
+                    const storedVencimentos = JSON.parse(localStorage.getItem('rm_vencimentos') || '{}');
+                    if (newUserExpiration) {
+                      storedVencimentos[generatedUser] = newUserExpiration;
+                    } else {
+                      delete storedVencimentos[generatedUser];
+                    }
+                    localStorage.setItem('rm_vencimentos', JSON.stringify(storedVencimentos));
+
+                    const storedContatos = JSON.parse(localStorage.getItem('rm_contatos') || '{}');
+                    if (newUserContact) {
+                      storedContatos[generatedUser] = newUserContact;
+                    } else {
+                      delete storedContatos[generatedUser];
+                    }
+                    localStorage.setItem('rm_contatos', JSON.stringify(storedContatos));
                   } else {
                     // Insert new
                     const { error } = await supabase.from('usuarios').insert({
@@ -1084,10 +1134,9 @@ const AdminPage = () => {
                       senha: generatedPassword,
                       role: newUserPlan === 'Administrador' ? 'admin' : 'aluna',
                       plano: newUserPlan,
-                      status: newUserStatus,
-                      vencimento: newUserExpiration || null
+                      status: newUserStatus
                     });
-                    
+
                     if (error) {
                       if (error.message.includes('unique constraint') || error.message.includes('duplicate')) {
                         setCreateError('Este nome de usuário já está sendo usado. Por favor, escolha outro.');
@@ -1097,6 +1146,19 @@ const AdminPage = () => {
                       setIsSavingUser(false);
                       return;
                     }
+
+                    // Save in local storage
+                    const storedVencimentos = JSON.parse(localStorage.getItem('rm_vencimentos') || '{}');
+                    if (newUserExpiration) {
+                      storedVencimentos[generatedUser] = newUserExpiration;
+                    }
+                    localStorage.setItem('rm_vencimentos', JSON.stringify(storedVencimentos));
+
+                    const storedContatos = JSON.parse(localStorage.getItem('rm_contatos') || '{}');
+                    if (newUserContact) {
+                      storedContatos[generatedUser] = newUserContact;
+                    }
+                    localStorage.setItem('rm_contatos', JSON.stringify(storedContatos));
                   }
 
                   await fetchData();
@@ -1177,6 +1239,16 @@ const AdminPage = () => {
                       type="date" 
                       value={newUserExpiration}
                       onChange={(e) => setNewUserExpiration(e.target.value)}
+                      className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
+                    />
+                  </div>
+                  <div>
+                    <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>WhatsApp da Aluna (com DDD)</label>
+                    <input 
+                      type="tel" 
+                      placeholder="Ex: 11999999999"
+                      value={newUserContact}
+                      onChange={(e) => setNewUserContact(e.target.value)}
                       className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
                     />
                   </div>

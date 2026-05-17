@@ -63,6 +63,15 @@ const DashboardPage = () => {
   const [currentWeight, setCurrentWeight] = useState(0)
 
   useEffect(() => {
+    // Dynamic matching of body background to prevent light gaps on mobile scrolling rubberbanding
+    const originalBg = document.body.style.backgroundColor;
+    document.body.style.backgroundColor = '#141210';
+    return () => {
+      document.body.style.backgroundColor = originalBg;
+    };
+  }, []);
+
+  useEffect(() => {
     const checkUser = async () => {
       const storedUser = localStorage.getItem('rm_user')
       if (!storedUser) {
