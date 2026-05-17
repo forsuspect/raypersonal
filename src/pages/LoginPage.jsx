@@ -55,7 +55,7 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="fixed inset-0 w-full h-full flex bg-[#050203] overflow-hidden z-[100]">
+    <div className="fixed inset-0 w-full h-full flex bg-[#FAF8F5] overflow-hidden z-[100]">
       {/* Visual Left Side */}
       <div className="hidden lg:flex lg:w-1/2 h-full relative bg-wine-950 items-center justify-center overflow-hidden">
         {/* BG Image */}
@@ -79,53 +79,53 @@ const LoginPage = () => {
       </div>
 
       {/* Login Right Side */}
-      <div className="w-full lg:w-1/2 h-full flex items-center justify-center p-6 relative">
+      <div className="w-full lg:w-1/2 h-full flex items-center justify-center p-6 relative bg-[#FAF8F5]">
         {/* Back Link */}
         <Link 
           to="/" 
-          className="absolute top-8 left-8 lg:left-12 flex items-center gap-2 text-white/60 hover:text-white font-bold text-sm transition-colors group"
+          className="absolute top-8 left-8 lg:left-12 flex items-center gap-2 text-wine-900/60 hover:text-wine-950 font-bold text-sm transition-colors group"
         >
           <FiArrowLeft className="transition-transform group-hover:-translate-x-1" />
           Voltar para o site
         </Link>
 
         {/* Mobile Background Elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-bordeaux/15 rounded-full blur-3xl -z-10 lg:hidden" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-wine-100/50 rounded-full blur-3xl -z-10 lg:hidden" />
         
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <Link to="/" className="flex items-center mb-10 lg:hidden justify-center">
-            <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-20 sm:h-24 w-auto drop-shadow-md brightness-0 invert" />
+            <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-20 sm:h-24 w-auto drop-shadow-md" />
           </Link>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="bg-white/5 p-8 md:p-10 rounded-[2.5rem] shadow-premium-lg border border-white/10 backdrop-blur-xl relative"
+            className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-premium-lg border border-wine-100/50 relative"
           >
-            <h1 className="text-3xl font-bold text-white mb-2">Portal da Aluna</h1>
-            <p className="text-white/50 text-sm mb-8">Entre para acessar seu plano.</p>
+            <h1 className="text-3xl font-black text-wine-950 tracking-tighter mb-2">Portal da Aluna</h1>
+            <p className="text-wine-900/50 text-sm mb-8 font-medium">Entre para acessar seu plano.</p>
 
             {error && (
-              <div className="mb-6 p-4 bg-red-950/40 border border-red-500/20 rounded-2xl flex items-start gap-3 text-red-300 text-sm">
-                <FiAlertCircle className="mt-0.5 flex-shrink-0" size={16} />
+              <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 text-rose-800 text-sm font-semibold">
+                <FiAlertCircle className="mt-0.5 flex-shrink-0 text-rose-600" size={16} />
                 <p>{error}</p>
               </div>
             )}
 
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-2">Usuário</label>
+                <label className="block text-xs font-black text-wine-900/60 uppercase tracking-widest mb-2">Usuário</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-wine-900/40">
                     <FiUser />
                   </div>
                   <input
                     type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-bordeaux focus:ring-1 focus:ring-bordeaux transition-colors text-white"
+                    className="w-full pl-12 pr-4 py-4 bg-wine-50/50 border border-wine-100 rounded-2xl focus:outline-none focus:border-wine-900 focus:ring-1 focus:ring-wine-900 transition-colors text-wine-950 font-bold text-sm placeholder-wine-950/30"
                     placeholder="Seu usuário"
                     required
                   />
@@ -133,16 +133,16 @@ const LoginPage = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-2">Senha</label>
+                <label className="block text-xs font-black text-wine-900/60 uppercase tracking-widest mb-2">Senha</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-wine-900/40">
                     <FiLock />
                   </div>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-bordeaux focus:ring-1 focus:ring-bordeaux transition-colors text-white mb-2"
+                    className="w-full pl-12 pr-4 py-4 bg-wine-50/50 border border-wine-100 rounded-2xl focus:outline-none focus:border-wine-900 focus:ring-1 focus:ring-wine-900 transition-colors text-wine-950 font-bold text-sm placeholder-wine-950/30 mb-2"
                     placeholder="••••••••"
                     required
                   />
@@ -154,7 +154,7 @@ const LoginPage = () => {
                       setError('A recuperação de senha deve ser solicitada diretamente à sua personal.')
                       setTimeout(() => setError(null), 6000)
                     }}
-                    className="text-xs text-rose-soft font-bold hover:underline"
+                    className="text-xs text-bordeaux font-black hover:underline"
                   >
                     Esqueceu a senha?
                   </button>
@@ -164,7 +164,7 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full btn-premium py-4 mt-4 flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full py-4.5 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {loading ? 'Entrando...' : (
                   <>Acessar <FiArrowRight /></>

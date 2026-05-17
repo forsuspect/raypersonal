@@ -251,6 +251,17 @@ const DashboardPage = () => {
           ))}
         </nav>
 
+        {/* Footer info at bottom of sidebar */}
+        <div className="pt-4 border-t border-white/5 flex flex-col gap-2 mt-auto">
+          <a 
+            href="https://automize-one.vercel.app/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-[10px] text-white/30 hover:text-white/60 font-bold transition-all text-center flex items-center justify-center gap-1 bg-white/5 py-2 rounded-xl cursor-pointer"
+          >
+            Desenvolvido por <span className="text-rose-soft">Automize</span>
+          </a>
+        </div>
       </aside>
 
       {/* Main Content Area */}
@@ -721,6 +732,18 @@ const DashboardPage = () => {
               </button>
             ))}
           </nav>
+
+          {/* Footer info at bottom of sidebar */}
+          <div className="pt-4 border-t border-white/5 flex flex-col gap-2 mt-auto">
+            <a 
+              href="https://automize-one.vercel.app/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-[10px] text-white/30 hover:text-white/60 font-bold transition-all text-center flex items-center justify-center gap-1 bg-white/5 py-2 rounded-xl"
+            >
+              Desenvolvido por <span className="text-rose-soft">Automize</span>
+            </a>
+          </div>
         </aside>
       </div>
     </div>

@@ -45,8 +45,18 @@ const Footer = () => {
 
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-center">
           <p className="text-white/40 text-xs font-medium">© {new Date().getFullYear()} Rayana Maria. Todos os direitos reservados.</p>
-          <div className="flex items-center gap-2 text-white/40 text-xs font-medium justify-center bg-white/5 px-4 py-2 rounded-full">
-            Feito com <FiHeart size={12} className="text-bordeaux fill-bordeaux animate-pulse" /> para alunas dedicadas
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="flex items-center gap-2 text-white/40 text-xs font-medium justify-center bg-white/5 px-4 py-2 rounded-full">
+              Feito com <FiHeart size={12} className="text-bordeaux fill-bordeaux animate-pulse" /> para alunas dedicadas
+            </div>
+            <a 
+              href="https://automize-one.vercel.app/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="flex items-center gap-1 text-white/40 text-xs font-bold justify-center bg-white/5 px-4 py-2 rounded-full hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+            >
+              Desenvolvido por <span className="text-rose-soft">Automize</span>
+            </a>
           </div>
         </div>
       </div>

@@ -459,6 +459,18 @@ const AdminPage = () => {
           <button onClick={() => navigate('/')} className="mt-6 flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold transition-colors text-white/30 hover:text-white">
             <FiArrowLeft className="w-5 h-5" /> Voltar para o site
           </button>
+
+          {/* Footer info inside Admin sidebar */}
+          <div className="pt-4 border-t border-white/10 flex flex-col gap-2 mt-auto">
+            <a 
+              href="https://automize-one.vercel.app/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-[10px] text-white/30 hover:text-white/60 font-bold transition-all text-center flex items-center justify-center gap-1 bg-white/5 py-2 rounded-xl cursor-pointer"
+            >
+              Desenvolvido por <span className="text-rose-soft">Automize</span>
+            </a>
+          </div>
       </aside>
 
       <main className="flex-1 h-full flex flex-col min-w-0 overflow-y-auto relative z-10 bg-black">
@@ -596,7 +608,17 @@ const AdminPage = () => {
                         </div>
                       </div>
 
-                      <div className="hidden md:block text-sm font-bold opacity-80 text-white">{s.plano}</div>
+                      <div className="hidden md:block">
+                        <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm inline-block ${
+                          s.plano === 'VIP Elite' 
+                            ? 'bg-bordeaux/20 text-rose-soft border-bordeaux/30'
+                            : s.plano === 'Premium'
+                              ? 'bg-wine-900/20 text-white border-white/10'
+                              : 'bg-white/5 text-white/50 border-white/5'
+                        }`}>
+                          {s.plano}
+                        </span>
+                      </div>
                       
                       <div className="hidden md:flex flex-col">
                         <span className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-0.5">Criado em</span>
@@ -608,19 +630,26 @@ const AdminPage = () => {
                         <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 shadow-sm">Ativo</span>
                       </div>
 
-                      <div className="flex items-center justify-end gap-4 border-t md:border-t-0 pt-4 md:pt-0 border-white/5">
+                      <div className="flex items-center justify-end gap-3 border-t md:border-t-0 pt-4 md:pt-0 border-white/5">
+                        <button 
+                          onClick={() => { setShowWorkoutModal(true); setSelectedStudentId(s.id); }}
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-bordeaux/20 text-rose-soft border border-bordeaux/30 hover:bg-bordeaux/35 cursor-pointer"
+                        >
+                          <FiActivity size={12} />
+                          <span className="md:hidden lg:inline">Treino</span>
+                        </button>
                         <button 
                           onClick={() => handleEditStudent(s)}
-                          className="flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-white/5 text-white hover:bg-white/10"
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-white/5 text-white hover:bg-white/10 cursor-pointer"
                         >
-                          <FiEdit size={14} />
+                          <FiEdit size={12} />
                           <span className="md:hidden lg:inline">Editar</span>
                         </button>
                         <button 
                           onClick={() => handleDeleteStudent(s.name)}
-                          className="flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 hover:bg-red-500/20 cursor-pointer"
                         >
-                          <FiTrash2 size={14} />
+                          <FiTrash2 size={12} />
                           <span className="md:hidden lg:inline">Excluir</span>
                         </button>
                       </div>
