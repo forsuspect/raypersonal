@@ -212,80 +212,42 @@ const AdminPage = () => {
       // Simulating AI Intelligence for Workout Generation
       // In a real app, this could call an OpenAI API or a specialized microservice
       // Generating a full 6-day weekly cycle following the user's reference
-      const weeklyCycle = [
-        {
-          day: "SEG",
-          title: "SEG: QUADRÍCEPS & PANTURRILHA",
-          exercises: [
-            { exercise: "Cadeira Extensora", sets: "4 x 12", detail: "Foco em pico de contração" },
-            { exercise: "Panturrilha Sentado", sets: "4 x 12", detail: "Máxima amplitude" },
-            { exercise: "Leg Press 45º", sets: "4 x 12", detail: "Cadência controlada" },
-            { exercise: "Hack Machine", sets: "4 x 12", detail: "Foco em quadríceps" },
-            { exercise: "Leg Press Horizontal", sets: "4 x 12", detail: "Pés baixos na plataforma" },
-            { exercise: "CARDIO: Bicicleta", sets: "10-12 min", detail: "Intensidade moderada" }
-          ]
-        },
-        {
-          day: "TER",
-          title: "TER: PEITO & TRÍCEPS",
-          exercises: [
-            { exercise: "Rosca Concentrada", sets: "4 x 12", detail: "Foco no pico do bíceps" },
-            { exercise: "Supino Inclinado", sets: "4 x 12", detail: "Halteres, foco em peitoral superior" },
-            { exercise: "Rosca Scott", sets: "4 x 12", detail: "Movimento completo" },
-            { exercise: "Flexão de Braços", sets: "4 x 12", detail: "Até a falha técnica" },
-            { exercise: "Crucifixo Reto", sets: "4 x 12", detail: "Halteres, alongamento controlado" },
-            { exercise: "CARDIO: Bicicleta", sets: "15-20 min", detail: "HIIT" }
-          ]
-        },
-        {
-          day: "QUA",
-          title: "QUA: COSTA & BÍCEPS",
-          exercises: [
-            { exercise: "Remada Unilateral (Serrote)", sets: "4 x 12", detail: "Puxada em direção ao quadril" },
-            { exercise: "Remada Curvada", sets: "4 x 12", detail: "Barra, pegada pronada" },
-            { exercise: "Rosca Martelo", sets: "4 x 12", detail: "Halteres, pegada neutra" },
-            { exercise: "Rosca Concentrada", sets: "4 x 12", detail: "Sentado, isolamento total" },
-            { exercise: "Puxada Barra Fixa", sets: "4 x 12", detail: "Ou graviton se necessário" },
-            { exercise: "CARDIO: Esteira", sets: "15-20 min", detail: "Caminhada inclinada" }
-          ]
-        },
-        {
-          day: "QUI",
-          title: "QUI: OMBRO ISOLADO",
-          exercises: [
-            { exercise: "Elevação Frontal", sets: "4 x 12", detail: "Halteres, alternado" },
-            { exercise: "Remada Alta", sets: "4 x 12", detail: "Polia baixa, foco em trapézio" },
-            { exercise: "Elevação Lateral", sets: "4 x 12", detail: "Halteres, tronco levemente inclinado" },
-            { exercise: "Desenvolvimento Arnold", sets: "4 x 12", detail: "Rotação completa de punho" },
-            { exercise: "Elevação Lateral Inclinada", sets: "4 x 12", detail: "Deitado no banco inclinado" },
-            { exercise: "CARDIO: Bicicleta", sets: "15-20 min", detail: "Ritmo constante" }
-          ]
-        },
-        {
-          day: "SEX",
-          title: "SEX: GLÚTEOS & PANTURRILHA",
-          exercises: [
-            { exercise: "Levantamento Terra Sumô", sets: "4 x 12", detail: "Foco em glúteo e adutores" },
-            { exercise: "Adutora na Máquina", sets: "4 x 12", detail: "Pico de contração de 2s" },
-            { exercise: "Stiff com Barra", sets: "4 x 12", detail: "Alongar bem os posteriores" },
-            { exercise: "Agachamento Sumô", sets: "4 x 12", detail: "Kettlebell ou halter" },
-            { exercise: "Elevação Pélvica", sets: "4 x 12", detail: "Contração máxima no topo" },
-            { exercise: "CARDIO: Bicicleta", sets: "10-12 min", detail: "Baixa intensidade" }
-          ]
-        },
-        {
-          day: "SAB",
-          title: "SAB: FULL BODY ELITE",
-          exercises: [
-            { exercise: "Burpees Explosivos", sets: "4 x 12", detail: "Alta intensidade" },
-            { exercise: "Corrida Estacionária", sets: "4 x 12", detail: "Joelho alto" },
-            { exercise: "Mountain Climbers", sets: "4 x 12", detail: "Velocidade máxima" },
-            { exercise: "Polichinelos Intensos", sets: "4 x 12", detail: "Sem descanso entre séries" },
-            { exercise: "Salto Vertical", sets: "4 x 12", detail: "Amortecer bem a queda" },
-            { exercise: "CARDIO: Bicicleta", sets: "15-20 min", detail: "Giro livre" }
-          ]
-        }
-      ];
+      const templates = {
+        'Hipertrofia': [
+          { day: "SEG", title: "SEG: QUADRÍCEPS & PANTURRILHA", exercises: [ { exercise: "Cadeira Extensora", sets: "4 x 12", detail: "Foco em pico de contração" }, { exercise: "Panturrilha Sentado", sets: "4 x 12", detail: "Máxima amplitude" }, { exercise: "Leg Press 45º", sets: "4 x 12", detail: "Cadência controlada" }, { exercise: "Hack Machine", sets: "4 x 12", detail: "Foco em quadríceps" } ] },
+          { day: "TER", title: "TER: PEITO & TRÍCEPS", exercises: [ { exercise: "Supino Reto", sets: "4 x 10", detail: "Barra, cadência 3010" }, { exercise: "Tríceps Testa", sets: "4 x 12", detail: "Foco na excêntrica" }, { exercise: "Crucifixo Inclinado", sets: "4 x 12", detail: "Halteres" }, { exercise: "Tríceps Corda", sets: "4 x 15", detail: "Pico de contração" } ] },
+          { day: "QUA", title: "QUA: COSTA & BÍCEPS", exercises: [ { exercise: "Puxada Frontal", sets: "4 x 12", detail: "Pegada aberta" }, { exercise: "Remada Curvada", sets: "4 x 10", detail: "Tronco 45º" }, { exercise: "Rosca Direta", sets: "4 x 12", detail: "Barra W" }, { exercise: "Rosca Martelo", sets: "4 x 12", detail: "Halteres" } ] },
+          { day: "QUI", title: "QUI: OMBRO ISOLADO", exercises: [ { exercise: "Desenvolvimento", sets: "4 x 10", detail: "Halteres" }, { exercise: "Elevação Lateral", sets: "4 x 15", detail: "Cabo cruzado" }, { exercise: "Crucifixo Invertido", sets: "4 x 15", detail: "Máquina" }, { exercise: "Encolhimento", sets: "4 x 15", detail: "Halteres" } ] },
+          { day: "SEX", title: "SEX: GLÚTEOS & POSTERIOR", exercises: [ { exercise: "Elevação Pélvica", sets: "4 x 12", detail: "Pausa de 2s no topo" }, { exercise: "Mesa Flexora", sets: "4 x 12", detail: "Pico de contração" }, { exercise: "Stiff", sets: "4 x 12", detail: "Halteres" }, { exercise: "Cadeira Abdutora", sets: "4 x 15", detail: "Tronco inclinado" } ] },
+          { day: "SAB", title: "SAB: FULL BODY", exercises: [ { exercise: "Agachamento Livre", sets: "4 x 10", detail: "Amplitude total" }, { exercise: "Supino Inclinado", sets: "4 x 12", detail: "Halteres" }, { exercise: "Remada Máquina", sets: "4 x 12", detail: "Pegada neutra" }, { exercise: "Prancha", sets: "4 x 45s", detail: "Isometria" } ] }
+        ],
+        'Emagrecimento': [
+          { day: "SEG", title: "SEG: HIIT & CORE", exercises: [ { exercise: "Tiro na Esteira", sets: "10 x 1 min", detail: "Descanso 30s" }, { exercise: "Prancha Frontal", sets: "4 x 1 min", detail: "Isometria" }, { exercise: "Abdominal Remador", sets: "4 x 20", detail: "Explosão" }, { exercise: "Burpees", sets: "4 x 15", detail: "Intenso" } ] },
+          { day: "TER", title: "TER: CIRCUITO SUPERIOR", exercises: [ { exercise: "Flexão de Braço", sets: "4 x Falha", detail: "Sem pausa" }, { exercise: "Remada TRX", sets: "4 x 15", detail: "Rápido" }, { exercise: "Polichinelo", sets: "4 x 50", detail: "Cardio" }, { exercise: "Desenvolvimento Arnold", sets: "4 x 15", detail: "Leve" } ] },
+          { day: "QUA", title: "QUA: CARDIO LONGO", exercises: [ { exercise: "Bicicleta", sets: "45 min", detail: "Ritmo moderado" }, { exercise: "Abdominal Infra", sets: "4 x 20", detail: "No solo" }, { exercise: "Prancha Lateral", sets: "3 x 45s", detail: "Cada lado" } ] },
+          { day: "QUI", title: "QUI: CIRCUITO INFERIOR", exercises: [ { exercise: "Agachamento Salto", sets: "4 x 20", detail: "Explosão" }, { exercise: "Afundo Alternado", sets: "4 x 20", detail: "Dinâmico" }, { exercise: "Pular Corda", sets: "4 x 3 min", detail: "Cardio" }, { exercise: "Elevação Pélvica Solo", sets: "4 x 20", detail: "Rápido" } ] },
+          { day: "SEX", title: "SEX: METABÓLICO", exercises: [ { exercise: "Kettlebell Swing", sets: "4 x 20", detail: "Potência" }, { exercise: "Mountain Climber", sets: "4 x 40", detail: "Rápido" }, { exercise: "Thruster", sets: "4 x 15", detail: "Halteres leves" }, { exercise: "Corrida Estacionária", sets: "4 x 1 min", detail: "Joelhos altos" } ] },
+          { day: "SAB", title: "SAB: DESAFIO CARDIO", exercises: [ { exercise: "Corrida Rua", sets: "5 km", detail: "Melhor tempo" }, { exercise: "Alongamento Geral", sets: "15 min", detail: "Recuperação" } ] }
+        ],
+        'Glúteos & Core': [
+          { day: "SEG", title: "SEG: GLÚTEO MÁXIMO", exercises: [ { exercise: "Elevação Pélvica Barra", sets: "4 x 10", detail: "Pausa no topo" }, { exercise: "Agachamento Sumô", sets: "4 x 12", detail: "Halter" }, { exercise: "Glúteo Polia", sets: "4 x 15", detail: "Perna estendida" } ] },
+          { day: "TER", title: "TER: CORE INTENSO", exercises: [ { exercise: "Prancha com Movimento", sets: "4 x 45s", detail: "Toca ombro" }, { exercise: "Abdominal Bicicleta", sets: "4 x 30", detail: "Tronco alto" }, { exercise: "Elevação de Pernas", sets: "4 x 15", detail: "Lento na descida" } ] },
+          { day: "QUA", title: "QUA: GLÚTEO MÉDIO", exercises: [ { exercise: "Cadeira Abdutora", sets: "4 x 15", detail: "Tronco inclinado" }, { exercise: "Elevação Pélvica Unilateral", sets: "4 x 12", detail: "Cada perna" }, { exercise: "Passada", sets: "4 x 20 passos", detail: "Com halteres" } ] },
+          { day: "QUI", title: "QUI: DESCANSO ATIVO", exercises: [ { exercise: "Caminhada", sets: "30 min", detail: "Ritmo leve" }, { exercise: "Mobilidade Quadril", sets: "15 min", detail: "Foco articular" } ] },
+          { day: "SEX", title: "SEX: ISOLAMENTO", exercises: [ { exercise: "Glúteo 4 Apoios", sets: "4 x 15", detail: "Caneleira" }, { exercise: "Levantamento Terra", sets: "4 x 10", detail: "Barra" }, { exercise: "Stiff", sets: "4 x 12", detail: "Barra" } ] },
+          { day: "SAB", title: "SAB: CORE & CARDIO", exercises: [ { exercise: "Abdominal Remador", sets: "4 x 20", detail: "Completo" }, { exercise: "Prancha Frontal", sets: "4 x 1 min", detail: "Isometria" }, { exercise: "Escada", sets: "20 min", detail: "Cardio" } ] }
+        ],
+        'Condicionamento': [
+          { day: "SEG", title: "SEG: FORÇA TOTAL", exercises: [ { exercise: "Levantamento Terra", sets: "4 x 8", detail: "Pesado" }, { exercise: "Supino Reto", sets: "4 x 8", detail: "Pesado" }, { exercise: "Barra Fixa", sets: "4 x Falha", detail: "Livre" } ] },
+          { day: "TER", title: "TER: CAPACIDADE AERÓBICA", exercises: [ { exercise: "Remo Seco", sets: "4 x 5 min", detail: "Intenso" }, { exercise: "Pular Corda", sets: "5 x 3 min", detail: "Constante" } ] },
+          { day: "QUA", title: "QUA: POTÊNCIA", exercises: [ { exercise: "Box Jump", sets: "4 x 10", detail: "Salto na caixa" }, { exercise: "Medicine Ball Slam", sets: "4 x 15", detail: "Explosão" }, { exercise: "Kettlebell Swing", sets: "4 x 15", detail: "Pesado" } ] },
+          { day: "QUI", title: "QUI: RESISTÊNCIA MUSCULAR", exercises: [ { exercise: "Flexão de Braço", sets: "4 x 20", detail: "Controlado" }, { exercise: "Agachamento Livre", sets: "4 x 20", detail: "Sem peso" }, { exercise: "Barra Supinada", sets: "4 x 12", detail: "Controlado" } ] },
+          { day: "SEX", title: "SEX: MOBILIDADE & CORE", exercises: [ { exercise: "Prancha", sets: "4 x 1 min", detail: "Firme" }, { exercise: "Abdominal Canivete", sets: "4 x 15", detail: "Completo" }, { exercise: "Yoga/Alongamento", sets: "20 min", detail: "Corpo todo" } ] },
+          { day: "SAB", title: "SAB: DESAFIO FINAL", exercises: [ { exercise: "Burpees", sets: "100 repetições", detail: "Menor tempo possível" }, { exercise: "Corrida", sets: "3 km", detail: "Ritmo forte" } ] }
+        ]
+      };
+
+      const weeklyCycle = templates[workoutType] || templates['Hipertrofia'];
 
       const selectedStudent = studentsData.find(s => s.id === selectedStudentId);
       const studentName = selectedStudent ? selectedStudent.name : 'Desconhecida';

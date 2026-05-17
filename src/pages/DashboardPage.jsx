@@ -18,8 +18,24 @@ const DashboardPage = () => {
   const [completedExercises, setCompletedExercises] = useState([])
   const [isWorkoutFinished, setIsWorkoutFinished] = useState(false)
   const [activeWorkoutTab, setActiveWorkoutTab] = useState(0)
+  const [isDoingWorkout, setIsDoingWorkout] = useState(false)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+
+  const [confirmedDays, setConfirmedDays] = useState(() => {
+    try {
+      const stored = localStorage.getItem('rm_confirmed_days');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const toggleConfirmDay = (day) => {
+    const newDays = { ...confirmedDays, [day]: !confirmedDays[day] };
+    setConfirmedDays(newDays);
+    localStorage.setItem('rm_confirmed_days', JSON.stringify(newDays));
+  };
 
   // Funcionalidades de Stats
   const [waterIntake, setWaterIntake] = useState(0)
@@ -270,40 +286,119 @@ const DashboardPage = () => {
                   ))}
                 </div>
 
-                {/* Today's Workout Card */}
-                <div className="backdrop-blur-xl rounded-[2.5rem] p-8 md:p-10 border border-white/5 shadow-2xl relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)' }}>
-                  {/* Decorative Elements */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-bordeaux/20 blur-[80px] rounded-full pointer-events-none" />
-                  <div className="absolute bottom-0 left-10 w-40 h-40 bg-emerald-500/10 blur-[60px] rounded-full pointer-events-none" />
-                  <div className="absolute inset-0 bg-[url('/img/noise.png')] opacity-20 mix-blend-overlay pointer-events-none" />
+                {/* Today's Workout Card / Interactive Session */}
+                {!isDoingWorkout ? (
+                  <div className="backdrop-blur-xl rounded-[2.5rem] p-8 md:p-10 border border-white/5 shadow-2xl relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)' }}>
+                    {/* Decorative Elements */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-bordeaux/20 blur-[80px] rounded-full pointer-events-none" />
+                    <div className="absolute bottom-0 left-10 w-40 h-40 bg-emerald-500/10 blur-[60px] rounded-full pointer-events-none" />
+                    <div className="absolute inset-0 bg-[url('/img/noise.png')] opacity-20 mix-blend-overlay pointer-events-none" />
 
-                  <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-                  <div>
-                    <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border ${isWorkoutFinished ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-white/80 border-white/10'}`}>
-                      {isWorkoutFinished ? 'Meta Batida' : 'Treino do Dia'}
-                    </span>
-                    <h2 className="text-3xl md:text-4xl font-serif italic mb-3 text-white">
-                      {isWorkoutFinished ? 'Treino Diário Concluído!' : (activeWorkout ? activeWorkout.titulo : 'Sem Treino Ativo')}
-                    </h2>
-                    <p className="text-white/50 text-sm mb-6 max-w-md leading-relaxed">
-                      {isWorkoutFinished 
-                        ? 'Parabéns! Você finalizou todos os exercícios programados para hoje. Descanse bem e mantenha o foco!' 
-                        : (activeWorkout ? activeWorkout.descricao : 'Sua personal ainda não gerou seu ciclo de treinos personalizado.')}
-                    </p>
-                    {!isWorkoutFinished && activeWorkout && (
-                      <button onClick={() => setActiveTab('workout')} className="bg-white text-wine-950 font-bold px-8 py-3.5 rounded-xl hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-lg text-sm">
-                        Iniciar Treino
-                      </button>
-                    )}
-                    {isWorkoutFinished && (
-                       <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm bg-emerald-500/5 w-fit px-4 py-2 rounded-xl border border-emerald-500/10">
-                         <FiCheckCircle size={16} /> Progresso de hoje: 100%
-                       </div>
-                    )}
+                    <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+                      <div>
+                        <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border ${isWorkoutFinished ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-white/80 border-white/10'}`}>
+                          {isWorkoutFinished ? 'Meta Batida' : 'Treino do Dia'}
+                        </span>
+                        <h2 className="text-3xl md:text-4xl font-serif italic mb-3 text-white">
+                          {isWorkoutFinished ? 'Treino Diário Concluído!' : (activeWorkout ? activeWorkout.titulo : 'Sem Treino Ativo')}
+                        </h2>
+                        <p className="text-white/50 text-sm mb-6 max-w-md leading-relaxed">
+                          {isWorkoutFinished 
+                            ? 'Parabéns! Você finalizou todos os exercícios programados para hoje. Descanse bem e mantenha o foco!' 
+                            : (activeWorkout ? activeWorkout.descricao : 'Sua personal ainda não gerou seu ciclo de treinos personalizado.')}
+                        </p>
+                        {!isWorkoutFinished && activeWorkout && (
+                          <button onClick={() => setIsDoingWorkout(true)} className="bg-white text-wine-950 font-bold px-8 py-3.5 rounded-xl hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-lg text-sm">
+                            Iniciar Treino
+                          </button>
+                        )}
+                        {isWorkoutFinished && (
+                           <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm bg-emerald-500/5 w-fit px-4 py-2 rounded-xl border border-emerald-500/10">
+                             <FiCheckCircle size={16} /> Progresso de hoje: 100%
+                           </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
+                ) : (
+                  <div className="backdrop-blur-xl rounded-[2.5rem] p-6 md:p-10 border border-white/5 shadow-2xl relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)' }}>
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-bordeaux/20 blur-[80px] rounded-full pointer-events-none" />
+                    <div className="relative z-10 flex flex-col gap-6">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-[10px] font-black uppercase text-rose-soft/80 tracking-widest block mb-1">Em Execução</span>
+                          <h2 className="text-2xl md:text-3xl font-serif italic text-white">Treino de Hoje</h2>
+                        </div>
+                        <button onClick={() => setIsDoingWorkout(false)} className="p-2 bg-white/5 hover:bg-white/10 rounded-full text-white/70 hover:text-white transition-colors">
+                          <FiX size={20} />
+                        </button>
+                      </div>
 
+                      <div className="grid gap-3 text-left">
+                        {(() => {
+                          const dayNames = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
+                          const currentDayIndex = new Date().getDay();
+                          const currentDayName = dayNames[currentDayIndex];
+                          const todayWorkout = activeWorkout?.conteudo_treino?.workouts?.find(w => w.day === currentDayName) 
+                            || activeWorkout?.conteudo_treino?.workouts?.[0];
+
+                          return todayWorkout?.exercises?.map((ex, i) => {
+                            const isChecked = completedExercises.includes(ex.exercise);
+                            return (
+                              <div 
+                                key={i} 
+                                onClick={() => {
+                                  if (isChecked) {
+                                    setCompletedExercises(prev => prev.filter(item => item !== ex.exercise));
+                                  } else {
+                                    setCompletedExercises(prev => [...prev, ex.exercise]);
+                                  }
+                                }}
+                                className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 ${
+                                  isChecked 
+                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' 
+                                    : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${isChecked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-white/30 text-transparent'}`}>
+                                    <FiCheck size={12} />
+                                  </div>
+                                  <div>
+                                    <h4 className={`font-bold text-sm ${isChecked ? 'line-through opacity-60' : ''}`}>{ex.exercise}</h4>
+                                    <p className="text-[10px] opacity-50 uppercase tracking-widest">{ex.detail}</p>
+                                  </div>
+                                </div>
+                                <span className="text-xs font-black bg-white/5 px-2.5 py-1 rounded-lg border border-white/5 shrink-0">{ex.sets}</span>
+                              </div>
+                            );
+                          });
+                        })()}
+                      </div>
+
+                      <div className="flex gap-3 mt-4">
+                        <button 
+                          onClick={() => setIsDoingWorkout(false)}
+                          className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl text-xs uppercase tracking-widest transition-all border border-white/10"
+                        >
+                          Voltar
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setIsWorkoutFinished(true);
+                            setIsDoingWorkout(false);
+                            if (userData) {
+                              localStorage.setItem(`finished_${userData.id}`, new Date().toDateString());
+                            }
+                          }}
+                          className="flex-1 py-4 bg-gradient-to-r from-wine-900 to-bordeaux text-white font-bold rounded-xl text-xs uppercase tracking-widest transition-all shadow-lg hover:shadow-wine"
+                        >
+                          Finalizar Treino
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </motion.div>
             )}
 
@@ -324,32 +419,50 @@ const DashboardPage = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.1 }}
-                      className="bg-wine-950 rounded-[2.5rem] p-8 md:p-10 text-white shadow-wine relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500"
+                      className="bg-wine-950 rounded-[2.5rem] p-8 md:p-10 text-white shadow-wine relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500 flex flex-col justify-between"
                     >
                       <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl rounded-full" />
                       
-                      <div className="relative z-10">
-                        <div className="flex items-center justify-between mb-8">
-                          <h3 className="text-xl font-bold text-rose-soft/90 uppercase tracking-wider">{w.title}</h3>
-                          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-20 group-hover:opacity-100 transition-opacity">
-                            <FiTarget size={14} className="text-rose-soft" />
+                      <div className="relative z-10 flex-1 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-8">
+                            <h3 className="text-xl font-bold text-rose-soft/90 uppercase tracking-wider">{w.title}</h3>
+                            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-20 group-hover:opacity-100 transition-opacity">
+                              <FiTarget size={14} className="text-rose-soft" />
+                            </div>
+                          </div>
+                          
+                          <div className="h-px w-full bg-white/10 mb-8" />
+                          
+                          <div className="space-y-6 text-left">
+                            {w.exercises.map((ex, i) => (
+                              <div key={i} className="flex items-start gap-4 group/ex">
+                                <div className="w-2 h-2 rounded-full bg-rose-soft mt-1.5 shrink-0 shadow-[0_0_8px_rgba(255,170,170,0.5)]" />
+                                <div>
+                                  <p className="text-sm font-medium text-white/90 leading-tight mb-1">
+                                    {ex.exercise} <span className="text-rose-soft/70 ml-1">({ex.sets})</span>
+                                  </p>
+                                  <p className="text-[10px] text-white/30 font-black uppercase tracking-widest">{ex.detail}</p>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
-                        
-                        <div className="h-px w-full bg-white/10 mb-8" />
-                        
-                        <div className="space-y-6">
-                          {w.exercises.map((ex, i) => (
-                            <div key={i} className="flex items-start gap-4 group/ex">
-                              <div className="w-2 h-2 rounded-full bg-rose-soft mt-1.5 shrink-0 shadow-[0_0_8px_rgba(255,170,170,0.5)]" />
-                              <div>
-                                <p className="text-sm font-medium text-white/90 leading-tight mb-1">
-                                  {ex.exercise} <span className="text-rose-soft/70 ml-1">({ex.sets})</span>
-                                </p>
-                                <p className="text-[10px] text-white/30 font-black uppercase tracking-widest">{ex.detail}</p>
-                              </div>
-                            </div>
-                          ))}
+
+                        <div>
+                          <div className="h-px w-full bg-white/10 my-8" />
+                          
+                          <button 
+                            onClick={() => toggleConfirmDay(w.day)}
+                            className={`w-full py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 ${
+                              confirmedDays[w.day]
+                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
+                                : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                            }`}
+                          >
+                            <FiCheckCircle size={14} />
+                            {confirmedDays[w.day] ? 'Treino Confirmado!' : `Confirmar treino de ${w.day}`}
+                          </button>
                         </div>
                       </div>
                     </motion.div>
@@ -522,18 +635,18 @@ const DashboardPage = () => {
 
       {/* Mobile Sidebar Overlay */}
       <div 
-        className={`fixed inset-0 bg-wine-950/50 z-40 lg:hidden backdrop-blur-sm transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-wine-950/70 z-40 lg:hidden backdrop-blur-sm transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsSidebarOpen(false)}
       >
         <aside
-          className={`w-64 bg-white h-full p-6 flex flex-col transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          className={`w-64 bg-[#0a0507]/95 border-r border-white/5 backdrop-blur-xl h-full p-6 flex flex-col transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
           onClick={e => e.stopPropagation()}
         >
           <div className="flex justify-between items-center mb-12">
             <div className="flex items-center gap-2">
-              <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-8 w-auto" />
+              <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-8 w-auto brightness-0 invert" />
             </div>
-            <button onClick={() => setIsSidebarOpen(false)} className="text-wine-950 p-2"><FiX size={24} /></button>
+            <button onClick={() => setIsSidebarOpen(false)} className="text-white/70 hover:text-white p-2"><FiX size={24} /></button>
           </div>
 
           <nav className="flex-1 space-y-2">
@@ -543,8 +656,8 @@ const DashboardPage = () => {
                 onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false) }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
                   activeTab === item.id 
-                    ? 'bg-wine-50 text-wine-900 font-bold' 
-                    : 'text-wine-900/60 hover:bg-wine-50/50 hover:text-wine-900 font-medium'
+                    ? 'bg-white/5 border border-white/10 text-white font-bold' 
+                    : 'text-white/50 hover:bg-white/[0.02] hover:text-white font-medium'
                 }`}
               >
                 <item.icon size={20} />

@@ -18,11 +18,11 @@ const Services = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 })
 
   return (
-    <section id="objetivos" className="relative bg-premium-light overflow-hidden py-16 md:py-24">
+    <section id="objetivos" className="relative bg-[#060304] overflow-hidden py-16 md:py-24">
       <div ref={ref} className="w-full max-w-7xl mx-auto px-4 md:px-6 flex flex-col gap-10">
         <div className="text-center">
           <span className="text-bordeaux font-bold text-[10px] md:text-xs uppercase tracking-[0.4em] mb-3 block italic">Resultados Direcionados</span>
-          <h2 className="font-black leading-tight text-wine-950" style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}>
+          <h2 className="font-black leading-tight text-white" style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}>
             Escolha seu <span className="text-wine-gradient italic">Objetivo</span>
           </h2>
         </div>

@@ -55,7 +55,7 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="fixed inset-0 w-full h-full flex bg-premium-light overflow-hidden z-[100]">
+    <div className="fixed inset-0 w-full h-full flex bg-[#050203] overflow-hidden z-[100]">
       {/* Visual Left Side */}
       <div className="hidden lg:flex lg:w-1/2 h-full relative bg-wine-950 items-center justify-center overflow-hidden">
         {/* BG Image */}
@@ -83,32 +83,32 @@ const LoginPage = () => {
         {/* Back Link */}
         <Link 
           to="/" 
-          className="absolute top-8 left-8 lg:left-12 flex items-center gap-2 text-wine-900/60 hover:text-wine-900 font-bold text-sm transition-colors group"
+          className="absolute top-8 left-8 lg:left-12 flex items-center gap-2 text-white/60 hover:text-white font-bold text-sm transition-colors group"
         >
           <FiArrowLeft className="transition-transform group-hover:-translate-x-1" />
           Voltar para o site
         </Link>
 
         {/* Mobile Background Elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-rose-soft/10 rounded-full blur-3xl -z-10 lg:hidden" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-bordeaux/15 rounded-full blur-3xl -z-10 lg:hidden" />
         
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <Link to="/" className="flex items-center mb-10 lg:hidden justify-center">
-            <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-20 sm:h-24 w-auto drop-shadow-md" />
+            <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-20 sm:h-24 w-auto drop-shadow-md brightness-0 invert" />
           </Link>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-premium-lg border border-wine-50 relative"
+            className="bg-white/5 p-8 md:p-10 rounded-[2.5rem] shadow-premium-lg border border-white/10 backdrop-blur-xl relative"
           >
-            <h1 className="text-3xl font-bold text-wine-950 mb-2">Portal da Aluna</h1>
-            <p className="text-wine-900/60 text-sm mb-8">Entre para acessar seu plano.</p>
+            <h1 className="text-3xl font-bold text-white mb-2">Portal da Aluna</h1>
+            <p className="text-white/50 text-sm mb-8">Entre para acessar seu plano.</p>
 
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 text-red-600 text-sm">
+              <div className="mb-6 p-4 bg-red-950/40 border border-red-500/20 rounded-2xl flex items-start gap-3 text-red-300 text-sm">
                 <FiAlertCircle className="mt-0.5 flex-shrink-0" size={16} />
                 <p>{error}</p>
               </div>
@@ -116,16 +116,16 @@ const LoginPage = () => {
 
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <label className="block text-xs font-bold text-wine-900 uppercase tracking-widest mb-2">Usuário</label>
+                <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-2">Usuário</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-wine-900/40">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40">
                     <FiUser />
                   </div>
                   <input
                     type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-premium-light border border-wine-100 rounded-2xl focus:outline-none focus:border-wine-900 focus:ring-1 focus:ring-wine-900 transition-colors text-wine-950"
+                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-bordeaux focus:ring-1 focus:ring-bordeaux transition-colors text-white"
                     placeholder="Seu usuário"
                     required
                   />
@@ -133,16 +133,16 @@ const LoginPage = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-wine-900 uppercase tracking-widest mb-2">Senha</label>
+                <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-2">Senha</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-wine-900/40">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40">
                     <FiLock />
                   </div>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-premium-light border border-wine-100 rounded-2xl focus:outline-none focus:border-wine-900 focus:ring-1 focus:ring-wine-900 transition-colors text-wine-950 mb-2"
+                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-bordeaux focus:ring-1 focus:ring-bordeaux transition-colors text-white mb-2"
                     placeholder="••••••••"
                     required
                   />
@@ -154,7 +154,7 @@ const LoginPage = () => {
                       setError('A recuperação de senha deve ser solicitada diretamente à sua personal.')
                       setTimeout(() => setError(null), 6000)
                     }}
-                    className="text-xs text-bordeaux font-bold hover:underline"
+                    className="text-xs text-rose-soft font-bold hover:underline"
                   >
                     Esqueceu a senha?
                   </button>
