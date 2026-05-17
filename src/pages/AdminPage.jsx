@@ -35,12 +35,12 @@ const AdminPage = () => {
   const isDarkMode = true // Permanent Dark Theme
   const [studentsData, setStudentsData] = useState([])
   // Detect logged-in user role for developer-only features
-  const [currentUserRole, setCurrentUserRole] = useState(() => {
+  const [currentUser, setCurrentUser] = useState(() => {
     try {
-      const u = JSON.parse(localStorage.getItem('rm_user') || '{}')
-      return u.role || ''
-    } catch { return '' }
+      return JSON.parse(localStorage.getItem('rm_user') || '{}')
+    } catch { return {} }
   })
+  const currentUserRole = currentUser.role || ''
   const isDeveloper = currentUserRole === 'desenvolvedor'
   const [stats, setStats] = useState({
     activeStudents: 0,
@@ -82,6 +82,7 @@ const AdminPage = () => {
   const [isSavingWorkout, setIsSavingWorkout] = useState(false)
 
   const navigate = useNavigate()
+  const [searchTerm, setSearchTerm] = useState('')
 
   // ── Edit workout helpers (component-level, no stale closure) ──────────
   const editUpdateExercise = (dayIdx, exIdx, field, val) => {
@@ -729,7 +730,9 @@ const AdminPage = () => {
             </div>
             <div>
               <span className="font-display font-black text-base text-white">RAYANA</span>
-              <span className="block text-[10px] tracking-[0.2em] uppercase text-bordeaux font-black">Admin Hub</span>
+              <span className="block text-[10px] tracking-[0.2em] uppercase text-bordeaux font-black">
+                {isDeveloper ? 'Dev Hub' : 'Admin Hub'}
+              </span>
             </div>
           </Link>
           <button className="lg:hidden text-white/40 hover:text-white" onClick={() => setSidebarOpen(false)}>
@@ -892,7 +895,13 @@ const AdminPage = () => {
               <div className="backdrop-blur-xl rounded-[32px] overflow-hidden border border-white/5 bg-white/5 shadow-2xl">
                 <div className="p-6 border-b border-white/5 flex items-center gap-4">
                   <FiSearch className="text-white/40" />
-                  <input type="text" placeholder="Buscar por nome ou plano..." className="bg-transparent border-none outline-none flex-1 text-sm font-bold text-white" />
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Buscar por nome ou plano..."
+                    className="bg-transparent border-none outline-none flex-1 text-sm font-bold text-white placeholder-white/30"
+                  />
                 </div>
 
                 <div className="hidden md:grid md:grid-cols-5 p-6 text-[10px] font-black uppercase tracking-widest border-b text-white/40 border-white/5">
@@ -904,124 +913,195 @@ const AdminPage = () => {
                 </div>
 
                 <div className="divide-y divide-white/5">
-                  {studentsData.map((s, i) => (
-                    <div key={i} className="grid grid-cols-1 md:grid-cols-5 items-center p-4 sm:p-6 gap-4 md:gap-0 hover:bg-white/[0.02] transition-colors border-white/5">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center text-white font-black text-xs shadow-lg">{s.name[0]}</div>
-                        <div>
-                          <span className="font-bold text-sm block text-white">{s.name}</span>
-                          <span className="text-[9px] font-black uppercase tracking-widest opacity-40 block mt-0.5">{s.objective}</span>
-                          {s.contact && (
-                            <div className="flex items-center gap-1.5 mt-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg w-fit">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                              <span className="text-[9px] font-black tracking-wider whitespace-nowrap">{s.contact}</span>
-                            </div>
+                  {studentsData
+                    .filter(s => s.role !== 'admin' && s.role !== 'desenvolvedor')
+                    .filter(s => {
+                      const search = searchTerm.toLowerCase();
+                      const nameMatch = (s.name || '').toLowerCase().includes(search);
+                      const planoMatch = (s.plano || '').toLowerCase().includes(search);
+                      return nameMatch || planoMatch;
+                    })
+                    .map((s, i) => (
+                      <div key={i} className="grid grid-cols-1 md:grid-cols-5 items-center p-4 sm:p-6 gap-4 md:gap-0 hover:bg-white/[0.02] transition-colors border-white/5">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center text-white font-black text-xs shadow-lg">{s.name[0]}</div>
+                          <div>
+                            <span className="font-bold text-sm block text-white">{s.name}</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest opacity-40 block mt-0.5">{s.objective}</span>
+                            {s.contact && (
+                              <div className="flex items-center gap-1.5 mt-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg w-fit">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                <span className="text-[9px] font-black tracking-wider whitespace-nowrap">{s.contact}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="hidden md:block">
+                          <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm inline-block ${
+                            s.plano === 'VIP Elite'
+                              ? 'bg-bordeaux/20 text-rose-soft border-bordeaux/30'
+                              : s.plano === 'Premium'
+                                ? 'bg-wine-900/20 text-white border-white/10'
+                                : 'bg-white/5 text-white/50 border-white/5'
+                          }`}>
+                            {s.plano}
+                          </span>
+                        </div>
+
+                        <div className="hidden md:flex flex-col">
+                          <span className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-0.5">Criado em</span>
+                          <span className="text-xs font-bold text-white">{s.lastCheck}</span>
+                        </div>
+
+                        <div className="flex md:block items-center justify-between">
+                          <span className="md:hidden text-[10px] font-black uppercase tracking-widest opacity-30">Status</span>
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${s.status === 'Inativo'
+                              ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                              : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                            }`}>
+                            {s.status || 'Ativo'}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-end gap-3 border-t md:border-t-0 pt-4 md:pt-0 border-white/5">
+                          {s.status === 'Inativo' ? (
+                            <button
+                              onClick={() => handleToggleStatus(s)}
+                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/25 cursor-pointer"
+                            >
+                              <FiUnlock size={12} />
+                              <span className="hidden md:inline">Ativar</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleToggleStatus(s)}
+                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/25 cursor-pointer"
+                            >
+                              <FiLock size={12} />
+                              <span className="hidden md:inline">Inativar</span>
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleEditStudent(s)}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-white/5 text-white hover:bg-white/10 cursor-pointer"
+                          >
+                            <FiEdit size={12} />
+                            <span className="hidden md:inline">Editar</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteStudent(s.name)}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 hover:bg-red-500/20 cursor-pointer"
+                          >
+                            <FiTrash2 size={12} />
+                            <span className="hidden md:inline">Excluir</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* Equipe & Administradores */}
+              <div className="backdrop-blur-xl rounded-[32px] overflow-hidden border border-white/5 bg-white/5 shadow-2xl mt-8">
+                <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <FiShield className="text-violet-400" size={20} />
+                    <h3 className="text-sm font-black uppercase tracking-wider text-white">Equipe de Gestão</h3>
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest bg-violet-500/10 text-violet-400 border border-violet-500/20 px-3 py-1 rounded-xl">
+                    Master & Administração
+                  </span>
+                </div>
+
+                <div className="hidden md:grid md:grid-cols-5 p-6 text-[10px] font-black uppercase tracking-widest border-b text-white/40 border-white/5">
+                  <div>Nome / Usuário</div>
+                  <div>Cargo / Plano</div>
+                  <div>Cadastro</div>
+                  <div>Status</div>
+                  <div className="text-right">Ações</div>
+                </div>
+
+                <div className="divide-y divide-white/5">
+                  {studentsData
+                    .filter(s => s.role === 'admin' || s.role === 'desenvolvedor')
+                    .map((s, i) => (
+                      <div key={i} className="grid grid-cols-1 md:grid-cols-5 items-center p-4 sm:p-6 gap-4 md:gap-0 hover:bg-white/[0.02] transition-colors border-white/5">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-950 to-violet-700 flex items-center justify-center text-white font-black text-xs shadow-lg">
+                            {(s.name || 'A')[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <span className="font-bold text-sm block text-white">{s.name}</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest opacity-40 block mt-0.5">Gestor do Sistema</span>
+                          </div>
+                        </div>
+
+                        <div className="hidden md:block">
+                          <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm inline-block ${
+                            s.role === 'desenvolvedor'
+                              ? 'bg-violet-500/20 text-violet-300 border-violet-500/30'
+                              : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                          }`}>
+                            {s.role === 'desenvolvedor' ? 'Desenvolvedor' : 'Administrador'}
+                          </span>
+                        </div>
+
+                        <div className="hidden md:flex flex-col">
+                          <span className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-0.5">Criado em</span>
+                          <span className="text-xs font-bold text-white">{s.lastCheck}</span>
+                        </div>
+
+                        <div className="flex md:block items-center justify-between">
+                          <span className="md:hidden text-[10px] font-black uppercase tracking-widest opacity-30">Status</span>
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${s.status === 'Inativo'
+                              ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                              : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                            }`}>
+                            {s.status || 'Ativo'}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-end gap-3 border-t md:border-t-0 pt-4 md:pt-0 border-white/5">
+                          {isDeveloper ? (
+                            <>
+                              {s.name !== currentUser.usuario && (
+                                <button
+                                  onClick={() => handleDeleteStudent(s.name)}
+                                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 hover:bg-red-500/20 cursor-pointer"
+                                >
+                                  <FiTrash2 size={12} />
+                                  <span className="hidden md:inline">Excluir</span>
+                                </button>
+                              )}
+                              {s.role !== 'desenvolvedor' && (
+                                <button
+                                  onClick={() => handleSetRole(s, 'desenvolvedor')}
+                                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-violet-500/10 text-violet-400 border border-violet-500/20 hover:bg-violet-500/20 cursor-pointer"
+                                  title="Definir como Desenvolvedor"
+                                >
+                                  <FiShield size={12} />
+                                  <span className="hidden md:inline">Dev</span>
+                                </button>
+                              )}
+                              {s.role === 'admin' && (
+                                <button
+                                  onClick={() => handleSetRole(s, 'aluna')}
+                                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 cursor-pointer"
+                                  title="Rebaixar Admin"
+                                >
+                                  <FiArrowLeft size={12} />
+                                  <span className="hidden md:inline">Rebaixar</span>
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            // Non-developer: no actions on team members
+                            <span className="text-[10px] font-black uppercase opacity-20 tracking-wider">Acesso Master</span>
                           )}
                         </div>
                       </div>
-
-                      <div className="hidden md:block">
-                        <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm inline-block ${
-                          s.plano === 'Desenvolvedor'
-                            ? 'bg-violet-500/20 text-violet-300 border-violet-500/30'
-                            : s.plano === 'Administrador'
-                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                              : s.plano === 'VIP Elite'
-                                ? 'bg-bordeaux/20 text-rose-soft border-bordeaux/30'
-                                : s.plano === 'Premium'
-                                  ? 'bg-wine-900/20 text-white border-white/10'
-                                  : 'bg-white/5 text-white/50 border-white/5'
-                        }`}>
-                          {s.plano}
-                        </span>
-                      </div>
-
-                      <div className="hidden md:flex flex-col">
-                        <span className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-0.5">Criado em</span>
-                        <span className="text-xs font-bold text-white">{s.lastCheck}</span>
-                      </div>
-
-                      <div className="flex md:block items-center justify-between">
-                        <span className="md:hidden text-[10px] font-black uppercase tracking-widest opacity-30">Status</span>
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${s.status === 'Inativo'
-                            ? 'bg-red-500/10 text-red-500 border-red-500/20'
-                            : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                          }`}>
-                          {s.status || 'Ativo'}
-                        </span>
-                      </div>
-
-                      <div className="flex flex-wrap items-center justify-end gap-3 border-t md:border-t-0 pt-4 md:pt-0 border-white/5">
-                        {s.status === 'Inativo' ? (
-                          <button
-                            onClick={() => handleToggleStatus(s)}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/25 cursor-pointer"
-                          >
-                            <FiUnlock size={12} />
-                            <span className="hidden md:inline">Ativar</span>
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleToggleStatus(s)}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/25 cursor-pointer"
-                          >
-                            <FiLock size={12} />
-                            <span className="hidden md:inline">Inativar</span>
-                          </button>
-                        )}
-                        <button
-                          onClick={() => handleEditStudent(s)}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-white/5 text-white hover:bg-white/10 cursor-pointer"
-                        >
-                          <FiEdit size={12} />
-                          <span className="hidden md:inline">Editar</span>
-                        </button>
-                        {/* Developer-only: delete any user incl. admins */}
-                        {isDeveloper ? (
-                          <>
-                            <button
-                              onClick={() => handleDeleteStudent(s.name)}
-                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 hover:bg-red-500/20 cursor-pointer"
-                            >
-                              <FiTrash2 size={12} />
-                              <span className="hidden md:inline">Excluir</span>
-                            </button>
-                            {s.role !== 'desenvolvedor' && (
-                              <button
-                                onClick={() => handleSetRole(s, 'desenvolvedor')}
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-violet-500/10 text-violet-400 border border-violet-500/20 hover:bg-violet-500/20 cursor-pointer"
-                                title="Definir como Desenvolvedor"
-                              >
-                                <FiShield size={12} />
-                                <span className="hidden md:inline">Dev</span>
-                              </button>
-                            )}
-                            {s.role === 'admin' && (
-                              <button
-                                onClick={() => handleSetRole(s, 'aluna')}
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 cursor-pointer"
-                                title="Rebaixar Admin"
-                              >
-                                <FiArrowLeft size={12} />
-                                <span className="hidden md:inline">Rebaixar</span>
-                              </button>
-                            )}
-                          </>
-                        ) : (
-                          // Non-developer: can't delete admins
-                          s.role !== 'admin' && s.role !== 'desenvolvedor' && (
-                            <button
-                              onClick={() => handleDeleteStudent(s.name)}
-                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 hover:bg-red-500/20 cursor-pointer"
-                            >
-                              <FiTrash2 size={12} />
-                              <span className="hidden md:inline">Excluir</span>
-                            </button>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
             </motion.div>
@@ -1388,7 +1468,9 @@ const AdminPage = () => {
           {activeTab === 'profile' && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2 text-bordeaux">Conta Admin</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2 text-bordeaux">
+                  {isDeveloper ? 'Conta Dev (Master)' : 'Conta Admin'}
+                </p>
                 <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white">Meu Perfil</h2>
               </div>
 
@@ -1397,11 +1479,15 @@ const AdminPage = () => {
                 <div className="absolute top-0 right-0 w-48 h-48 bg-bordeaux/10 blur-3xl rounded-full pointer-events-none" />
                 <div className="relative z-10 flex items-center gap-6">
                   <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center text-white font-black text-3xl shadow-2xl">
-                    A
+                    {(currentUser.usuario || 'A')[0].toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-white mb-1">Administrador</h3>
-                    <p className="text-bordeaux font-black text-xs uppercase tracking-[0.3em]">@admin</p>
+                    <h3 className="text-2xl font-black text-white mb-1">
+                      {isDeveloper ? 'Desenvolvedor Master' : 'Administradora'}
+                    </h3>
+                    <p className="text-bordeaux font-black text-xs uppercase tracking-[0.3em]">
+                      {currentUser.usuario ? `@${currentUser.usuario}` : '@admin'}
+                    </p>
                   </div>
                 </div>
               </div>

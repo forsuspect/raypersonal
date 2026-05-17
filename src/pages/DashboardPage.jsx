@@ -100,6 +100,13 @@ const DashboardPage = () => {
           navigate('/login')
           return
         }
+
+        // Redirect admins or developers to /admin
+        if (userFromDb.role === 'admin' || userFromDb.role === 'desenvolvedor') {
+          navigate('/admin')
+          return
+        }
+
         setUserData(userFromDb)
 
         // Fetch latest workout
