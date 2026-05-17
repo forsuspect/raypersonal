@@ -916,7 +916,7 @@ const AdminPage = () => {
                 <div className="backdrop-blur-xl rounded-[32px] p-6 border border-white/5 bg-white/5 shadow-2xl space-y-4">
                   <h3 className="text-sm font-black uppercase tracking-wider text-white mb-2">Selecione uma Aluna</h3>
                   <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
-                    {studentsData.map((student) => {
+                    {studentsData.filter(s => s.role !== 'admin' && s.role !== 'desenvolvedor').map((student) => {
                       const hasWorkout = workoutsList.some(w => w.usuarios?.usuario === student.name || w.aluna_id === student.id);
                       const isSelected = selectedInspectStudent?.name === student.name;
                       return (
@@ -1432,49 +1432,34 @@ const AdminPage = () => {
                 try {
                   const wasEditing = !!editingUser;
                   if (editingUser) {
-                    // Update existing
+                    // Prepare update payload
+                    const updateData = {
+                      usuario: generatedUser,
+                      plano: newUserPlan,
+                      status: newUserStatus,
+                      vencimento: newUserExpiration || null,
+                      contato: newUserContact || null
+                    };
+                    if (generatedPassword) {
+                      updateData.senha = generatedPassword;
+                    }
+
                     const { error } = await supabase
                       .from('usuarios')
-                      .update({
-                        usuario: generatedUser,
-                        senha: generatedPassword || undefined,
-                        plano: newUserPlan
-                      })
+                      .update(updateData)
                       .eq('usuario', editingUser);
 
                     if (error) throw error;
-
-                    // Update in local storage
-                    const storedVencimentos = JSON.parse(localStorage.getItem('rm_vencimentos') || '{}');
-                    if (newUserExpiration) {
-                      storedVencimentos[generatedUser] = newUserExpiration;
-                    } else {
-                      delete storedVencimentos[generatedUser];
-                    }
-                    localStorage.setItem('rm_vencimentos', JSON.stringify(storedVencimentos));
-
-                    const storedContatos = JSON.parse(localStorage.getItem('rm_contatos') || '{}');
-                    if (newUserContact) {
-                      storedContatos[generatedUser] = newUserContact;
-                    } else {
-                      delete storedContatos[generatedUser];
-                    }
-                    localStorage.setItem('rm_contatos', JSON.stringify(storedContatos));
-
-                    const storedStatus = JSON.parse(localStorage.getItem('rm_status') || '{}');
-                    if (newUserStatus) {
-                      storedStatus[generatedUser] = newUserStatus;
-                    } else {
-                      delete storedStatus[generatedUser];
-                    }
-                    localStorage.setItem('rm_status', JSON.stringify(storedStatus));
                   } else {
                     // Insert new
                     const { error } = await supabase.from('usuarios').insert({
                       usuario: generatedUser,
                       senha: generatedPassword,
                       role: newUserPlan === 'Administrador' ? 'admin' : 'aluna',
-                      plano: newUserPlan
+                      plano: newUserPlan,
+                      status: newUserStatus,
+                      vencimento: newUserExpiration || null,
+                      contato: newUserContact || null
                     });
 
                     if (error) {
@@ -1486,25 +1471,6 @@ const AdminPage = () => {
                       setIsSavingUser(false);
                       return;
                     }
-
-                    // Save in local storage
-                    const storedVencimentos = JSON.parse(localStorage.getItem('rm_vencimentos') || '{}');
-                    if (newUserExpiration) {
-                      storedVencimentos[generatedUser] = newUserExpiration;
-                    }
-                    localStorage.setItem('rm_vencimentos', JSON.stringify(storedVencimentos));
-
-                    const storedContatos = JSON.parse(localStorage.getItem('rm_contatos') || '{}');
-                    if (newUserContact) {
-                      storedContatos[generatedUser] = newUserContact;
-                    }
-                    localStorage.setItem('rm_contatos', JSON.stringify(storedContatos));
-
-                    const storedStatus = JSON.parse(localStorage.getItem('rm_status') || '{}');
-                    if (newUserStatus) {
-                      storedStatus[generatedUser] = newUserStatus;
-                    }
-                    localStorage.setItem('rm_status', JSON.stringify(storedStatus));
                   }
 
                   await fetchData();
