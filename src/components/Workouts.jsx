@@ -12,6 +12,7 @@ const features = [
 
 const Workouts = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 })
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   return (
     <section id="treinos" className="relative bg-[#0a0507] overflow-hidden flex items-center py-16 md:py-24">
@@ -21,7 +22,7 @@ const Workouts = () => {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={isMobile ? { opacity: 0 } : { opacity: 0, x: -30 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
