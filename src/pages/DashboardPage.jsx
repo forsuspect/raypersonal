@@ -8,7 +8,23 @@ import {
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
-// MOCK_USER removed to fix build
+const isDateInCurrentWeek = (dateStr) => {
+  if (!dateStr) return false;
+  const date = new Date(dateStr);
+  const now = new Date();
+  
+  // Monday as first day of week in Portuguese calendar
+  const day = now.getDay();
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+  const currentMonday = new Date(now.setDate(diff));
+  currentMonday.setHours(0, 0, 0, 0);
+  
+  const currentSunday = new Date(currentMonday);
+  currentSunday.setDate(currentMonday.getDate() + 6);
+  currentSunday.setHours(23, 59, 59, 999);
+  
+  return date >= currentMonday && date <= currentSunday;
+};
 
 const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState('overview')
@@ -32,7 +48,12 @@ const DashboardPage = () => {
   });
 
   const toggleConfirmDay = (day) => {
-    const newDays = { ...confirmedDays, [day]: !confirmedDays[day] };
+    const val = confirmedDays[day];
+    const isCurrentlyConfirmed = val && (val === true || isDateInCurrentWeek(val));
+    const newDays = { 
+      ...confirmedDays, 
+      [day]: isCurrentlyConfirmed ? null : new Date().toISOString().split('T')[0] 
+    };
     setConfirmedDays(newDays);
     localStorage.setItem('rm_confirmed_days', JSON.stringify(newDays));
   };
@@ -177,6 +198,12 @@ const DashboardPage = () => {
     avatar: userData?.avatar || `https://ui-avatars.com/api/?name=${userData?.usuario || 'RM'}&background=4A0E0E&color=fff`
   }
 
+  const workoutsCompleted = Object.keys(confirmedDays).filter(day => {
+    const val = confirmedDays[day];
+    return val && (val === true || isDateInCurrentWeek(val));
+  }).length;
+  const totalWorkouts = activeWorkout?.conteudo_treino?.workouts?.length || 5;
+
   const menuItems = [
     { id: 'overview', icon: FiHome, label: 'Visão Geral' },
     { id: 'workout', icon: FiActivity, label: 'Meu Treino' },
@@ -263,7 +290,7 @@ const DashboardPage = () => {
                 {/* Quick Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
-                    { id: 'workouts', icon: FiTarget, label: 'Treinos na Semana', value: '4', sub: '/5' },
+                    { id: 'workouts', icon: FiTarget, label: 'Treinos na Semana', value: workoutsCompleted.toString(), sub: '/' + totalWorkouts },
                     { id: 'water', icon: FiDroplet, label: 'Água Hoje', value: waterIntake.toString(), sub: 'L', onClick: handleWaterClick },
                     { id: 'weight', icon: FiActivity, label: 'Peso Atual', value: currentWeight.toString(), sub: 'kg', onClick: handleWeightClick },
                     { id: 'evolution', icon: FiTrendingUp, label: 'Evolução', value: '+2%', sub: ' MM', green: true },
@@ -390,6 +417,22 @@ const DashboardPage = () => {
                             if (userData) {
                               localStorage.setItem(`finished_${userData.id}`, new Date().toDateString());
                             }
+                            
+                            // Auto-confirm current day in weekly checklist
+                            const dayNames = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
+                            const currentDayIndex = new Date().getDay();
+                            const currentDayName = dayNames[currentDayIndex];
+                            const todayWorkout = activeWorkout?.conteudo_treino?.workouts?.find(w => w.day === currentDayName) 
+                              || activeWorkout?.conteudo_treino?.workouts?.[0];
+                              
+                            if (todayWorkout) {
+                              const newDays = { 
+                                ...confirmedDays, 
+                                [todayWorkout.day]: new Date().toISOString().split('T')[0] 
+                              };
+                              setConfirmedDays(newDays);
+                              localStorage.setItem('rm_confirmed_days', JSON.stringify(newDays));
+                            }
                           }}
                           className="flex-1 py-4 bg-gradient-to-r from-wine-900 to-bordeaux text-white font-bold rounded-xl text-xs uppercase tracking-widest transition-all shadow-lg hover:shadow-wine"
                         >
@@ -452,17 +495,22 @@ const DashboardPage = () => {
                         <div>
                           <div className="h-px w-full bg-white/10 my-8" />
                           
-                          <button 
-                            onClick={() => toggleConfirmDay(w.day)}
-                            className={`w-full py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 ${
-                              confirmedDays[w.day]
-                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
-                                : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
-                            }`}
-                          >
-                            <FiCheckCircle size={14} />
-                            {confirmedDays[w.day] ? 'Treino Confirmado!' : `Confirmar treino de ${w.day}`}
-                          </button>
+                          {(() => {
+                            const isDayConfirmed = confirmedDays[w.day] && (confirmedDays[w.day] === true || isDateInCurrentWeek(confirmedDays[w.day]));
+                            return (
+                              <button 
+                                onClick={() => toggleConfirmDay(w.day)}
+                                className={`w-full py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 ${
+                                  isDayConfirmed
+                                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
+                                    : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                                }`}
+                              >
+                                <FiCheckCircle size={14} />
+                                {isDayConfirmed ? 'Treino Confirmado!' : `Confirmar treino de ${w.day}`}
+                              </button>
+                            );
+                          })()}
                         </div>
                       </div>
                     </motion.div>
