@@ -5,7 +5,7 @@ import {
   FiHome, FiUsers, FiTarget, FiDollarSign, FiBarChart2,
   FiBell, FiMenu, FiX, FiPlus, FiRefreshCw, FiUser,
   FiSearch, FiTrendingUp, FiActivity,
-  FiEdit, FiTrash2, FiCheckCircle, FiChevronRight, FiArrowLeft, FiAlertCircle, FiLogOut
+  FiEdit, FiTrash2, FiCheckCircle, FiChevronRight, FiArrowLeft, FiAlertCircle, FiLogOut, FiLock, FiUnlock
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
@@ -141,7 +141,7 @@ const AdminPage = () => {
         setStudentsData(users.map(u => ({
           id: u.id,
           name: u.usuario || 'Usuário Sem Nome',
-          plano: u.plano || 'Premium',
+          plano: u.role === 'admin' || u.usuario === 'admin' ? 'Administrador' : (u.plano || 'Premium'),
           status: u.status || 'Ativo', 
           objective: u.objetivo || 'Aguardando Avaliação',
           lastCheck: new Date(u.data_cadastro).toLocaleDateString('pt-BR'),
@@ -219,6 +219,35 @@ const AdminPage = () => {
         }
       }
     })
+  }
+
+  const handleToggleStatus = async (student) => {
+    const newStatus = student.status === 'Inativo' ? 'Ativo' : 'Inativo';
+    const actionText = newStatus === 'Inativo' ? 'inativar' : 'ativar';
+    
+    setConfirmModal({
+      show: true,
+      title: `${newStatus === 'Inativo' ? 'Inativar' : 'Ativar'} Aluna`,
+      message: `Tem certeza que deseja ${actionText} o acesso de ${student.name}?`,
+      onConfirm: async () => {
+        try {
+          const { error } = await supabase
+            .from('usuarios')
+            .update({ status: newStatus })
+            .eq('usuario', student.name);
+          
+          if (error) throw error;
+          
+          await fetchData();
+          setConfirmModal(prev => ({ ...prev, show: false }));
+          showNotification(`Aluna ${student.name} foi ${newStatus === 'Inativo' ? 'inativada' : 'ativada'} com sucesso.`);
+        } catch (err) {
+          console.error("Erro ao alterar status:", err);
+          setConfirmModal(prev => ({ ...prev, show: false }));
+          showNotification(`Erro ao alterar status: ${err.message}`, 'error');
+        }
+      }
+    });
   }
 
   const handleEditStudent = (student) => {
@@ -388,6 +417,20 @@ const AdminPage = () => {
       return w;
     }));
   }
+
+  const formatPhoneNumber = (value) => {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 2) {
+      return digits.length > 0 ? `(${digits}` : '';
+    }
+    if (digits.length <= 6) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    }
+    if (digits.length <= 10) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    }
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  };
 
 
   return (
@@ -635,7 +678,7 @@ const AdminPage = () => {
                             {s.contact && (
                               <>
                                 <span className="w-1 h-1 rounded-full bg-white/10" />
-                                <span className="text-[9px] text-emerald-400 font-black">{s.contact}</span>
+                                <span className="text-[9px] text-emerald-400 font-black whitespace-nowrap">{s.contact}</span>
                               </>
                             )}
                           </div>
@@ -644,11 +687,13 @@ const AdminPage = () => {
 
                       <div className="hidden md:block">
                         <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm inline-block ${
-                          s.plano === 'VIP Elite' 
-                            ? 'bg-bordeaux/20 text-rose-soft border-bordeaux/30'
-                            : s.plano === 'Premium'
-                              ? 'bg-wine-900/20 text-white border-white/10'
-                              : 'bg-white/5 text-white/50 border-white/5'
+                          s.plano === 'Administrador'
+                            ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                            : s.plano === 'VIP Elite' 
+                              ? 'bg-bordeaux/20 text-rose-soft border-bordeaux/30'
+                              : s.plano === 'Premium'
+                                ? 'bg-wine-900/20 text-white border-white/10'
+                                : 'bg-white/5 text-white/50 border-white/5'
                         }`}>
                           {s.plano}
                         </span>
@@ -671,26 +716,36 @@ const AdminPage = () => {
                       </div>
 
                       <div className="flex items-center justify-end gap-3 border-t md:border-t-0 pt-4 md:pt-0 border-white/5">
-                        <button 
-                          onClick={() => { setShowWorkoutModal(true); setSelectedStudentId(s.id); }}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-bordeaux/20 text-rose-soft border border-bordeaux/30 hover:bg-bordeaux/35 cursor-pointer"
-                        >
-                          <FiActivity size={12} />
-                          <span className="md:hidden lg:inline">Treino</span>
-                        </button>
+                        {s.status === 'Inativo' ? (
+                          <button 
+                            onClick={() => handleToggleStatus(s)}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/25 cursor-pointer"
+                          >
+                            <FiUnlock size={12} />
+                            <span className="hidden md:inline">Ativar</span>
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => handleToggleStatus(s)}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/25 cursor-pointer"
+                          >
+                            <FiLock size={12} />
+                            <span className="hidden md:inline">Inativar</span>
+                          </button>
+                        )}
                         <button 
                           onClick={() => handleEditStudent(s)}
                           className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-white/5 text-white hover:bg-white/10 cursor-pointer"
                         >
                           <FiEdit size={12} />
-                          <span className="md:hidden lg:inline">Editar</span>
+                          <span className="hidden md:inline">Editar</span>
                         </button>
                         <button 
                           onClick={() => handleDeleteStudent(s.name)}
                           className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 hover:bg-red-500/20 cursor-pointer"
                         >
                           <FiTrash2 size={12} />
-                          <span className="md:hidden lg:inline">Excluir</span>
+                          <span className="hidden md:inline">Excluir</span>
                         </button>
                       </div>
                     </div>
@@ -1246,9 +1301,9 @@ const AdminPage = () => {
                     <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>WhatsApp da Aluna (com DDD)</label>
                     <input 
                       type="tel" 
-                      placeholder="Ex: 11999999999"
+                      placeholder="Ex: (11) 99999-9999"
                       value={newUserContact}
-                      onChange={(e) => setNewUserContact(e.target.value)}
+                      onChange={(e) => setNewUserContact(formatPhoneNumber(e.target.value))}
                       className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
                     />
                   </div>
