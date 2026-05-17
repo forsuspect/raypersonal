@@ -40,14 +40,14 @@ const Pricing = () => {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto w-full">
+        <div className="flex md:grid overflow-x-auto snap-x snap-mandatory md:grid-cols-3 gap-5 max-w-5xl mx-auto w-full pb-8 md:pb-0 px-4 md:px-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className={`relative p-6 rounded-[2rem] border-2 flex flex-col ${
+              className={`relative p-6 rounded-[2rem] border-2 flex flex-col shrink-0 w-[85vw] sm:w-[300px] md:w-auto snap-center ${
                 plan.highlight
                   ? 'border-wine-900 bg-white shadow-premium-lg md:scale-105 z-10'
                   : 'border-wine-100 bg-premium-light hover:border-wine-900/30 transition-colors'
