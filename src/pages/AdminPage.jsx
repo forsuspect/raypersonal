@@ -138,11 +138,12 @@ const AdminPage = () => {
         console.log("Usuários encontrados:", users.length);
         const storedVencimentos = JSON.parse(localStorage.getItem('rm_vencimentos') || '{}');
         const storedContatos = JSON.parse(localStorage.getItem('rm_contatos') || '{}');
+        const storedStatus = JSON.parse(localStorage.getItem('rm_status') || '{}');
         setStudentsData(users.map(u => ({
           id: u.id,
           name: u.usuario || 'Usuário Sem Nome',
           plano: u.role === 'admin' || u.usuario === 'admin' ? 'Administrador' : (u.plano || 'Premium'),
-          status: u.status || 'Ativo', 
+          status: u.status || storedStatus[u.usuario] || 'Ativo', 
           objective: u.objetivo || 'Aguardando Avaliação',
           lastCheck: new Date(u.data_cadastro).toLocaleDateString('pt-BR'),
           expirationDate: u.vencimento || storedVencimentos[u.usuario] || '',
@@ -231,12 +232,9 @@ const AdminPage = () => {
       message: `Tem certeza que deseja ${actionText} o acesso de ${student.name}?`,
       onConfirm: async () => {
         try {
-          const { error } = await supabase
-            .from('usuarios')
-            .update({ status: newStatus })
-            .eq('usuario', student.name);
-          
-          if (error) throw error;
+          const storedStatus = JSON.parse(localStorage.getItem('rm_status') || '{}');
+          storedStatus[student.name] = newStatus;
+          localStorage.setItem('rm_status', JSON.stringify(storedStatus));
           
           await fetchData();
           setConfirmModal(prev => ({ ...prev, show: false }));
@@ -1159,8 +1157,7 @@ const AdminPage = () => {
                       .update({
                         usuario: generatedUser,
                         senha: generatedPassword || undefined,
-                        plano: newUserPlan,
-                        status: newUserStatus
+                        plano: newUserPlan
                       })
                       .eq('usuario', editingUser);
                     
@@ -1182,14 +1179,21 @@ const AdminPage = () => {
                       delete storedContatos[generatedUser];
                     }
                     localStorage.setItem('rm_contatos', JSON.stringify(storedContatos));
+
+                    const storedStatus = JSON.parse(localStorage.getItem('rm_status') || '{}');
+                    if (newUserStatus) {
+                      storedStatus[generatedUser] = newUserStatus;
+                    } else {
+                      delete storedStatus[generatedUser];
+                    }
+                    localStorage.setItem('rm_status', JSON.stringify(storedStatus));
                   } else {
                     // Insert new
                     const { error } = await supabase.from('usuarios').insert({
                       usuario: generatedUser,
                       senha: generatedPassword,
                       role: newUserPlan === 'Administrador' ? 'admin' : 'aluna',
-                      plano: newUserPlan,
-                      status: newUserStatus
+                      plano: newUserPlan
                     });
 
                     if (error) {
@@ -1214,6 +1218,12 @@ const AdminPage = () => {
                       storedContatos[generatedUser] = newUserContact;
                     }
                     localStorage.setItem('rm_contatos', JSON.stringify(storedContatos));
+
+                    const storedStatus = JSON.parse(localStorage.getItem('rm_status') || '{}');
+                    if (newUserStatus) {
+                      storedStatus[generatedUser] = newUserStatus;
+                    }
+                    localStorage.setItem('rm_status', JSON.stringify(storedStatus));
                   }
 
                   await fetchData();

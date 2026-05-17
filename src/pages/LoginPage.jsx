@@ -45,8 +45,10 @@ const LoginPage = () => {
 
       const user = data[0]
 
-      // Check if student status is set to Inativo
-      if (user.status === 'Inativo') {
+      // Check if student status is set to Inativo (Supabase or LocalStorage fallback)
+      const storedStatus = JSON.parse(localStorage.getItem('rm_status') || '{}')
+      const userStatus = user.status || storedStatus[user.usuario] || 'Ativo'
+      if (userStatus === 'Inativo') {
         setError('inativa') // Set custom error code to trigger stylized inactive card
         return
       }
