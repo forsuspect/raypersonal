@@ -5,7 +5,7 @@ import {
   FiHome, FiUsers, FiTarget, FiDollarSign, FiBarChart2,
   FiBell, FiMenu, FiX, FiPlus, FiRefreshCw, FiUser,
   FiSearch, FiTrendingUp, FiActivity,
-  FiEdit, FiTrash2, FiCheckCircle, FiChevronRight, FiArrowLeft, FiAlertCircle, FiLogOut, FiLock, FiUnlock, FiShield
+  FiEdit, FiTrash2, FiCheckCircle, FiChevronRight, FiArrowLeft, FiAlertCircle, FiLogOut, FiLock, FiUnlock, FiShield, FiMessageCircle, FiSend
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
@@ -80,6 +80,101 @@ const AdminPage = () => {
   const [editWorkoutData, setEditWorkoutData] = useState(null) // { workoutId, workouts: [...] }
   const [editDayTab, setEditDayTab] = useState('SEG')
   const [isSavingWorkout, setIsSavingWorkout] = useState(false)
+
+  // VIP Chat Admin States
+  const [activeChatStudent, setActiveChatStudent] = useState(null)
+  const [adminChatMessages, setAdminChatMessages] = useState([])
+  const [adminChatInput, setAdminChatInput] = useState('')
+
+  const handleAdminSendMessage = async (e) => {
+    e.preventDefault();
+    if (!adminChatInput.trim() || !activeChatStudent) return;
+
+    const newMsg = {
+      id: adminChatMessages.length + 1,
+      sender: 'rayana',
+      text: adminChatInput,
+      time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    };
+
+    const updatedMessages = [...adminChatMessages, newMsg];
+    setAdminChatMessages(updatedMessages);
+    const textToSend = adminChatInput;
+    setAdminChatInput('');
+
+    // Fetch original objective JSON structure
+    let parsedObjective = {
+      objetivo_texto: activeChatStudent.raw?.objetivo && !activeChatStudent.raw.objetivo.trim().startsWith('{') ? activeChatStudent.raw.objetivo : 'Foco Fitness',
+      evolucao: {
+        gordura: 0,
+        massa_magra: 0,
+        cintura: 0,
+        historico_peso: [],
+        before_photo: '',
+        after_photo: ''
+      },
+      chat_messages: updatedMessages
+    };
+
+    if (activeChatStudent.raw?.objetivo && activeChatStudent.raw.objetivo.trim().startsWith('{')) {
+      try {
+        const parsed = JSON.parse(activeChatStudent.raw.objetivo);
+        parsedObjective = {
+          ...parsed,
+          chat_messages: updatedMessages
+        };
+      } catch (err) {
+        console.error("Error parsing objective JSON in admin send:", err);
+      }
+    }
+
+    try {
+      // Save updated data via bypass update
+      await performUserUpdateBypass(activeChatStudent.id, { objetivo: JSON.stringify(parsedObjective) });
+      
+      // Update local active student raw object so subsequent clicks/sends are fully synced
+      if (activeChatStudent.raw) {
+        activeChatStudent.raw.objetivo = JSON.stringify(parsedObjective);
+      }
+      
+      // Re-fetch all data to ensure lists are perfectly in sync
+      await fetchData();
+    } catch (err) {
+      console.error("Error sending admin chat reply:", err);
+      showNotification("Erro ao enviar mensagem: " + err.message, "error");
+    }
+  };
+
+  // Live Chat polling for Admin
+  useEffect(() => {
+    if (!activeChatStudent) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('objetivo')
+          .eq('id', activeChatStudent.id)
+          .single();
+
+        if (!error && data && data.objetivo && data.objetivo.trim().startsWith('{')) {
+          const parsed = JSON.parse(data.objetivo);
+          if (parsed.chat_messages && parsed.chat_messages.length !== adminChatMessages.length) {
+            setAdminChatMessages(parsed.chat_messages);
+            
+            // Sync inside activeChatStudent too
+            if (activeChatStudent.raw) {
+              activeChatStudent.raw.objetivo = data.objetivo;
+            }
+          }
+        }
+      } catch (e) {
+        // Silent catch
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [activeChatStudent, adminChatMessages.length]);
 
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
@@ -227,7 +322,17 @@ const AdminPage = () => {
           name: u.usuario || 'Usuário Sem Nome',
           plano: u.role === 'admin' || u.role === 'desenvolvedor' ? (u.role === 'desenvolvedor' ? 'Desenvolvedor' : 'Administrador') : (u.plano || 'Premium'),
           status: u.status || 'Ativo',
-          objective: u.objetivo || 'Aguardando Avaliação',
+          objective: (() => {
+            if (u.objetivo && u.objetivo.trim().startsWith('{')) {
+              try {
+                const parsed = JSON.parse(u.objetivo);
+                return parsed.objetivo_texto || 'Aguardando Avaliação';
+              } catch (e) {
+                return u.objetivo;
+              }
+            }
+            return u.objetivo || 'Aguardando Avaliação';
+          })(),
           lastCheck: new Date(u.data_cadastro).toLocaleDateString('pt-BR'),
           expirationDate: storedVencimentos[u.usuario] || '',
           contact: storedContatos[u.usuario] || '',
@@ -988,6 +1093,25 @@ const AdminPage = () => {
                           >
                             <FiEdit size={12} />
                             <span className="hidden md:inline">Editar</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setActiveChatStudent(s);
+                              let msgs = [];
+                              if (s.raw?.objetivo && s.raw.objetivo.trim().startsWith('{')) {
+                                try {
+                                  const parsed = JSON.parse(s.raw.objetivo);
+                                  msgs = parsed.chat_messages || [];
+                                } catch (e) {
+                                  console.error("Error parsing chat history in admin:", e);
+                                }
+                              }
+                              setAdminChatMessages(msgs);
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-bordeaux/20 text-rose-soft border border-bordeaux/30 hover:bg-bordeaux/30 cursor-pointer"
+                          >
+                            <FiMessageCircle size={12} />
+                            <span className="hidden md:inline">Chat VIP</span>
                           </button>
                           <button
                             onClick={() => handleDeleteStudent(s.name)}
@@ -2212,6 +2336,117 @@ const AdminPage = () => {
           </div>
         )}
       </AnimatePresence>
+      {/* Chat VIP Admin Modal */}
+      <AnimatePresence>
+        {activeChatStudent && (
+          <div className="fixed inset-0 z-[160] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className={`rounded-[2.5rem] w-full max-w-2xl shadow-2xl relative border flex flex-col h-[600px] overflow-hidden ${
+                isDarkMode ? 'bg-[#141210] border-white/10' : 'bg-white border-wine-100'
+              }`}
+            >
+              {/* Header */}
+              <div className={`p-6 border-b flex items-center justify-between ${
+                isDarkMode ? 'border-white/5 bg-white/[0.01]' : 'border-wine-50 bg-wine-50/10'
+              }`}>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-wine-900 to-bordeaux flex items-center justify-center text-white font-black text-sm shadow-md">
+                    {activeChatStudent.name[0]}
+                  </div>
+                  <div>
+                    <h3 className={`font-bold text-base ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>
+                      Chat VIP: {activeChatStudent.name}
+                    </h3>
+                    <p className={`text-[10px] font-black uppercase tracking-widest ${
+                      isDarkMode ? 'text-rose-soft' : 'text-bordeaux'
+                    }`}>
+                      {activeChatStudent.plano}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setActiveChatStudent(null)}
+                  className={`p-2 rounded-xl transition-colors ${
+                    isDarkMode ? 'text-white/40 hover:text-white' : 'text-wine-900/40 hover:text-wine-900'
+                  }`}
+                >
+                  <FiX size={22} />
+                </button>
+              </div>
+
+              {/* Messages Area */}
+              <div className="flex-1 p-6 overflow-y-auto space-y-4 flex flex-col justify-end">
+                <div className="space-y-4 w-full">
+                  {adminChatMessages.length === 0 ? (
+                    <div className="text-center py-20 opacity-30">
+                      <FiMessageCircle size={32} className="mx-auto mb-3" />
+                      <p className="text-xs font-bold">Nenhuma mensagem trocada ainda.</p>
+                      <p className="text-[10px]">Envie uma mensagem para iniciar o chat!</p>
+                    </div>
+                  ) : (
+                    adminChatMessages.map((msg) => {
+                      const isRayana = msg.sender === 'rayana';
+                      return (
+                        <div key={msg.id} className={`flex ${isRayana ? 'justify-end' : 'justify-start'}`}>
+                          <div className="max-w-[75%] flex flex-col gap-1">
+                            <span className="text-[8px] font-black uppercase tracking-widest opacity-35 px-2">
+                              {isRayana ? 'Você (Rayana Maria)' : activeChatStudent.name}
+                            </span>
+                            <div
+                              className={`px-5 py-3.5 rounded-2xl text-sm font-semibold leading-relaxed shadow-lg border ${
+                                isRayana
+                                  ? 'bg-gradient-to-r from-rose-950 to-bordeaux text-white border-bordeaux/30 rounded-tr-sm'
+                                  : isDarkMode
+                                    ? 'bg-[#1c1916] text-white border-white/5 rounded-tl-sm'
+                                    : 'bg-wine-50 text-wine-950 border-wine-100 rounded-tl-sm'
+                              }`}
+                            >
+                              {msg.text}
+                            </div>
+                            <span className="text-[8px] font-black opacity-20 px-2 text-right">
+                              {msg.time}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Input Form */}
+              <form
+                onSubmit={handleAdminSendMessage}
+                className={`p-4 border-t flex items-center gap-3 ${
+                  isDarkMode ? 'border-white/5 bg-white/[0.01]' : 'border-wine-50 bg-wine-50/10'
+                }`}
+              >
+                <input
+                  type="text"
+                  value={adminChatInput}
+                  onChange={(e) => setAdminChatInput(e.target.value)}
+                  placeholder="Escreva uma resposta para a aluna..."
+                  className={`flex-1 px-5 py-4 border rounded-2xl focus:outline-none transition-colors font-bold text-sm ${
+                    isDarkMode
+                      ? 'bg-white/5 border-white/10 focus:border-wine-900 focus:ring-1 focus:ring-wine-900 text-white placeholder-white/20'
+                      : 'bg-white border-wine-200 focus:border-bordeaux focus:ring-1 focus:ring-bordeaux text-wine-950 placeholder-wine-900/30'
+                  }`}
+                />
+                <button
+                  type="submit"
+                  className="w-12 h-12 rounded-xl bg-gradient-to-r from-wine-900 to-bordeaux flex items-center justify-center text-white shrink-0 hover:shadow-wine transition-all cursor-pointer shadow-md hover:scale-105"
+                >
+                  <FiSend size={16} />
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Notification Toast */}
       <AnimatePresence>
         {notification.show && (

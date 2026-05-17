@@ -12,7 +12,10 @@ const Footer = () => {
       <div className="w-full max-w-7xl mx-auto px-6 relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-start gap-10 md:gap-6 mb-12">
           <div className="flex flex-col items-start text-left max-w-sm">
-            <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-14 w-auto brightness-0 invert mb-6" />
+            <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-14 w-auto brightness-0 invert mb-4" />
+            <span className="text-[9px] bg-white/10 border border-white/20 text-rose-soft font-black px-2.5 py-1 rounded-md uppercase tracking-wider mb-6">
+              CREF 098432-G/SP
+            </span>
             <p className="text-white/60 text-sm mb-8 leading-relaxed">
               Transformando corpos e mentes através de protocolos de treino de elite. O método perfeito para quem busca resultados definitivos.
             </p>

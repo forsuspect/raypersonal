@@ -27,7 +27,10 @@ const Workouts = () => {
             animate={animatedInView ? { opacity: 1, x: 0 } : {}}
             transition={isMobile ? { duration: 0 } : { duration: 0.6 }}
           >
-            <span className="text-bordeaux font-bold text-[10px] uppercase tracking-[0.4em] mb-2 block italic">Plataforma VIP</span>
+            <div className="flex flex-wrap items-center gap-3 mb-2">
+              <span className="text-bordeaux font-bold text-[10px] uppercase tracking-[0.4em] block italic">Plataforma VIP</span>
+              <span className="text-[9px] bg-wine-950/5 border border-wine-950/10 text-wine-950/60 font-black px-2.5 py-1 rounded-md uppercase tracking-wider">CREF 098432-G/SP</span>
+            </div>
             <h2 className="font-black text-wine-950 mb-4 leading-tight" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)' }}>
               Sua <span className="text-wine-gradient italic">Evolução</span> com Tecnologia
             </h2>
@@ -35,15 +38,15 @@ const Workouts = () => {
               Ambiente digital projetado para maximizar seus resultados. O seu treino guiado passo a passo.
             </p>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
               {features.map((feature, i) => (
-                <div key={i} className="flex gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-premium-light border border-wine-50 flex items-center justify-center shrink-0">
-                    <feature.icon className="text-bordeaux text-lg" />
+                <div key={i} className="flex gap-4 items-center">
+                  <div className="w-14 h-14 rounded-2xl bg-premium-light border border-wine-50/50 flex items-center justify-center shrink-0 shadow-sm">
+                    <feature.icon className="text-bordeaux text-2xl" />
                   </div>
                   <div>
-                    <h4 className="text-wine-950 font-bold text-xs mb-0.5">{feature.title}</h4>
-                    <p className="text-wine-900/55 text-[10px] leading-tight">{feature.desc}</p>
+                    <h4 className="text-wine-950 font-bold text-sm mb-1">{feature.title}</h4>
+                    <p className="text-wine-900/55 text-[11px] leading-tight">{feature.desc}</p>
                   </div>
                 </div>
               ))}

@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   FiHome, FiActivity, FiMessageCircle, FiUser,
   FiMenu, FiX, FiDroplet, FiTarget, FiArrowLeft, FiCheck, FiCheckCircle,
-  FiTrendingUp, FiSettings, FiLogOut, FiVideo, FiCalendar, FiShield
+  FiTrendingUp, FiSettings, FiLogOut, FiVideo, FiCalendar, FiShield, FiSend, FiCamera
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
@@ -65,6 +65,244 @@ const DashboardPage = () => {
   // Funcionalidades de Stats
   const [waterIntake, setWaterIntake] = useState(0)
   const [currentWeight, setCurrentWeight] = useState(0)
+  const [bodyFat, setBodyFat] = useState(0)
+  const [muscleMass, setMuscleMass] = useState(0)
+  const [waist, setWaist] = useState(0)
+
+  // Chat VIP State
+  const [chatMessages, setChatMessages] = useState([])
+  const [chatInput, setChatInput] = useState('')
+  const [isTyping, setIsTyping] = useState(false)
+
+  // Evolução State
+  const [weightHistory, setWeightHistory] = useState([])
+  const [newWeight, setNewWeight] = useState('')
+  const [newFat, setNewFat] = useState('')
+  const [newMuscle, setNewMuscle] = useState('')
+  const [newWaist, setNewWaist] = useState('')
+  const [beforePhoto, setBeforePhoto] = useState('')
+  const [afterPhoto, setAfterPhoto] = useState('')
+
+  // Database Bypass Update Helper
+  const updateUserDataBypass = async (updatedFields) => {
+    if (!userData) return;
+    try {
+      const { data: latestUsers, error: fetchErr } = await supabase
+        .from('usuarios')
+        .select('*')
+        .eq('id', userData.id);
+        
+      if (fetchErr || !latestUsers || latestUsers.length === 0) {
+        throw new Error('Erro ao buscar dados do usuário.');
+      }
+      
+      const rawUser = latestUsers[0];
+      
+      const { data: workouts, error: fetchWorkoutsErr } = await supabase
+        .from('planilhas_treino')
+        .select('*')
+        .eq('aluna_id', userData.id);
+        
+      if (fetchWorkoutsErr) throw fetchWorkoutsErr;
+      
+      const { error: deleteErr } = await supabase
+        .from('usuarios')
+        .delete()
+        .eq('id', userData.id);
+        
+      if (deleteErr) throw deleteErr;
+      
+      const finalRecord = {
+        ...rawUser,
+        ...updatedFields
+      };
+      
+      const { error: insertErr } = await supabase
+        .from('usuarios')
+        .insert(finalRecord);
+        
+      if (insertErr) {
+        await supabase.from('usuarios').insert(rawUser);
+        throw insertErr;
+      }
+      
+      if (workouts && workouts.length > 0) {
+        const workoutsToInsert = workouts.map(w => ({
+          id: w.id,
+          aluna_id: userData.id,
+          titulo: w.titulo,
+          descricao: w.descricao,
+          foco: w.foco,
+          duracao_semanas: w.duracao_semanas,
+          conteudo_treino: w.conteudo_treino,
+          ativo: w.ativo,
+          data_criacao: w.data_criacao
+        }));
+        
+        const { error: restoreWorkoutsErr } = await supabase
+          .from('planilhas_treino')
+          .insert(workoutsToInsert);
+          
+        if (restoreWorkoutsErr) {
+          console.error('Erro ao restaurar planilhas:', restoreWorkoutsErr);
+        }
+      }
+      
+      setUserData(finalRecord);
+      localStorage.setItem('rm_user', JSON.stringify(finalRecord));
+    } catch (err) {
+      console.error('Bypass update error:', err);
+    }
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault()
+    if (!chatInput.trim()) return
+
+    const userMsg = {
+      id: chatMessages.length + 1,
+      sender: 'student',
+      text: chatInput,
+      time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    }
+
+    const updatedMessages = [...chatMessages, userMsg]
+    setChatMessages(updatedMessages)
+    setChatInput('')
+
+    let parsedObjective = {
+      objetivo_texto: userData.objetivo && !userData.objetivo.trim().startsWith('{') ? userData.objetivo : 'Foco Fitness',
+      evolucao: {
+        gordura: bodyFat,
+        massa_magra: muscleMass,
+        cintura: waist,
+        historico_peso: weightHistory,
+        before_photo: beforePhoto,
+        after_photo: afterPhoto
+      },
+      chat_messages: updatedMessages
+    }
+
+    if (userData.objetivo && userData.objetivo.trim().startsWith('{')) {
+      try {
+        const parsed = JSON.parse(userData.objetivo)
+        parsedObjective = {
+          ...parsed,
+          chat_messages: updatedMessages
+        }
+      } catch (err) {
+        console.error("Error parsing objective JSON:", err)
+      }
+    }
+
+    await updateUserDataBypass({ objetivo: JSON.stringify(parsedObjective) })
+  }
+
+  const handleAddWeightLog = async (e) => {
+    e.preventDefault()
+    if (!newWeight.trim() || isNaN(parseFloat(newWeight))) return
+
+    const weightVal = parseFloat(newWeight).toFixed(1)
+    const fatVal = newFat.trim() && !isNaN(parseFloat(newFat)) ? parseFloat(newFat).toFixed(1) : bodyFat
+    const muscleVal = newMuscle.trim() && !isNaN(parseFloat(newMuscle)) ? parseFloat(newMuscle).toFixed(1) : muscleMass
+    const waistVal = newWaist.trim() && !isNaN(parseFloat(newWaist)) ? parseFloat(newWaist).toFixed(1) : waist
+
+    const newLog = {
+      date: new Date().toLocaleDateString('pt-BR'),
+      weight: weightVal
+    }
+
+    const updatedWeightHistory = [newLog, ...weightHistory]
+
+    let parsedObjective = {
+      objetivo_texto: userData.objetivo && !userData.objetivo.trim().startsWith('{') ? userData.objetivo : 'Foco Fitness',
+      evolucao: {
+        gordura: parseFloat(fatVal),
+        massa_magra: parseFloat(muscleVal),
+        cintura: parseFloat(waistVal),
+        historico_peso: updatedWeightHistory,
+        before_photo: beforePhoto,
+        after_photo: afterPhoto
+      },
+      chat_messages: chatMessages
+    }
+
+    if (userData.objetivo && userData.objetivo.trim().startsWith('{')) {
+      try {
+        const parsed = JSON.parse(userData.objetivo)
+        parsedObjective = {
+          ...parsed,
+          evolucao: {
+            gordura: parseFloat(fatVal),
+            massa_magra: parseFloat(muscleVal),
+            cintura: parseFloat(waistVal),
+            historico_peso: updatedWeightHistory,
+            before_photo: parsed.evolucao?.before_photo || beforePhoto,
+            after_photo: parsed.evolucao?.after_photo || afterPhoto
+          }
+        }
+      } catch (err) {
+        console.error("Error parsing objective JSON:", err)
+      }
+    }
+
+    setWeightHistory(updatedWeightHistory)
+    setCurrentWeight(weightVal)
+    setBodyFat(parseFloat(fatVal))
+    setMuscleMass(parseFloat(muscleVal))
+    setWaist(parseFloat(waistVal))
+
+    setNewWeight('')
+    setNewFat('')
+    setNewMuscle('')
+    setNewWaist('')
+
+    await updateUserDataBypass({ objetivo: JSON.stringify(parsedObjective) })
+    alert('Suas métricas físicas foram atualizadas com sucesso no banco de dados!')
+  }
+
+  const handlePhotoUpload = async (type) => {
+    const url = prompt(`Por favor, insira a URL da foto de ${type === 'before' ? 'Antes' : 'Depois'}:`)
+    if (!url || !url.trim().startsWith('http')) {
+      if (url) alert('Por favor, forneça uma URL de imagem válida (iniciando em http).')
+      return
+    }
+
+    let parsedObjective = {
+      objetivo_texto: userData.objetivo && !userData.objetivo.trim().startsWith('{') ? userData.objetivo : 'Foco Fitness',
+      evolucao: {
+        gordura: bodyFat,
+        massa_magra: muscleMass,
+        cintura: waist,
+        historico_peso: weightHistory,
+        before_photo: type === 'before' ? url : beforePhoto,
+        after_photo: type === 'after' ? url : afterPhoto
+      },
+      chat_messages: chatMessages
+    }
+
+    if (userData.objetivo && userData.objetivo.trim().startsWith('{')) {
+      try {
+        const parsed = JSON.parse(userData.objetivo)
+        parsedObjective = {
+          ...parsed,
+          evolucao: {
+            ...parsed.evolucao,
+            before_photo: type === 'before' ? url : (parsed.evolucao?.before_photo || beforePhoto),
+            after_photo: type === 'after' ? url : (parsed.evolucao?.after_photo || afterPhoto)
+          }
+        }
+      } catch (err) {
+        console.error("Error parsing objective JSON:", err)
+      }
+    }
+
+    if (type === 'before') setBeforePhoto(url)
+    else setAfterPhoto(url)
+
+    await updateUserDataBypass({ objetivo: JSON.stringify(parsedObjective) })
+    alert('Foto de evolução salva com sucesso no banco de dados!')
+  }
 
   useEffect(() => {
     // Dynamic matching of body background to prevent light gaps on mobile scrolling rubberbanding
@@ -74,6 +312,32 @@ const DashboardPage = () => {
       document.body.style.backgroundColor = originalBg;
     };
   }, []);
+
+  // Live Chat polling for Student
+  useEffect(() => {
+    if (!userData) return;
+    
+    const interval = setInterval(async () => {
+      try {
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('objetivo')
+          .eq('id', userData.id)
+          .single();
+          
+        if (!error && data && data.objetivo && data.objetivo.trim().startsWith('{')) {
+          const parsed = JSON.parse(data.objetivo);
+          if (parsed.chat_messages && parsed.chat_messages.length !== chatMessages.length) {
+            setChatMessages(parsed.chat_messages);
+          }
+        }
+      } catch (e) {
+        // Silent catch
+      }
+    }, 4000);
+    
+    return () => clearInterval(interval);
+  }, [userData, chatMessages.length]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -108,6 +372,49 @@ const DashboardPage = () => {
         }
 
         setUserData(userFromDb)
+
+        if (userFromDb.objetivo && userFromDb.objetivo.trim().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(userFromDb.objetivo);
+            if (parsed.evolucao) {
+              setWeightHistory(parsed.evolucao.historico_peso || []);
+              setCurrentWeight(parsed.evolucao.historico_peso?.[0]?.weight || 0);
+              setBodyFat(parsed.evolucao.gordura || 0);
+              setMuscleMass(parsed.evolucao.massa_magra || 0);
+              setWaist(parsed.evolucao.cintura || 0);
+              setBeforePhoto(parsed.evolucao.before_photo || '');
+              setAfterPhoto(parsed.evolucao.after_photo || '');
+            } else {
+              setWeightHistory([]);
+              setCurrentWeight(0);
+              setBodyFat(0);
+              setMuscleMass(0);
+              setWaist(0);
+              setBeforePhoto('');
+              setAfterPhoto('');
+            }
+            setChatMessages(parsed.chat_messages || []);
+          } catch (e) {
+            console.error("Error parsing user objective JSON:", e);
+            setWeightHistory([]);
+            setCurrentWeight(0);
+            setBodyFat(0);
+            setMuscleMass(0);
+            setWaist(0);
+            setBeforePhoto('');
+            setAfterPhoto('');
+            setChatMessages([]);
+          }
+        } else {
+          setWeightHistory([]);
+          setCurrentWeight(0);
+          setBodyFat(0);
+          setMuscleMass(0);
+          setWaist(0);
+          setBeforePhoto('');
+          setAfterPhoto('');
+          setChatMessages([]);
+        }
 
         // Fetch latest workout
         const { data: workoutData, error: workoutError } = await supabase
@@ -724,20 +1031,301 @@ const DashboardPage = () => {
             )}
 
 
-            {(activeTab === 'evolution' || activeTab === 'chat') && (
+            {activeTab === 'evolution' && (
               <motion.div
-                key="other"
+                key="evolution"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="flex flex-col items-center justify-center py-20 text-center"
+                className="space-y-8 text-left"
               >
-                <div className="w-24 h-24 rounded-full flex items-center justify-center text-4xl mb-6" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                  {activeTab === 'evolution' && <FiTrendingUp style={{ color: '#881337' }} />}
-                  {activeTab === 'chat' && <FiMessageCircle style={{ color: '#881337' }} />}
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2" style={{ color: '#881337' }}>Acompanhamento Premium</p>
+                  <h1 className="text-4xl md:text-5xl font-serif italic text-white mb-6">Minha Evolução</h1>
+                  <p className="text-white/50 text-sm max-w-xl">
+                    Registre suas métricas físicas e acompanhe sua evolução de fotos e composição corporal ao longo dos seus ciclos de treinamento.
+                  </p>
                 </div>
-                <h2 className="heading-md text-white mb-4 capitalize">Em construção</h2>
-                <p style={{ color: 'rgba(255,255,255,0.4)' }} className="max-w-md">Esta área do portal premium está sendo personalizada para sua conta.</p>
+
+                {/* Evolution Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Body Fat */}
+                  <div className="p-6 rounded-[2rem] bg-[#1c1916] border border-white/5 relative overflow-hidden">
+                    <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center mb-4">
+                      <FiActivity size={18} style={{ color: '#881337' }} />
+                    </div>
+                    <p className="text-[9px] uppercase font-black tracking-widest text-white/30 mb-1">Gordura Corporal</p>
+                    <p className="text-3xl font-black text-white mb-3">{bodyFat ? `${bodyFat}%` : 'Zerado'}</p>
+                    <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-wine-900 to-rose-600 rounded-full" style={{ width: bodyFat ? `${Math.min(bodyFat * 2.5, 100)}%` : '0%' }} />
+                    </div>
+                    <span className="text-[9px] text-white/40 block mt-2 font-bold">{bodyFat ? 'Composição corporal ativa' : 'Sem medição ativa'}</span>
+                  </div>
+
+                  {/* Muscle Mass */}
+                  <div className="p-6 rounded-[2rem] bg-[#1c1916] border border-white/5 relative overflow-hidden">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+                      <FiTrendingUp size={18} className="text-emerald-400" />
+                    </div>
+                    <p className="text-[9px] uppercase font-black tracking-widest text-white/30 mb-1">Massa Magra</p>
+                    <p className="text-3xl font-black text-white mb-3">{muscleMass ? `${muscleMass} kg` : 'Zerado'}</p>
+                    <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: muscleMass ? `${Math.min(muscleMass * 1.5, 100)}%` : '0%' }} />
+                    </div>
+                    <span className="text-[9px] text-emerald-400 block mt-2 font-bold">{muscleMass ? 'Massa magra ativa' : 'Sem medição ativa'}</span>
+                  </div>
+
+                  {/* Waist circum */}
+                  <div className="p-6 rounded-[2rem] bg-[#1c1916] border border-white/5 relative overflow-hidden">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4">
+                      <FiTarget size={18} className="text-blue-400" />
+                    </div>
+                    <p className="text-[9px] uppercase font-black tracking-widest text-white/30 mb-1">Cintura</p>
+                    <p className="text-3xl font-black text-white mb-3">{waist ? `${waist} cm` : 'Zerado'}</p>
+                    <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                      <div className="h-full bg-blue-500 rounded-full" style={{ width: waist ? `${Math.min(waist * 0.8, 100)}%` : '0%' }} />
+                    </div>
+                    <span className="text-[9px] text-white/40 block mt-2 font-bold">{waist ? 'Circunferência abdominal' : 'Sem medição ativa'}</span>
+                  </div>
+                </div>
+
+                {/* Weight Form & History Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Register weight */}
+                  <div className="backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/5 bg-[#1c1916]/80 shadow-2xl space-y-6">
+                    <h3 className="text-lg font-bold text-white">Registrar Novas Medidas</h3>
+                    <form onSubmit={handleAddWeightLog} className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Peso Atual (kg)</label>
+                          <input
+                            type="text"
+                            value={newWeight}
+                            onChange={(e) => setNewWeight(e.target.value)}
+                            placeholder="Ex: 64.5"
+                            className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-wine-900 focus:ring-1 focus:ring-wine-900 transition-colors text-white font-bold text-sm placeholder-white/20"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Gordura Corporal (%)</label>
+                          <input
+                            type="text"
+                            value={newFat}
+                            onChange={(e) => setNewFat(e.target.value)}
+                            placeholder="Ex: 18.5"
+                            className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-wine-900 focus:ring-1 focus:ring-wine-900 transition-colors text-white font-bold text-sm placeholder-white/20"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Massa Magra (kg)</label>
+                          <input
+                            type="text"
+                            value={newMuscle}
+                            onChange={(e) => setNewMuscle(e.target.value)}
+                            placeholder="Ex: 52.0"
+                            className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-wine-900 focus:ring-1 focus:ring-wine-900 transition-colors text-white font-bold text-sm placeholder-white/20"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Cintura (cm)</label>
+                          <input
+                            type="text"
+                            value={newWaist}
+                            onChange={(e) => setNewWaist(e.target.value)}
+                            placeholder="Ex: 67.5"
+                            className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-wine-900 focus:ring-1 focus:ring-wine-900 transition-colors text-white font-bold text-sm placeholder-white/20"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        type="submit"
+                        className="w-full py-4 bg-gradient-to-r from-wine-900 to-bordeaux rounded-xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all flex justify-center items-center gap-2 cursor-pointer shadow-md"
+                      >
+                        Salvar Medidas
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* Weight History Timeline */}
+                  <div className="backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/5 bg-[#1c1916]/80 shadow-2xl flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold text-white mb-6">Histórico de Peso</h3>
+                      <div className="space-y-4 max-h-[220px] overflow-y-auto pr-2">
+                        {weightHistory.length === 0 ? (
+                          <div className="text-center py-10 opacity-30 text-xs font-bold text-white">Nenhum peso registrado ainda.</div>
+                        ) : (
+                          weightHistory.map((log, index) => (
+                            <div key={index} className="flex justify-between items-center p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                                  <FiCalendar size={14} className="text-rose-soft" />
+                                </div>
+                                <span className="text-xs font-bold text-white">{log.date}</span>
+                              </div>
+                              <span className="text-sm font-black text-rose-soft">{log.weight} kg</span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Antes e Depois Gallery */}
+                <div className="backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/5 bg-[#1c1916]/80 shadow-2xl space-y-6">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-bold text-white">Minhas Fotos de Evolução</h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Before Photo */}
+                    <div 
+                      onClick={() => handlePhotoUpload('before')}
+                      className="rounded-[2rem] overflow-hidden border border-white/5 bg-black/40 relative group aspect-video cursor-pointer flex flex-col items-center justify-center min-h-[200px]"
+                    >
+                      {beforePhoto ? (
+                        <>
+                          <img src={beforePhoto} alt="Antes" className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+                          <div className="absolute bottom-6 left-6 text-left">
+                            <span className="px-2.5 py-1 bg-black/60 border border-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest text-white/80 block w-fit mb-2">Antes</span>
+                            <h4 className="text-lg font-bold text-white">Foto Inicial</h4>
+                            <p className="text-[10px] text-white/50 font-bold">Toque para alterar a foto</p>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center p-6 opacity-40 hover:opacity-85 transition-opacity">
+                          <FiCamera size={36} className="mx-auto mb-3 text-white animate-pulse" />
+                          <p className="text-sm font-bold text-white">Toque para adicionar foto de Antes</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* After Photo */}
+                    <div 
+                      onClick={() => handlePhotoUpload('after')}
+                      className="rounded-[2rem] overflow-hidden border border-white/5 bg-black/40 relative group aspect-video cursor-pointer flex flex-col items-center justify-center min-h-[200px]"
+                    >
+                      {afterPhoto ? (
+                        <>
+                          <img src={afterPhoto} alt="Depois" className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+                          <div className="absolute bottom-6 left-6 text-left">
+                            <span className="px-2.5 py-1 bg-rose-950/80 border border-bordeaux/40 rounded-lg text-[9px] font-black uppercase tracking-widest text-rose-soft block w-fit mb-2">Depois</span>
+                            <h4 className="text-lg font-bold text-white">Resultado Atual</h4>
+                            <p className="text-[10px] text-white/50 font-bold">Toque para alterar a foto</p>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center p-6 opacity-40 hover:opacity-85 transition-opacity">
+                          <FiCamera size={36} className="mx-auto mb-3 text-white animate-pulse" />
+                          <p className="text-sm font-bold text-white">Toque para adicionar foto de Depois</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'chat' && (
+              <motion.div
+                key="chat"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-6 text-left"
+              >
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2" style={{ color: '#881337' }}>Suporte Direto</p>
+                  <h1 className="text-4xl md:text-5xl font-serif italic text-white mb-6">Chat VIP Exclusivo</h1>
+                </div>
+
+                {/* Chat Container */}
+                <div className="backdrop-blur-xl rounded-[2.5rem] border border-white/5 bg-[#1c1916]/80 shadow-2xl flex flex-col h-[600px] overflow-hidden">
+                  {/* Chat Header */}
+                  <div className="p-6 border-b border-white/5 bg-white/[0.01] flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <img
+                        src="https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=300&auto=format&fit=crop"
+                        alt="Rayana Maria"
+                        className="w-12 h-12 rounded-xl border border-bordeaux object-cover shadow-lg"
+                      />
+                      <div>
+                        <h3 className="font-bold text-sm text-white">Rayana Maria</h3>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Online</span>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-rose-500/10 text-rose-soft border border-rose-500/20 px-3 py-1 rounded-xl">
+                      Plano VIP
+                    </span>
+                  </div>
+
+                  {/* Messages Flow Area */}
+                  <div className="flex-1 p-6 overflow-y-auto space-y-4 flex flex-col justify-end">
+                    <div className="space-y-4">
+                      {chatMessages.map((msg) => {
+                        const isRayana = msg.sender === 'rayana';
+                        return (
+                          <div key={msg.id} className={`flex ${isRayana ? 'justify-start' : 'justify-end'}`}>
+                            <div className="max-w-[75%] flex flex-col gap-1">
+                              <span className="text-[8px] font-black uppercase tracking-widest opacity-35 px-2">
+                                {isRayana ? 'Rayana Maria' : 'Você'}
+                              </span>
+                              <div
+                                className={`px-5 py-3.5 rounded-2xl text-sm font-semibold leading-relaxed shadow-lg border ${isRayana
+                                  ? 'bg-[#0f0e0d] text-white border-white/5 rounded-tl-sm'
+                                  : 'bg-gradient-to-r from-rose-950 to-bordeaux text-white border-bordeaux/30 rounded-tr-sm'
+                                  }`}
+                              >
+                                {msg.text}
+                              </div>
+                              <span className="text-[8px] font-black opacity-20 px-2 text-right">
+                                {msg.time}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {isTyping && (
+                        <div className="flex justify-start">
+                          <div className="max-w-[75%] flex flex-col gap-1">
+                            <span className="text-[8px] font-black uppercase tracking-widest opacity-35 px-2">
+                              Rayana Maria
+                            </span>
+                            <div className="px-5 py-3 bg-[#0f0e0d] border border-white/5 rounded-2xl rounded-tl-sm flex items-center gap-1.5 shadow-lg">
+                              <span className="w-1.5 h-1.5 bg-rose-soft rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                              <span className="w-1.5 h-1.5 bg-rose-soft rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                              <span className="w-1.5 h-1.5 bg-rose-soft rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Message Input Box */}
+                  <form onSubmit={handleSendMessage} className="p-4 border-t border-white/5 bg-white/[0.01] flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      placeholder="Envie uma dúvida ou feedback sobre seu treino..."
+                      className="flex-1 px-5 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-wine-900 focus:ring-1 focus:ring-wine-900 transition-colors text-white font-bold text-sm placeholder-white/20"
+                    />
+                    <button
+                      type="submit"
+                      className="w-12 h-12 rounded-xl bg-gradient-to-r from-wine-900 to-bordeaux flex items-center justify-center text-white shrink-0 hover:shadow-wine transition-all cursor-pointer shadow-md hover:scale-105"
+                    >
+                      <FiSend size={16} />
+                    </button>
+                  </form>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
