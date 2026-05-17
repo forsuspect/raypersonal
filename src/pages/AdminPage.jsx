@@ -1101,6 +1101,15 @@ const AdminPage = () => {
                                 onClick={() => {
                                   // Open edit modal pre-filled with current workout
                                   const workoutsClone = JSON.parse(JSON.stringify(studentWorkout.conteudo_treino?.workouts || []));
+                                  
+                                  const daysOfWeek = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'];
+                                  daysOfWeek.forEach(day => {
+                                    if (!workoutsClone.find(w => w.day === day)) {
+                                      workoutsClone.push({ day, title: `${day}: Descanso`, exercises: [] });
+                                    }
+                                  });
+                                  workoutsClone.sort((a, b) => daysOfWeek.indexOf(a.day) - daysOfWeek.indexOf(b.day));
+
                                   setEditWorkoutData({ workoutId: studentWorkout.id, workouts: workoutsClone });
                                   setEditDayTab(workoutsClone[0]?.day || 'SEG');
                                   setIsEditingWorkout(true);
@@ -1229,7 +1238,7 @@ const AdminPage = () => {
                   <div>
                     <span className="text-[10px] font-black uppercase text-emerald-400/70 tracking-[0.25em]">Assinaturas Ativas</span>
                     <h3 className="text-4xl font-black text-white mt-2 mb-1">
-                      {studentsData.filter(s => s.status === 'Ativo').length}
+                      {studentsData.filter(s => s.status === 'Ativo' && s.role !== 'admin' && s.role !== 'desenvolvedor').length}
                     </h3>
                     <p className="text-sm text-white/40 font-medium">alunas ativas no plano</p>
                   </div>
@@ -1238,6 +1247,7 @@ const AdminPage = () => {
                 {/* Card: A Vencer */}
                 {(() => {
                   const expiringCount = studentsData.filter(s => {
+                    if (s.role === 'admin' || s.role === 'desenvolvedor') return false;
                     if (!s.expirationDate) return false;
                     const expDate = new Date(s.expirationDate);
                     const today = new Date();
@@ -1271,7 +1281,7 @@ const AdminPage = () => {
                   <div>
                     <span className="text-[10px] font-black uppercase text-red-400/70 tracking-[0.25em]">Assinaturas Inativas</span>
                     <h3 className="text-4xl font-black text-white mt-2 mb-1">
-                      {studentsData.filter(s => s.status === 'Inativo').length}
+                      {studentsData.filter(s => s.status === 'Inativo' && s.role !== 'admin' && s.role !== 'desenvolvedor').length}
                     </h3>
                     <p className="text-sm text-white/40 font-medium">contas desativadas</p>
                   </div>
@@ -1286,7 +1296,7 @@ const AdminPage = () => {
                 </div>
 
                 <div className="divide-y divide-white/5">
-                  {studentsData.map((student) => {
+                  {studentsData.filter(s => s.role !== 'admin' && s.role !== 'desenvolvedor').map((student) => {
                     // Calculation of remaining days
                     const getRemainingDaysInfo = (expirationDate) => {
                       if (!expirationDate) return { text: 'Sem Vencimento Definido', days: 999, status: 'none', color: 'text-white/40 bg-white/5 border-white/5' };
