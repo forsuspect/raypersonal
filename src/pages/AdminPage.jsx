@@ -1436,9 +1436,7 @@ const AdminPage = () => {
                     const updateData = {
                       usuario: generatedUser,
                       plano: newUserPlan,
-                      status: newUserStatus,
-                      vencimento: newUserExpiration || null,
-                      contato: newUserContact || null
+                      status: newUserStatus
                     };
                     if (generatedPassword) {
                       updateData.senha = generatedPassword;
@@ -1450,6 +1448,18 @@ const AdminPage = () => {
                       .eq('usuario', editingUser);
 
                     if (error) throw error;
+                    
+                    // Update in local storage for missing columns
+                    const storedVencimentos = JSON.parse(localStorage.getItem('rm_vencimentos') || '{}');
+                    if (newUserExpiration) storedVencimentos[generatedUser] = newUserExpiration;
+                    else delete storedVencimentos[generatedUser];
+                    localStorage.setItem('rm_vencimentos', JSON.stringify(storedVencimentos));
+
+                    const storedContatos = JSON.parse(localStorage.getItem('rm_contatos') || '{}');
+                    if (newUserContact) storedContatos[generatedUser] = newUserContact;
+                    else delete storedContatos[generatedUser];
+                    localStorage.setItem('rm_contatos', JSON.stringify(storedContatos));
+
                   } else {
                     // Insert new
                     const { error } = await supabase.from('usuarios').insert({
@@ -1457,9 +1467,7 @@ const AdminPage = () => {
                       senha: generatedPassword,
                       role: newUserPlan === 'Administrador' ? 'admin' : 'aluna',
                       plano: newUserPlan,
-                      status: newUserStatus,
-                      vencimento: newUserExpiration || null,
-                      contato: newUserContact || null
+                      status: newUserStatus
                     });
 
                     if (error) {
@@ -1471,6 +1479,15 @@ const AdminPage = () => {
                       setIsSavingUser(false);
                       return;
                     }
+                    
+                    // Save in local storage
+                    const storedVencimentos = JSON.parse(localStorage.getItem('rm_vencimentos') || '{}');
+                    if (newUserExpiration) storedVencimentos[generatedUser] = newUserExpiration;
+                    localStorage.setItem('rm_vencimentos', JSON.stringify(storedVencimentos));
+
+                    const storedContatos = JSON.parse(localStorage.getItem('rm_contatos') || '{}');
+                    if (newUserContact) storedContatos[generatedUser] = newUserContact;
+                    localStorage.setItem('rm_contatos', JSON.stringify(storedContatos));
                   }
 
                   await fetchData();
