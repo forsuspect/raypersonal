@@ -49,6 +49,19 @@ const AdminPage = () => {
   const [selectedStudentId, setSelectedStudentId] = useState('')
   const [workoutType, setWorkoutType] = useState('Hipertrofia')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [workoutGenMode, setWorkoutGenMode] = useState('ai') // 'ai' | 'manual'
+  const [activeManualDay, setActiveManualDay] = useState('SEG')
+  const [manualTitle, setManualTitle] = useState('')
+  const [manualFocus, setManualFocus] = useState('Hipertrofia')
+  const [manualWorkouts, setManualWorkouts] = useState([
+    { day: "SEG", title: "SEG: Quadríceps & Panturrilha", exercises: [{ exercise: "", sets: "", detail: "" }] },
+    { day: "TER", title: "TER: Peito & Tríceps", exercises: [{ exercise: "", sets: "", detail: "" }] },
+    { day: "QUA", title: "QUA: Costas & Bíceps", exercises: [{ exercise: "", sets: "", detail: "" }] },
+    { day: "QUI", title: "QUI: Ombro Isolado", exercises: [{ exercise: "", sets: "", detail: "" }] },
+    { day: "SEX", title: "SEX: Glúteos & Posterior", exercises: [{ exercise: "", sets: "", detail: "" }] },
+    { day: "SAB", title: "SAB: Full Body", exercises: [{ exercise: "", sets: "", detail: "" }] },
+    { day: "DOM", title: "DOM: Descanso Ativo", exercises: [{ exercise: "", sets: "", detail: "" }] }
+  ])
   const [workoutsList, setWorkoutsList] = useState([])
 
   const navigate = useNavigate()
@@ -271,6 +284,96 @@ const AdminPage = () => {
     } finally {
       setIsGenerating(false);
     }
+  }
+
+  const handleSaveManualWorkout = async () => {
+    if (!selectedStudentId) {
+      showNotification('Selecione uma aluna primeiro.', 'error');
+      return;
+    }
+    if (!manualTitle) {
+      showNotification('Digite um título para a planilha.', 'error');
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const selectedStudent = studentsData.find(s => s.id === selectedStudentId);
+      const studentName = selectedStudent ? selectedStudent.name : 'Desconhecida';
+
+      // Filter out empty exercises to make sure only real data is saved
+      const cleanedWorkouts = manualWorkouts.map(w => ({
+        ...w,
+        exercises: w.exercises.filter(ex => ex.exercise.trim() !== '')
+      }));
+
+      const { error } = await supabase.from('planilhas_treino').insert({
+        aluna_id: selectedStudentId,
+        titulo: manualTitle,
+        foco: manualFocus,
+        conteudo_treino: { workouts: cleanedWorkouts },
+        descricao: `Planilha manual com foco em ${manualFocus} para ${studentName}.`
+      });
+
+      if (error) throw error;
+      
+      await fetchWorkouts();
+      setShowWorkoutModal(false);
+      
+      // Reset form
+      setManualTitle('');
+      setManualFocus('Hipertrofia');
+      setManualWorkouts([
+        { day: "SEG", title: "SEG: Quadríceps & Panturrilha", exercises: [{ exercise: "", sets: "", detail: "" }] },
+        { day: "TER", title: "TER: Peito & Tríceps", exercises: [{ exercise: "", sets: "", detail: "" }] },
+        { day: "QUA", title: "QUA: Costas & Bíceps", exercises: [{ exercise: "", sets: "", detail: "" }] },
+        { day: "QUI", title: "QUI: Ombro Isolado", exercises: [{ exercise: "", sets: "", detail: "" }] },
+        { day: "SEX", title: "SEX: Glúteos & Posterior", exercises: [{ exercise: "", sets: "", detail: "" }] },
+        { day: "SAB", title: "SAB: Full Body", exercises: [{ exercise: "", sets: "", detail: "" }] },
+        { day: "DOM", title: "DOM: Descanso Ativo", exercises: [{ exercise: "", sets: "", detail: "" }] }
+      ]);
+      
+      showNotification('Treino cadastrado com sucesso!');
+    } catch (err) {
+      console.error("Error saving manual workout:", err);
+      showNotification('Erro ao cadastrar treino: ' + err.message, 'error');
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  const updateDayTitle = (day, newTitle) => {
+    setManualWorkouts(prev => prev.map(w => w.day === day ? { ...w, title: newTitle } : w));
+  }
+
+  const updateExerciseField = (day, index, field, value) => {
+    setManualWorkouts(prev => prev.map(w => {
+      if (w.day === day) {
+        const newExercises = [...w.exercises];
+        newExercises[index] = { ...newExercises[index], [field]: value };
+        return { ...w, exercises: newExercises };
+      }
+      return w;
+    }));
+  }
+
+  const addExerciseRow = (day) => {
+    setManualWorkouts(prev => prev.map(w => {
+      if (w.day === day) {
+        return { ...w, exercises: [...w.exercises, { exercise: "", sets: "", detail: "" }] };
+      }
+      return w;
+    }));
+  }
+
+  const removeExerciseRow = (day, index) => {
+    setManualWorkouts(prev => prev.map(w => {
+      if (w.day === day) {
+        const newExercises = w.exercises.filter((_, idx) => idx !== index);
+        return { ...w, exercises: newExercises.length > 0 ? newExercises : [{ exercise: "", sets: "", detail: "" }] };
+      }
+      return w;
+    }));
   }
 
 
@@ -905,13 +1008,39 @@ const AdminPage = () => {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className={`p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl relative border ${isDarkMode ? 'bg-wine-950 border-white/10' : 'bg-white border-wine-100'}`}
+              className={`p-8 rounded-[2.5rem] w-full shadow-2xl relative border transition-all duration-500 ${
+                workoutGenMode === 'manual' ? 'max-w-3xl max-h-[90vh] overflow-y-auto' : 'max-w-md'
+              } ${isDarkMode ? 'bg-wine-950 border-white/10' : 'bg-white border-wine-100'}`}
             >
               <button onClick={() => setShowWorkoutModal(false)} className={`absolute top-6 right-6 transition-colors ${isDarkMode ? 'text-white/40 hover:text-white' : 'text-wine-900/40 hover:text-wine-900'}`}><FiX size={24} /></button>
               
-              <h2 className={`text-2xl font-black uppercase tracking-tighter mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Gerar Treino</h2>
-              <p className={`text-sm mb-8 font-medium ${isDarkMode ? 'text-white/60' : 'text-wine-900/60'}`}>A IA criará uma planilha personalizada para a aluna.</p>
+              <h2 className={`text-2xl font-black uppercase tracking-tighter mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Gerenciar Treino</h2>
+              <p className={`text-sm mb-6 font-medium ${isDarkMode ? 'text-white/60' : 'text-wine-900/60'}`}>Escolha gerar um treino completo por IA ou criar uma planilha manual.</p>
               
+              {/* Tab Selector */}
+              <div className={`flex border p-1 rounded-2xl mb-6 ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-wine-50 border-wine-100'}`}>
+                <button 
+                  onClick={() => setWorkoutGenMode('ai')}
+                  className={`flex-1 py-3 text-center text-xs font-black uppercase tracking-wider rounded-xl transition-all ${
+                    workoutGenMode === 'ai' 
+                      ? 'bg-gradient-to-r from-wine-900 to-bordeaux text-white shadow-lg' 
+                      : (isDarkMode ? 'text-white/40 hover:text-white' : 'text-wine-900/40 hover:text-wine-900')
+                  }`}
+                >
+                  Gerar via IA
+                </button>
+                <button 
+                  onClick={() => setWorkoutGenMode('manual')}
+                  className={`flex-1 py-3 text-center text-xs font-black uppercase tracking-wider rounded-xl transition-all ${
+                    workoutGenMode === 'manual' 
+                      ? 'bg-gradient-to-r from-wine-900 to-bordeaux text-white shadow-lg' 
+                      : (isDarkMode ? 'text-white/40 hover:text-white' : 'text-wine-900/40 hover:text-wine-900')
+                  }`}
+                >
+                  Cadastrar Manual
+                </button>
+              </div>
+
               <div className="space-y-6">
                 <div>
                   <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Selecionar Aluna</label>
@@ -920,42 +1049,178 @@ const AdminPage = () => {
                     onChange={(e) => setSelectedStudentId(e.target.value)}
                     className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
                   >
-                    <option value="" className="bg-[#1c1916] text-white/50">Selecione uma aluna...</option>
+                    <option value="" className={isDarkMode ? "bg-wine-950 text-white/50" : "bg-white text-wine-950/50"}>Selecione uma aluna...</option>
                     {studentsData.map(s => (
-                      <option key={s.id} value={s.id} className="bg-[#1c1916] text-white">{s.name} ({s.plano})</option>
+                      <option key={s.id} value={s.id} className={isDarkMode ? "bg-wine-950 text-white" : "bg-white text-wine-950"}>{s.name} ({s.plano})</option>
                     ))}
                   </select>
                 </div>
 
-                <div>
-                  <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Foco do Treino</label>
-                  <select 
-                    value={workoutType}
-                    onChange={(e) => setWorkoutType(e.target.value)}
-                    className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
-                  >
-                    <option value="Hipertrofia" className="bg-[#1c1916] text-white">Hipertrofia (Massa Magra)</option>
-                    <option value="Emagrecimento" className="bg-[#1c1916] text-white">Emagrecimento (Cardio/HIT)</option>
-                    <option value="Glúteos & Core" className="bg-[#1c1916] text-white">Foco em Glúteos & Core</option>
-                    <option value="Condicionamento" className="bg-[#1c1916] text-white">Condicionamento Físico</option>
-                  </select>
-                </div>
+                {workoutGenMode === 'ai' ? (
+                  <>
+                    <div>
+                      <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Foco do Treino</label>
+                      <select 
+                        value={workoutType}
+                        onChange={(e) => setWorkoutType(e.target.value)}
+                        className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
+                      >
+                        <option value="Hipertrofia" className={isDarkMode ? "bg-wine-950 text-white" : "bg-white text-wine-950"}>Hipertrofia (Massa Magra)</option>
+                        <option value="Emagrecimento" className={isDarkMode ? "bg-wine-950 text-white" : "bg-white text-wine-950"}>Emagrecimento (Cardio/HIT)</option>
+                        <option value="Glúteos & Core" className={isDarkMode ? "bg-wine-950 text-white" : "bg-white text-wine-950"}>Foco em Glúteos & Core</option>
+                        <option value="Condicionamento" className={isDarkMode ? "bg-wine-950 text-white" : "bg-white text-wine-950"}>Condicionamento Físico</option>
+                      </select>
+                    </div>
 
-                <div className={`p-6 rounded-3xl border text-center ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-wine-50 border-wine-100'}`}>
-                  <FiActivity className="w-8 h-8 text-bordeaux mx-auto mb-3" />
-                  <p className={`text-[10px] font-bold uppercase tracking-widest ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>IA RM v2.0 Ativa</p>
-                  <p className="text-xs mt-2 italic font-medium opacity-60">"Ajustando cargas e descansos com base no perfil da aluna."</p>
-                </div>
+                    <div className={`p-6 rounded-3xl border text-center ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-wine-50 border-wine-100'}`}>
+                      <FiActivity className="w-8 h-8 text-bordeaux mx-auto mb-3" />
+                      <p className={`text-[10px] font-bold uppercase tracking-widest ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>IA RM v2.0 Ativa</p>
+                      <p className="text-xs mt-2 italic font-medium opacity-60">"Ajustando cargas e descansos com base no perfil da aluna."</p>
+                    </div>
 
-                <button 
-                  onClick={handleGenerateWorkout}
-                  disabled={isGenerating || !selectedStudentId}
-                  className="w-full py-5 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-                >
-                  {isGenerating ? (
-                    <><FiRefreshCw className="animate-spin" /> Processando IA...</>
-                  ) : 'Gerar Planilha de Treino'}
-                </button>
+                    <button 
+                      onClick={handleGenerateWorkout}
+                      disabled={isGenerating || !selectedStudentId}
+                      className="w-full py-5 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                    >
+                      {isGenerating ? (
+                        <><FiRefreshCw className="animate-spin" /> Processando IA...</>
+                      ) : 'Gerar Planilha de Treino'}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Título da Planilha</label>
+                        <input 
+                          type="text"
+                          value={manualTitle}
+                          onChange={(e) => setManualTitle(e.target.value)}
+                          placeholder="Ex: Treino Personalizado VIP"
+                          className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
+                        />
+                      </div>
+                      <div>
+                        <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Foco Principal</label>
+                        <select 
+                          value={manualFocus}
+                          onChange={(e) => setManualFocus(e.target.value)}
+                          className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
+                        >
+                          <option value="Hipertrofia" className={isDarkMode ? "bg-wine-950 text-white" : "bg-white text-wine-950"}>Hipertrofia (Massa Magra)</option>
+                          <option value="Emagrecimento" className={isDarkMode ? "bg-wine-950 text-white" : "bg-white text-wine-950"}>Emagrecimento (Cardio/HIT)</option>
+                          <option value="Glúteos & Core" className={isDarkMode ? "bg-wine-950 text-white" : "bg-white text-wine-950"}>Foco em Glúteos & Core</option>
+                          <option value="Condicionamento" className={isDarkMode ? "bg-wine-950 text-white" : "bg-white text-wine-950"}>Condicionamento Físico</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Day Selection Row */}
+                    <div className="pt-4 border-t border-white/10">
+                      <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-3 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Selecione o Dia para Editar</label>
+                      <div className="flex flex-wrap gap-2">
+                        {manualWorkouts.map(w => (
+                          <button
+                            key={w.day}
+                            type="button"
+                            onClick={() => setActiveManualDay(w.day)}
+                            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border ${
+                              activeManualDay === w.day
+                                ? 'bg-gradient-to-r from-wine-900 to-bordeaux text-white border-transparent shadow-md'
+                                : (isDarkMode ? 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10' : 'bg-wine-50 border-wine-100 text-wine-950 hover:bg-wine-100')
+                            }`}
+                          >
+                            {w.day}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Editor for Active Day */}
+                    {(() => {
+                      const dayWorkout = manualWorkouts.find(w => w.day === activeManualDay);
+                      if (!dayWorkout) return null;
+                      return (
+                        <div className={`p-6 rounded-3xl border space-y-4 ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-wine-50 border-wine-100'}`}>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-[10px] font-black uppercase text-bordeaux tracking-widest">Editando Treino de {activeManualDay}</span>
+                          </div>
+                          
+                          <div>
+                            <label className={`block text-[10px] font-black uppercase tracking-[0.1em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Título do Treino de {activeManualDay}</label>
+                            <input 
+                              type="text"
+                              value={dayWorkout.title}
+                              onChange={(e) => updateDayTitle(activeManualDay, e.target.value)}
+                              placeholder={`Ex: ${activeManualDay}: Perna e Glúteos`}
+                              className={`w-full p-3.5 rounded-xl border transition-all font-bold text-sm ${isDarkMode ? 'bg-wine-950 border-white/10 text-white focus:border-bordeaux' : 'bg-white border-wine-100 text-wine-950 focus:border-wine-900'}`}
+                            />
+                          </div>
+
+                          <div className="space-y-3 pt-2">
+                            <label className={`block text-[10px] font-black uppercase tracking-[0.1em] ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Exercícios</label>
+                            
+                            {dayWorkout.exercises.map((ex, idx) => (
+                              <div key={idx} className="flex gap-2 items-center">
+                                <div className="grid grid-cols-3 gap-2 flex-1">
+                                  <input 
+                                    type="text"
+                                    value={ex.exercise}
+                                    onChange={(e) => updateExerciseField(activeManualDay, idx, 'exercise', e.target.value)}
+                                    placeholder="Exercício"
+                                    className={`p-2.5 rounded-xl border font-bold text-xs ${isDarkMode ? 'bg-wine-950 border-white/10 text-white focus:border-bordeaux' : 'bg-white border-wine-100 text-wine-950 focus:border-wine-900'}`}
+                                  />
+                                  <input 
+                                    type="text"
+                                    value={ex.sets}
+                                    onChange={(e) => updateExerciseField(activeManualDay, idx, 'sets', e.target.value)}
+                                    placeholder="Séries (4x12)"
+                                    className={`p-2.5 rounded-xl border font-bold text-xs ${isDarkMode ? 'bg-wine-950 border-white/10 text-white focus:border-bordeaux' : 'bg-white border-wine-100 text-wine-950 focus:border-wine-900'}`}
+                                  />
+                                  <input 
+                                    type="text"
+                                    value={ex.detail}
+                                    onChange={(e) => updateExerciseField(activeManualDay, idx, 'detail', e.target.value)}
+                                    placeholder="Detalhe"
+                                    className={`p-2.5 rounded-xl border font-bold text-xs ${isDarkMode ? 'bg-wine-950 border-white/10 text-white focus:border-bordeaux' : 'bg-white border-wine-100 text-wine-950 focus:border-wine-900'}`}
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeExerciseRow(activeManualDay, idx)}
+                                  className="p-2.5 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 rounded-xl transition-all border border-rose-500/20 shrink-0"
+                                >
+                                  <FiTrash2 size={14} />
+                                </button>
+                              </div>
+                            ))}
+
+                            <button
+                              type="button"
+                              onClick={() => addExerciseRow(activeManualDay)}
+                              className={`w-full py-2.5 border border-dashed rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                                isDarkMode ? 'border-white/20 text-white/50 hover:bg-white/5 hover:text-white' : 'border-wine-200 text-wine-900/60 hover:bg-wine-50'
+                              }`}
+                            >
+                              + Adicionar Exercício
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    <button 
+                      onClick={handleSaveManualWorkout}
+                      disabled={isGenerating || !selectedStudentId || !manualTitle}
+                      className="w-full py-5 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all mt-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                    >
+                      {isGenerating ? (
+                        <><FiRefreshCw className="animate-spin" /> Salvando Planilha...</>
+                      ) : 'Cadastrar Planilha de Treino'}
+                    </button>
+                  </>
+                )}
               </div>
             </motion.div>
           </div>

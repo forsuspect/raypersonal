@@ -34,6 +34,7 @@ const DashboardPage = () => {
   const [completedExercises, setCompletedExercises] = useState([])
   const [isWorkoutFinished, setIsWorkoutFinished] = useState(false)
   const [activeWorkoutTab, setActiveWorkoutTab] = useState(0)
+  const [selectedDayOverride, setSelectedDayOverride] = useState(null)
   const [isDoingWorkout, setIsDoingWorkout] = useState(false)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
@@ -204,6 +205,12 @@ const DashboardPage = () => {
   }).length;
   const totalWorkouts = activeWorkout?.conteudo_treino?.workouts?.length || 5;
 
+  const dayNames = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
+  const currentDayIndex = new Date().getDay();
+  const currentDayName = dayNames[currentDayIndex];
+  const activeDayName = selectedDayOverride || currentDayName;
+  const todayWorkout = activeWorkout?.conteudo_treino?.workouts?.find(w => w.day === activeDayName);
+
   const menuItems = [
     { id: 'overview', icon: FiHome, label: 'Visão Geral' },
     { id: 'workout', icon: FiActivity, label: 'Meu Treino' },
@@ -321,29 +328,75 @@ const DashboardPage = () => {
                     <div className="absolute bottom-0 left-10 w-40 h-40 bg-emerald-500/10 blur-[60px] rounded-full pointer-events-none" />
                     <div className="absolute inset-0 bg-[url('/img/noise.png')] opacity-20 mix-blend-overlay pointer-events-none" />
 
-                    <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-                      <div>
+                    <div className="relative z-10 flex flex-col items-start gap-6">
+                      <div className="w-full">
                         <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border ${isWorkoutFinished ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-white/80 border-white/10'}`}>
-                          {isWorkoutFinished ? 'Meta Batida' : 'Treino do Dia'}
+                          {isWorkoutFinished ? 'Meta Batida' : (todayWorkout ? `Treino de ${activeDayName}` : 'Descanso Programado')}
                         </span>
-                        <h2 className="text-3xl md:text-4xl font-serif italic mb-3 text-white">
-                          {isWorkoutFinished ? 'Treino Diário Concluído!' : (activeWorkout ? activeWorkout.titulo : 'Sem Treino Ativo')}
+                        
+                        <h2 className="text-2xl md:text-3xl font-serif italic mb-3 text-white">
+                          {isWorkoutFinished 
+                            ? 'Treino Diário Concluído!' 
+                            : (todayWorkout 
+                              ? todayWorkout.title 
+                              : (activeWorkout ? '🧘‍♀️ Dia de Descanso' : 'Sem Treino Ativo'))}
                         </h2>
+                        
                         <p className="text-white/50 text-sm mb-6 max-w-md leading-relaxed">
                           {isWorkoutFinished 
                             ? 'Parabéns! Você finalizou todos os exercícios programados para hoje. Descanse bem e mantenha o foco!' 
-                            : (activeWorkout ? activeWorkout.descricao : 'Sua personal ainda não gerou seu ciclo de treinos personalizado.')}
+                            : (todayWorkout 
+                              ? `Treino planejado para o seu objetivo. Foco de hoje: ${todayWorkout.title.split(':')[1] || 'Treinar Forte'}.` 
+                              : (activeWorkout 
+                                ? 'Hoje é seu dia de descanso programado. Aproveite para regenerar a musculatura, hidratar-se e fazer um cardio leve regenerativo se desejar!' 
+                                : 'Sua personal ainda não gerou seu ciclo de treinos personalizado.'))}
                         </p>
-                        {!isWorkoutFinished && activeWorkout && (
-                          <button onClick={() => setIsDoingWorkout(true)} className="bg-white text-wine-950 font-bold px-8 py-3.5 rounded-xl hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-lg text-sm">
-                            Iniciar Treino
-                          </button>
+
+                        <div className="flex flex-wrap gap-4 items-center mb-6">
+                          {!isWorkoutFinished && todayWorkout && (
+                            <button onClick={() => setIsDoingWorkout(true)} className="bg-white text-wine-950 font-bold px-8 py-3.5 rounded-xl hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-lg text-sm">
+                              Iniciar Treino
+                            </button>
+                          )}
+                          {isWorkoutFinished && (
+                             <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm bg-emerald-500/5 w-fit px-4 py-2 rounded-xl border border-emerald-500/10">
+                               <FiCheckCircle size={16} /> Progresso de hoje: 100%
+                             </div>
+                          )}
+                        </div>
+
+                        {/* Weekday Switcher */}
+                        {activeWorkout?.conteudo_treino?.workouts?.length > 0 && (
+                          <div className="pt-6 border-t border-white/5 w-full">
+                            <div className="flex items-center justify-between mb-3">
+                              <p className="text-[9px] uppercase font-black tracking-widest text-white/30">Mudar o dia do treino:</p>
+                              {selectedDayOverride && (
+                                <button 
+                                  onClick={() => setSelectedDayOverride(null)}
+                                  className="text-[9px] uppercase font-black tracking-widest text-rose-soft/70 hover:text-rose-soft transition-colors"
+                                >
+                                  Resetar para Hoje ({currentDayName})
+                                </button>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {activeWorkout.conteudo_treino.workouts.map(w => (
+                                <button
+                                  key={w.day}
+                                  onClick={() => setSelectedDayOverride(w.day)}
+                                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all border ${
+                                    activeDayName === w.day
+                                      ? 'bg-rose-900 border-rose-700 text-white shadow-lg'
+                                      : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white'
+                                  }`}
+                                >
+                                  {w.day} {currentDayName === w.day ? '•' : ''}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                         )}
-                        {isWorkoutFinished && (
-                           <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm bg-emerald-500/5 w-fit px-4 py-2 rounded-xl border border-emerald-500/10">
-                             <FiCheckCircle size={16} /> Progresso de hoje: 100%
-                           </div>
-                        )}
+
                       </div>
                     </div>
                   </div>
@@ -353,8 +406,8 @@ const DashboardPage = () => {
                     <div className="relative z-10 flex flex-col gap-6">
                       <div className="flex justify-between items-center">
                         <div>
-                          <span className="text-[10px] font-black uppercase text-rose-soft/80 tracking-widest block mb-1">Em Execução</span>
-                          <h2 className="text-2xl md:text-3xl font-serif italic text-white">Treino de Hoje</h2>
+                          <span className="text-[10px] font-black uppercase text-rose-soft/80 tracking-widest block mb-1">Em Execução ({activeDayName})</span>
+                          <h2 className="text-2xl md:text-3xl font-serif italic text-white">{todayWorkout?.title || 'Treino de Hoje'}</h2>
                         </div>
                         <button onClick={() => setIsDoingWorkout(false)} className="p-2 bg-white/5 hover:bg-white/10 rounded-full text-white/70 hover:text-white transition-colors">
                           <FiX size={20} />
@@ -362,45 +415,37 @@ const DashboardPage = () => {
                       </div>
 
                       <div className="grid gap-3 text-left">
-                        {(() => {
-                          const dayNames = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
-                          const currentDayIndex = new Date().getDay();
-                          const currentDayName = dayNames[currentDayIndex];
-                          const todayWorkout = activeWorkout?.conteudo_treino?.workouts?.find(w => w.day === currentDayName) 
-                            || activeWorkout?.conteudo_treino?.workouts?.[0];
-
-                          return todayWorkout?.exercises?.map((ex, i) => {
-                            const isChecked = completedExercises.includes(ex.exercise);
-                            return (
-                              <div 
-                                key={i} 
-                                onClick={() => {
-                                  if (isChecked) {
-                                    setCompletedExercises(prev => prev.filter(item => item !== ex.exercise));
-                                  } else {
-                                    setCompletedExercises(prev => [...prev, ex.exercise]);
-                                  }
-                                }}
-                                className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 ${
-                                  isChecked 
-                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' 
-                                    : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
-                                }`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${isChecked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-white/30 text-transparent'}`}>
-                                    <FiCheck size={12} />
-                                  </div>
-                                  <div>
-                                    <h4 className={`font-bold text-sm ${isChecked ? 'line-through opacity-60' : ''}`}>{ex.exercise}</h4>
-                                    <p className="text-[10px] opacity-50 uppercase tracking-widest">{ex.detail}</p>
-                                  </div>
+                        {todayWorkout?.exercises?.map((ex, i) => {
+                          const isChecked = completedExercises.includes(ex.exercise);
+                          return (
+                            <div 
+                              key={i} 
+                              onClick={() => {
+                                if (isChecked) {
+                                  setCompletedExercises(prev => prev.filter(item => item !== ex.exercise));
+                                } else {
+                                  setCompletedExercises(prev => [...prev, ex.exercise]);
+                                }
+                              }}
+                              className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 ${
+                                isChecked 
+                                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' 
+                                  : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${isChecked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-white/30 text-transparent'}`}>
+                                  <FiCheck size={12} />
                                 </div>
-                                <span className="text-xs font-black bg-white/5 px-2.5 py-1 rounded-lg border border-white/5 shrink-0">{ex.sets}</span>
+                                <div>
+                                  <h4 className={`font-bold text-sm ${isChecked ? 'line-through opacity-60' : ''}`}>{ex.exercise}</h4>
+                                  <p className="text-[10px] opacity-50 uppercase tracking-widest">{ex.detail}</p>
+                                </div>
                               </div>
-                            );
-                          });
-                        })()}
+                              <span className="text-xs font-black bg-white/5 px-2.5 py-1 rounded-lg border border-white/5 shrink-0">{ex.sets}</span>
+                            </div>
+                          );
+                        })}
                       </div>
 
                       <div className="flex gap-3 mt-4">
@@ -418,13 +463,6 @@ const DashboardPage = () => {
                               localStorage.setItem(`finished_${userData.id}`, new Date().toDateString());
                             }
                             
-                            // Auto-confirm current day in weekly checklist
-                            const dayNames = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
-                            const currentDayIndex = new Date().getDay();
-                            const currentDayName = dayNames[currentDayIndex];
-                            const todayWorkout = activeWorkout?.conteudo_treino?.workouts?.find(w => w.day === currentDayName) 
-                              || activeWorkout?.conteudo_treino?.workouts?.[0];
-                              
                             if (todayWorkout) {
                               const newDays = { 
                                 ...confirmedDays, 
@@ -441,7 +479,8 @@ const DashboardPage = () => {
                       </div>
                     </div>
                   </div>
-                )}
+                )
+              }
               </motion.div>
             )}
 
