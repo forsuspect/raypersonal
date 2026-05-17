@@ -37,6 +37,12 @@ const LoginPage = () => {
 
       const user = data[0]
 
+      // Check if student status is set to Inativo
+      if (user.status === 'Inativo') {
+        setError('inativa') // Set custom error code to trigger stylized inactive card
+        return
+      }
+
       // Use the returned data to determine navigation
       if (user.role === 'admin' || email.trim() === 'admin') {
         localStorage.setItem('rm_user', JSON.stringify({ ...user, usuario: email.trim() }))
@@ -108,10 +114,39 @@ const LoginPage = () => {
             <p className="text-wine-900/50 text-sm mb-8 font-medium">Entre para acessar seu plano.</p>
 
             {error && (
-              <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 text-rose-800 text-sm font-semibold">
-                <FiAlertCircle className="mt-0.5 flex-shrink-0 text-rose-600" size={16} />
-                <p>{error}</p>
-              </div>
+              error === 'inativa' ? (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="mb-6 p-5 bg-amber-500/10 border border-amber-500/20 rounded-[2rem] flex flex-col gap-3 text-amber-200 text-sm font-semibold shadow-inner"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0 shadow-inner">
+                      <FiAlertCircle size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-amber-650 uppercase tracking-wider text-[10px]">Acesso Temporário Suspenso</h4>
+                      <p className="text-amber-700/80 text-[11px] font-bold">Sua conta está definida como inativa.</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-amber-900/90 leading-relaxed font-bold mt-1">
+                    Fale diretamente com a sua personal trainer para reativar o seu portal de aluna.
+                  </p>
+                  <a 
+                    href="https://wa.me/5500000000000?text=Olá, Rayana! Meu acesso ao portal está inativo. Poderia me ajudar a reativar minha conta?"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3.5 bg-amber-600 text-white rounded-2xl text-center text-[10px] font-black uppercase tracking-widest hover:bg-amber-700 transition-all flex items-center justify-center gap-1.5 shadow-sm mt-1"
+                  >
+                    Suporte WhatsApp
+                  </a>
+                </motion.div>
+              ) : (
+                <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 text-rose-800 text-sm font-semibold">
+                  <FiAlertCircle className="mt-0.5 flex-shrink-0 text-rose-600" size={16} />
+                  <p>{error}</p>
+                </div>
+              )
             )}
 
             <form onSubmit={handleLogin} className="space-y-6">
@@ -164,7 +199,7 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4.5 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full h-14 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
               >
                 {loading ? 'Entrando...' : (
                   <>Acessar <FiArrowRight /></>

@@ -10,12 +10,10 @@ import {
 import { supabase } from '../lib/supabase'
 
 const adminLinks = [
-  { icon: FiHome, label: 'Dashboard', id: 'dashboard' },
-  { icon: FiUsers, label: 'Gestão de Alunas', id: 'students' },
-  { icon: FiTarget, label: 'Planilhas de Treino', id: 'workouts' },
-  { icon: FiBarChart2, label: 'Evolução Global', id: 'analytics' },
-  { icon: FiDollarSign, label: 'Financeiro', id: 'finance' },
-  { icon: FiBell, label: 'Notificações', id: 'notifications' },
+  { icon: FiHome, label: 'Painel Geral', id: 'dashboard' },
+  { icon: FiUsers, label: 'Minhas Alunas', id: 'students' },
+  { icon: FiActivity, label: 'Verificar Treinos', id: 'inspect_workouts' },
+  { icon: FiDollarSign, label: 'Cobranças & Planos', id: 'billing' },
   { icon: FiUser, label: 'Meu Perfil', id: 'profile' },
 ]
 
@@ -28,6 +26,8 @@ const AdminPage = () => {
   const [generatedUser, setGeneratedUser] = useState('')
   const [generatedPassword, setGeneratedPassword] = useState('')
   const [newUserPlan, setNewUserPlan] = useState('Premium')
+  const [newUserStatus, setNewUserStatus] = useState('Ativo')
+  const [newUserExpiration, setNewUserExpiration] = useState('')
   const [isCreatingUser, setIsCreatingUser] = useState(false)
   const [isSavingUser, setIsSavingUser] = useState(false)
   const [createError, setCreateError] = useState(null)
@@ -63,6 +63,10 @@ const AdminPage = () => {
     { day: "DOM", title: "DOM: Descanso Ativo", exercises: [{ exercise: "", sets: "", detail: "" }] }
   ])
   const [workoutsList, setWorkoutsList] = useState([])
+  
+  // New States for inspecting student workouts
+  const [selectedInspectStudent, setSelectedInspectStudent] = useState(null)
+  const [inspectDayTab, setInspectDayTab] = useState('SEG')
 
   const navigate = useNavigate()
 
@@ -132,7 +136,9 @@ const AdminPage = () => {
           plano: u.plano || 'Premium',
           status: u.status || 'Ativo', 
           objective: u.objetivo || 'Aguardando Avaliação',
-          lastCheck: new Date(u.data_cadastro).toLocaleDateString('pt-BR')
+          lastCheck: new Date(u.data_cadastro).toLocaleDateString('pt-BR'),
+          expirationDate: u.vencimento || '',
+          raw: u
         })))
 
         // Calculate basic stats
@@ -210,6 +216,8 @@ const AdminPage = () => {
     setGeneratedUser(student.name)
     setGeneratedPassword('')
     setNewUserPlan(student.plano)
+    setNewUserStatus(student.status || 'Ativo')
+    setNewUserExpiration(student.expirationDate || '')
     setEditingUser(student.name)
     setIsCreatingUser(true)
   }
@@ -513,7 +521,16 @@ const AdminPage = () => {
                   <h2 className="font-display font-black text-lg uppercase tracking-tight text-white">Ações Rápidas</h2>
                   <div className="grid grid-cols-1 gap-4">
                     <button 
-                      onClick={() => { setCreateError(null); setIsCreatingUser(true); }}
+                      onClick={() => { 
+                        setEditingUser(null);
+                        setGeneratedUser('');
+                        setGeneratedPassword('');
+                        setNewUserPlan('Premium');
+                        setNewUserStatus('Ativo');
+                        setNewUserExpiration('');
+                        setCreateError(null); 
+                        setIsCreatingUser(true); 
+                      }}
                       className="flex items-center gap-4 p-5 rounded-3xl backdrop-blur-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-wine-900/40 transition-all group text-left shadow-2xl"
                     >
                       <div className="w-12 h-12 rounded-2xl bg-wine-900/20 flex items-center justify-center group-hover:bg-wine-900/40 transition-all">
@@ -577,6 +594,8 @@ const AdminPage = () => {
                   setGeneratedUser('')
                   setGeneratedPassword('')
                   setNewUserPlan('Premium')
+                  setNewUserStatus('Ativo')
+                  setNewUserExpiration('')
                   setEditingUser(null)
                   setCreateError(null)
                   setIsCreatingUser(true)
@@ -660,109 +679,309 @@ const AdminPage = () => {
             </motion.div>
           )}
 
-          {activeTab === 'workouts' && (
+          {activeTab === 'inspect_workouts' && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white">Planilhas de Treino</h2>
-                  <p className="text-white/40 text-sm">Histórico de treinos gerados por IA.</p>
+                  <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white">Verificar Treinos</h2>
+                  <p className="text-white/40 text-sm">Inspecione de forma detalhada as planilhas semanais das alunas.</p>
                 </div>
                 <button 
                   onClick={() => setShowWorkoutModal(true)}
-                  className="px-6 py-3 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-xl"
+                  className="px-6 py-3 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-xl cursor-pointer"
                 >
-                  Novo Treino IA
+                  Criar Treino IA / Manual
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {workoutsList.length > 0 ? workoutsList.map((w, i) => (
-                  <div key={i} className="p-8 rounded-[32px] border border-white/5 bg-white/5 shadow-premium hover:border-bordeaux/40 transition-all hover:scale-[1.02] cursor-pointer group flex flex-col justify-between">
-                    <div>
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-wine-900 to-bordeaux flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
-                        <FiTarget size={24} />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Students list for selection */}
+                <div className="backdrop-blur-xl rounded-[32px] p-6 border border-white/5 bg-white/5 shadow-2xl space-y-4">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-white mb-2">Selecione uma Aluna</h3>
+                  <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
+                    {studentsData.map((student) => {
+                      const hasWorkout = workoutsList.some(w => w.usuarios?.usuario === student.name || w.aluna_id === student.id);
+                      const isSelected = selectedInspectStudent?.name === student.name;
+                      return (
+                        <button
+                          key={student.id}
+                          onClick={() => {
+                            setSelectedInspectStudent(student);
+                            setInspectDayTab('SEG');
+                          }}
+                          className={`w-full p-4 rounded-2xl text-left transition-all border flex items-center justify-between group cursor-pointer ${
+                            isSelected 
+                              ? 'bg-gradient-to-r from-wine-900 to-bordeaux border-bordeaux text-white shadow-lg' 
+                              : 'bg-white/5 border-white/5 text-white/80 hover:bg-white/10 hover:border-white/10'
+                          }`}
+                        >
+                          <div>
+                            <p className="font-bold text-sm tracking-tight">{student.name}</p>
+                            <p className={`text-[9px] font-black uppercase tracking-widest ${isSelected ? 'text-white/70' : 'text-bordeaux'}`}>
+                              {student.plano}
+                            </p>
+                          </div>
+                          <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full ${
+                            hasWorkout 
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/10' 
+                              : 'bg-amber-500/20 text-amber-400 border border-amber-500/10'
+                          }`}>
+                            {hasWorkout ? 'Ativo' : 'Sem Treino'}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Workout Inspector Sheet */}
+                <div className="lg:col-span-2 backdrop-blur-xl rounded-[32px] p-8 border border-white/5 bg-white/5 shadow-2xl">
+                  {selectedInspectStudent ? (() => {
+                    const studentWorkout = workoutsList.find(w => w.usuarios?.usuario === selectedInspectStudent.name || w.aluna_id === selectedInspectStudent.id);
+                    const workoutsArray = studentWorkout?.conteudo_treino?.workouts || [];
+                    const activeDayWorkout = workoutsArray.find(d => d.day === inspectDayTab);
+
+                    return (
+                      <div className="space-y-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-6">
+                          <div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-bordeaux">Inspeção Ativa</span>
+                            <h3 className="font-display font-black text-2xl text-white">{selectedInspectStudent.name}</h3>
+                            <p className="text-white/40 text-xs mt-0.5">Objetivo: {selectedInspectStudent.objective} • Plano: {selectedInspectStudent.plano}</p>
+                          </div>
+                          {studentWorkout && (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  setSelectedStudentId(selectedInspectStudent.id);
+                                  setSelectedWorkout(studentWorkout);
+                                }}
+                                className="px-4 py-2 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-wine-900 transition-all cursor-pointer"
+                              >
+                                Detalhes Completos
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {studentWorkout ? (
+                          <div className="space-y-6">
+                            {/* Days selector tab bar */}
+                            <div className="flex flex-wrap gap-2">
+                              {['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'].map((day) => {
+                                const isDaySelected = inspectDayTab === day;
+                                const dayWorkout = workoutsArray.find(d => d.day === day);
+                                return (
+                                  <button
+                                    key={day}
+                                    onClick={() => setInspectDayTab(day)}
+                                    className={`px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all border cursor-pointer ${
+                                      isDaySelected 
+                                        ? 'bg-bordeaux border-bordeaux text-white shadow-md' 
+                                        : 'bg-white/5 border-white/5 text-white/50 hover:bg-white/10 hover:text-white'
+                                    }`}
+                                  >
+                                    {day}
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            {/* Active Day Exercises inspect card */}
+                            <div className="p-6 rounded-2xl border border-white/5 bg-white/5 space-y-4">
+                              <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                                <h4 className="font-display font-black text-sm uppercase tracking-tight text-white">
+                                  {activeDayWorkout?.title || `${inspectDayTab}: Treino de Descanso`}
+                                </h4>
+                                <span className="text-[10px] font-black text-bordeaux uppercase tracking-widest">
+                                  {activeDayWorkout?.exercises?.length || 0} Exercícios
+                                </span>
+                              </div>
+
+                              {activeDayWorkout?.exercises && activeDayWorkout.exercises.length > 0 ? (
+                                <div className="space-y-3">
+                                  {activeDayWorkout.exercises.map((ex, idx) => (
+                                    <div key={idx} className="p-4 rounded-xl bg-white/5 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                      <div>
+                                        <p className="font-bold text-white text-sm">{ex.exercise}</p>
+                                        {ex.detail && <p className="text-[10px] text-white/40 mt-0.5">{ex.detail}</p>}
+                                      </div>
+                                      <span className="px-3.5 py-1.5 rounded-lg bg-bordeaux/20 text-bordeaux text-xs font-black uppercase tracking-wider shrink-0 select-none border border-bordeaux/10">
+                                        {ex.sets}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="py-8 text-center text-white/40 text-xs font-medium">
+                                  Nenhum exercício cadastrado para este dia da semana.
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="py-12 flex flex-col items-center justify-center text-center">
+                            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 mb-4 border border-amber-500/10">
+                              <FiAlertCircle size={28} />
+                            </div>
+                            <h4 className="font-black text-white text-base mb-1">Sem Planilha Ativa</h4>
+                            <p className="text-white/40 text-xs max-w-sm mb-6">Esta aluna ainda não possui nenhuma planilha de treinos gerada no sistema.</p>
+                            <button
+                              onClick={() => {
+                                setSelectedStudentId(selectedInspectStudent.id);
+                                setWorkoutType(selectedInspectStudent.plano === 'VIP Elite' ? 'Glúteos & Core' : 'Hipertrofia');
+                                setManualTitle(`Planilha Semanal - ${selectedInspectStudent.name}`);
+                                setShowWorkoutModal(true);
+                              }}
+                              className="px-6 py-3 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black text-xs uppercase tracking-widest hover:shadow-wine transition-all cursor-pointer"
+                            >
+                              Gerar / Cadastrar Treino
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <h3 className="font-display font-black text-lg mb-1 text-white">{w.titulo}</h3>
-                      <p className="text-[10px] font-black uppercase text-bordeaux mb-4">Aluna: {w.usuarios?.usuario || 'Desconhecida'}</p>
-                      <p className="text-xs mb-6 text-white/40">Foco: {w.foco} • {new Date(w.data_criacao).toLocaleDateString('pt-BR')}</p>
+                    );
+                  })() : (
+                    <div className="py-24 flex flex-col items-center justify-center text-center">
+                      <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-white/40 mb-4">
+                        <FiSearch size={28} />
+                      </div>
+                      <h4 className="font-black text-white text-base mb-1">Selecione uma Aluna</h4>
+                      <p className="text-white/40 text-xs max-w-xs">Clique em qualquer aluna na barra lateral para inspecionar seus treinos e rotinas semanais.</p>
                     </div>
-                    <button 
-                      onClick={() => setSelectedWorkout(w)}
-                      className="w-full py-3 rounded-xl border border-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-wine-900 transition-all"
-                    >
-                      Visualizar Treino
-                    </button>
-                  </div>
-                )) : (
-                  <div className="col-span-full p-12 text-center">
-                    <p className="text-sm font-medium text-white/40">Nenhum treino gerado ainda.</p>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </motion.div>
           )}
 
-          {activeTab === 'analytics' && (
+          {activeTab === 'billing' && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-              <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white">Evolução Global</h2>
-              <div className="p-12 rounded-[40px] border border-white/5 bg-white/5 flex flex-col items-center justify-center text-center">
-                <div className="lg:hidden bg-black border-b border-white/10 p-4 flex items-center justify-between sticky top-0 z-30">
-                  <FiBarChart2 size={40} />
-                </div>
-                <h3 className="text-xl font-black mb-2 text-white">Relatórios em Processamento</h3>
-                <p className="text-sm opacity-60 max-w-md text-white/60">Os dados de evolução das alunas são processados mensalmente. Próxima atualização em 5 dias.</p>
+              <div>
+                <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white">Cobranças & Planos</h2>
+                <p className="text-white/40 text-sm">Monitore o status financeiro e envie notificações automáticas de vencimento via WhatsApp.</p>
               </div>
-            </motion.div>
-          )}
 
-          {activeTab === 'finance' && (
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-              <h2 className={`font-display font-black text-3xl uppercase tracking-tighter ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Financeiro</h2>
-              <div className="grid lg:grid-cols-3 gap-8">
-                <div className={`lg:col-span-2 p-10 rounded-[40px] border ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-white border-wine-100 shadow-2xl'}`}>
-                  <p className="text-xs font-black uppercase tracking-widest opacity-40 mb-2">Receita Anual</p>
-                  <h3 className="text-4xl font-display font-black mb-10">R$ {stats.monthlyRevenue * 12}</h3>
-                  <div className="h-64 flex items-end gap-2">
-                    {[40, 70, 45, 90, 65, 80, 100, 85, 95, 60, 75, 90].map((h, i) => (
-                      <div key={i} className="flex-1 bg-gradient-to-t from-wine-950 to-bordeaux rounded-t-lg transition-all hover:opacity-80" style={{ height: `${h}%` }} />
-                    ))}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Quick financial stats */}
+                <div className="p-6 rounded-[32px] border border-white/5 bg-white/5 shadow-premium flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-black uppercase text-white/40 tracking-wider">Assinaturas Ativas</span>
+                    <h3 className="text-2xl font-black text-white mt-1">
+                      {studentsData.filter(s => s.status === 'Ativo').length} Alunas
+                    </h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                    <FiUsers size={20} />
                   </div>
                 </div>
-                <div className={`p-8 rounded-[40px] border ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-white border-wine-100 shadow-2xl'}`}>
-                  <h4 className="font-black text-sm uppercase mb-6">Vencimentos Próximos</h4>
-                  <div className="space-y-4">
-                    {[1, 2, 3].map(i => (
-                      <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-wine-50/50">
-                        <span className="text-xs font-bold">Aluna #00{i}</span>
-                        <span className="text-[10px] font-black text-bordeaux">PENDENTE</span>
+
+                <div className="p-6 rounded-[32px] border border-white/5 bg-white/5 shadow-premium flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-black uppercase text-white/40 tracking-wider">A vencer (próx 7 dias)</span>
+                    <h3 className="text-2xl font-black text-white mt-1">
+                      {studentsData.filter(s => {
+                        if (!s.expirationDate) return false;
+                        const expDate = new Date(s.expirationDate);
+                        const today = new Date();
+                        today.setHours(0,0,0,0);
+                        const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+                        return diffDays >= 0 && diffDays <= 7;
+                      }).length} Pendentes
+                    </h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                    <FiAlertCircle size={20} />
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-[32px] border border-white/5 bg-white/5 shadow-premium flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-black uppercase text-white/40 tracking-wider">Assinaturas Inativas</span>
+                    <h3 className="text-2xl font-black text-white mt-1">
+                      {studentsData.filter(s => s.status === 'Inativo').length} Contas
+                    </h3>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center">
+                    <FiX size={20} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Invoices table / list */}
+              <div className="backdrop-blur-xl rounded-[32px] overflow-hidden border border-white/5 bg-white/5 shadow-2xl">
+                <div className="p-6 border-b border-white/5">
+                  <h3 className="font-display font-black text-lg text-white">Relatório de Assinaturas</h3>
+                </div>
+
+                <div className="divide-y divide-white/5">
+                  {studentsData.map((student) => {
+                    // Calculation of remaining days
+                    const getRemainingDaysInfo = (expirationDate) => {
+                      if (!expirationDate) return { text: 'Sem Vencimento Definido', days: 999, status: 'none', color: 'text-white/40 bg-white/5 border-white/5' };
+                      const expDate = new Date(expirationDate);
+                      const today = new Date();
+                      today.setHours(0,0,0,0);
+                      const diffTime = expDate - today;
+                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                      
+                      const formattedExpDate = new Date(expirationDate).toLocaleDateString('pt-BR');
+
+                      if (diffDays < 0) {
+                        return { text: `Vencido há ${Math.abs(diffDays)} dias (${formattedExpDate})`, days: diffDays, status: 'expired', color: 'text-red-400 bg-red-500/10 border-red-500/10' };
+                      }
+                      if (diffDays === 0) {
+                        return { text: `Vence Hoje! (${formattedExpDate})`, days: diffDays, status: 'today', color: 'text-rose-400 bg-rose-500/10 border-rose-500/10 animate-pulse' };
+                      }
+                      if (diffDays <= 7) {
+                        return { text: `Vence em ${diffDays} dias (${formattedExpDate})`, days: diffDays, status: 'warning', color: 'text-amber-400 bg-amber-500/10 border-amber-500/10' };
+                      }
+                      return { text: `Vence em ${diffDays} dias (${formattedExpDate})`, days: diffDays, status: 'active', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/10' };
+                    };
+
+                    const statusInfo = getRemainingDaysInfo(student.expirationDate);
+                    
+                    // Predefined customized friendly reminder message
+                    const reminderMsg = `Olá, ${student.name}! 🌟 Passando para lembrar que a sua assinatura da consultoria Rayana Maria vence em breve (${student.expirationDate ? new Date(student.expirationDate).toLocaleDateString('pt-BR') : ''}). Vamos renovar para continuar firmes nos seus treinos e evolução? Qualquer dúvida estou por aqui!`;
+                    const whatsappBillingUrl = `https://wa.me/5500000000000?text=${encodeURIComponent(reminderMsg)}`;
+
+                    return (
+                      <div key={student.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white-[0.02] transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center text-white shrink-0 font-bold shadow-lg`}>
+                            {student.name.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-bold text-white text-sm">{student.name}</h4>
+                              <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${
+                                student.status === 'Ativo' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+                              }`}>
+                                {student.status}
+                              </span>
+                            </div>
+                            <p className="text-white/40 text-xs mt-0.5">Plano: {student.plano}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className={`text-[10px] font-black uppercase px-4 py-2 rounded-xl border ${statusInfo.color}`}>
+                            {statusInfo.text}
+                          </span>
+
+                          <a
+                            href={whatsappBillingUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-5 py-2.5 bg-gradient-to-r from-wine-900 to-bordeaux rounded-xl text-white font-black text-[10px] uppercase tracking-widest hover:shadow-wine transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+                          >
+                            <FiDollarSign size={12} /> Cobrar
+                          </a>
+                        </div>
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
-              </div>
-            </motion.div>
-          )}
-
-          {activeTab === 'notifications' && (
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-              <h2 className={`font-display font-black text-3xl uppercase tracking-tighter ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Notificações</h2>
-              <div className="space-y-4">
-                {[
-                  { title: 'Novo Cadastro', desc: 'Ana Silva acabou de ativar o plano Premium.', time: '10 min atrás', type: 'success' },
-                  { title: 'Check-in Realizado', desc: 'Carla Santos completou o treino de Glúteos.', time: '1 hora atrás', type: 'info' },
-                  { title: 'Pendência de Pagamento', desc: 'O plano de Beatriz R. expira em 2 dias.', time: '5 horas atrás', type: 'warning' },
-                ].map((n, i) => (
-                  <div key={i} className={`p-6 rounded-3xl border flex items-center justify-between transition-all hover:bg-wine-50/20 ${isDarkMode ? 'bg-white/5 border-white/5' : 'bg-white border-wine-50 shadow-sm'}`}>
-                    <div className="flex items-center gap-4">
-                      <div className={`w-2 h-2 rounded-full ${n.type === 'success' ? 'bg-emerald-500' : n.type === 'warning' ? 'bg-bordeaux' : 'bg-blue-500'}`} />
-                      <div>
-                        <h4 className="font-bold text-sm">{n.title}</h4>
-                        <p className="text-xs opacity-60">{n.desc}</p>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-black opacity-30">{n.time}</span>
-                  </div>
-                ))}
               </div>
             </motion.div>
           )}
@@ -851,7 +1070,9 @@ const AdminPage = () => {
                       .update({
                         usuario: generatedUser,
                         senha: generatedPassword || undefined, // Only update password if provided
-                        plano: newUserPlan
+                        plano: newUserPlan,
+                        status: newUserStatus,
+                        vencimento: newUserExpiration || null
                       })
                       .eq('usuario', editingUser)
                     
@@ -863,7 +1084,8 @@ const AdminPage = () => {
                       senha: generatedPassword,
                       role: newUserPlan === 'Administrador' ? 'admin' : 'aluna',
                       plano: newUserPlan,
-                      status: 'Ativo'
+                      status: newUserStatus,
+                      vencimento: newUserExpiration || null
                     });
                     
                     if (error) {
@@ -924,7 +1146,7 @@ const AdminPage = () => {
                     className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
                   />
                 </div>
-                <div>
+                 <div>
                   <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Plano da Aluna</label>
                   <select 
                     value={newUserPlan}
@@ -936,6 +1158,28 @@ const AdminPage = () => {
                     <option value="VIP Elite" className="bg-[#1c1916] text-white">VIP Elite</option>
                     <option value="Administrador" className="bg-[#1c1916] text-white">Administrador</option>
                   </select>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Status de Acesso</label>
+                    <select 
+                      value={newUserStatus}
+                      onChange={(e) => setNewUserStatus(e.target.value)}
+                      className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
+                    >
+                      <option value="Ativo" className="bg-[#1c1916] text-white">Ativo</option>
+                      <option value="Inativo" className="bg-[#1c1916] text-white">Inativo</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Data de Vencimento</label>
+                    <input 
+                      type="date" 
+                      value={newUserExpiration}
+                      onChange={(e) => setNewUserExpiration(e.target.value)}
+                      className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
+                    />
+                  </div>
                 </div>
 
                 <button type="submit" disabled={isSavingUser} className="w-full py-5 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all mt-4 disabled:opacity-50 flex items-center justify-center gap-2">

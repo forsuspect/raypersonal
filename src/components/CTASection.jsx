@@ -17,9 +17,9 @@ const CTASection = () => {
       </div>
 
       <div ref={ref} className="relative z-10 w-full max-w-4xl mx-auto px-6 text-center">
-        <motion.div 
-          initial={isMobile ? false : { opacity: 0, y: 30 }} 
-          animate={animatedInView ? { opacity: 1, y: 0 } : {}} 
+        <motion.div
+          initial={isMobile ? false : { opacity: 0, y: 30 }}
+          animate={animatedInView ? { opacity: 1, y: 0 } : {}}
           transition={isMobile ? { duration: 0 } : { duration: 0.6 }}
           className="glass-dark p-8 md:p-12 rounded-[2.5rem] border border-white/10 shadow-premium-lg"
         >
@@ -34,7 +34,7 @@ const CTASection = () => {
             <a href="#planos" className="bg-white text-wine-950 font-bold px-8 py-4 rounded-xl hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-lg text-sm">
               Escolher Plano <FiArrowRight />
             </a>
-            <a href="https://wa.me/5500000000000" target="_blank" rel="noopener noreferrer" className="btn-outline border-white/30 text-white hover:bg-white hover:text-wine-950 flex justify-center items-center py-4 text-sm rounded-xl px-8">
+            <a href="https://wa.me/558174016680" target="_blank" rel="noopener noreferrer" className="btn-outline border-white/30 text-white hover:bg-white hover:text-wine-950 flex justify-center items-center py-4 text-sm rounded-xl px-8">
               Falar no WhatsApp
             </a>
           </div>
