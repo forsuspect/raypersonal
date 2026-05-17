@@ -230,8 +230,8 @@ const AdminPage = () => {
           status: u.status || 'Ativo',
           objective: u.objetivo || 'Aguardando Avaliação',
           lastCheck: new Date(u.data_cadastro).toLocaleDateString('pt-BR'),
-          expirationDate: u.vencimento || '',
-          contact: u.contato || '',
+          expirationDate: storedVencimentos[u.usuario] || '',
+          contact: storedContatos[u.usuario] || '',
           role: u.role || 'aluna',
           raw: u
         })))
@@ -1432,11 +1432,16 @@ const AdminPage = () => {
                 try {
                   const wasEditing = !!editingUser;
                   if (editingUser) {
+                    // Find the user's current role before updating
+                    const currentStudent = studentsData.find(s => s.name === editingUser);
+                    const currentRole = currentStudent ? currentStudent.role : 'aluna';
+
                     // Prepare update payload
                     const updateData = {
                       usuario: generatedUser,
                       plano: newUserPlan,
-                      status: newUserStatus
+                      status: newUserStatus,
+                      role: currentRole === 'desenvolvedor' ? 'desenvolvedor' : (newUserPlan === 'Administrador' ? 'admin' : 'aluna')
                     };
                     if (generatedPassword) {
                       updateData.senha = generatedPassword;
@@ -1451,11 +1456,17 @@ const AdminPage = () => {
                     
                     // Update in local storage for missing columns
                     const storedVencimentos = JSON.parse(localStorage.getItem('rm_vencimentos') || '{}');
+                    if (editingUser !== generatedUser) {
+                      delete storedVencimentos[editingUser];
+                    }
                     if (newUserExpiration) storedVencimentos[generatedUser] = newUserExpiration;
                     else delete storedVencimentos[generatedUser];
                     localStorage.setItem('rm_vencimentos', JSON.stringify(storedVencimentos));
 
                     const storedContatos = JSON.parse(localStorage.getItem('rm_contatos') || '{}');
+                    if (editingUser !== generatedUser) {
+                      delete storedContatos[editingUser];
+                    }
                     if (newUserContact) storedContatos[generatedUser] = newUserContact;
                     else delete storedContatos[generatedUser];
                     localStorage.setItem('rm_contatos', JSON.stringify(storedContatos));
