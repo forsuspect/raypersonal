@@ -301,14 +301,7 @@ const DashboardPage = () => {
                        </div>
                     )}
                   </div>
-                    {/* Abstract visual */}
-                    <div className="relative w-32 h-32 md:w-40 md:h-40 shrink-0 flex items-center justify-center">
-                      <div className="absolute inset-0 border border-white/10 rounded-full animate-[spin_10s_linear_infinite]" />
-                      <div className="absolute inset-2 border border-white/5 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
-                      <div className={`w-24 h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center shadow-2xl transition-all duration-700 ${isWorkoutFinished ? 'bg-emerald-500 shadow-emerald-500/30' : 'bg-bordeaux shadow-bordeaux/30'}`}>
-                        {isWorkoutFinished ? <FiCheck size={40} className="text-white" /> : <FiVideo size={32} className="text-white" />}
-                      </div>
-                    </div>
+
                   </div>
                 </div>
               </motion.div>
