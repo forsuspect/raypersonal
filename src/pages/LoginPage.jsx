@@ -47,7 +47,7 @@ const LoginPage = () => {
 
       // Check if student status is set to Inativo (Supabase or LocalStorage fallback)
       const storedStatus = JSON.parse(localStorage.getItem('rm_status') || '{}')
-      const userStatus = user.status || storedStatus[user.usuario] || 'Ativo'
+      const userStatus = storedStatus[user.usuario] || user.status || 'Ativo'
       if (userStatus === 'Inativo') {
         setError('inativa') // Set custom error code to trigger stylized inactive card
         return
@@ -76,14 +76,14 @@ const LoginPage = () => {
       <div className="hidden lg:flex lg:w-1/2 h-full relative bg-wine-950 items-center justify-center overflow-hidden">
         {/* BG Image */}
         <div className="absolute inset-0 opacity-40 mix-blend-overlay">
-          <img 
-            src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1470&auto=format&fit=crop" 
-            alt="Gym" 
+          <img
+            src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1470&auto=format&fit=crop"
+            alt="Gym"
             className="w-full h-full object-cover"
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-wine-950 via-transparent to-wine-950/50" />
-        
+
         {/* Content */}
         <div className="relative z-10 p-12 text-center max-w-lg">
           <img src="/img/ray-logo.png" alt="Rayana Maria" className="h-28 lg:h-32 w-auto mx-auto mb-10 brightness-0 invert" />
@@ -97,8 +97,8 @@ const LoginPage = () => {
       {/* Login Right Side */}
       <div className="w-full lg:w-1/2 h-full flex items-center justify-center p-6 relative bg-[#FAF8F5]">
         {/* Back Link */}
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className="absolute top-8 left-8 lg:left-12 flex items-center gap-2 text-wine-900/60 hover:text-wine-950 font-bold text-sm transition-colors group"
         >
           <FiArrowLeft className="transition-transform group-hover:-translate-x-1" />
@@ -107,7 +107,7 @@ const LoginPage = () => {
 
         {/* Mobile Background Elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-wine-100/50 rounded-full blur-3xl -z-10 lg:hidden" />
-        
+
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <Link to="/" className="flex items-center mb-10 lg:hidden justify-center">
@@ -125,7 +125,7 @@ const LoginPage = () => {
 
             {error && (
               error === 'inativa' ? (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="mb-6 p-5 bg-amber-500/10 border border-amber-500/20 rounded-[2rem] flex flex-col gap-3 text-amber-200 text-sm font-semibold shadow-inner"
@@ -142,8 +142,8 @@ const LoginPage = () => {
                   <p className="text-[11px] text-amber-900/90 leading-relaxed font-bold mt-1">
                     Fale diretamente com a sua personal trainer para reativar o seu portal de aluna.
                   </p>
-                  <a 
-                    href="https://wa.me/5500000000000?text=Olá, Rayana! Meu acesso ao portal está inativo. Poderia me ajudar a reativar minha conta?"
+                  <a
+                    href="https://wa.me/558174016680?text=Olá, Rayana! Meu acesso ao portal está inativo. Poderia me ajudar a reativar minha conta?"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full py-3.5 bg-amber-600 text-white rounded-2xl text-center text-[10px] font-black uppercase tracking-widest hover:bg-amber-700 transition-all flex items-center justify-center gap-1.5 shadow-sm mt-1"
@@ -193,7 +193,7 @@ const LoginPage = () => {
                   />
                 </div>
                 <div className="flex justify-end mt-1">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => {
                       setError('A recuperação de senha deve ser solicitada diretamente à sua personal.')

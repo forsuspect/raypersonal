@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
-import { 
+import {
   FiHome, FiUsers, FiTarget, FiDollarSign, FiBarChart2,
   FiBell, FiMenu, FiX, FiPlus, FiRefreshCw, FiUser,
   FiSearch, FiTrendingUp, FiActivity,
@@ -43,7 +43,7 @@ const AdminPage = () => {
   const [loading, setLoading] = useState(true)
   const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null })
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success' })
-  
+
   // Workout Generation State
   const [showWorkoutModal, setShowWorkoutModal] = useState(false)
   const [selectedWorkout, setSelectedWorkout] = useState(null)
@@ -64,14 +64,14 @@ const AdminPage = () => {
     { day: "DOM", title: "DOM: Descanso Ativo", exercises: [{ exercise: "", sets: "", detail: "" }] }
   ])
   const [workoutsList, setWorkoutsList] = useState([])
-  
+
   // New States for inspecting student workouts
   const [selectedInspectStudent, setSelectedInspectStudent] = useState(null)
   const [inspectDayTab, setInspectDayTab] = useState('SEG')
 
   const navigate = useNavigate()
 
-   useEffect(() => {
+  useEffect(() => {
     // Dynamic matching of body background to prevent light gaps on mobile scrolling rubberbanding
     const originalBg = document.body.style.backgroundColor;
     document.body.style.backgroundColor = '#000000';
@@ -108,7 +108,7 @@ const AdminPage = () => {
           usuarios (usuario)
         `)
         .order('data_criacao', { ascending: false })
-      
+
       if (error) throw error
       setWorkoutsList(data || [])
     } catch (err) {
@@ -143,7 +143,7 @@ const AdminPage = () => {
           id: u.id,
           name: u.usuario || 'Usuário Sem Nome',
           plano: u.role === 'admin' || u.usuario === 'admin' ? 'Administrador' : (u.plano || 'Premium'),
-          status: u.status || storedStatus[u.usuario] || 'Ativo', 
+          status: storedStatus[u.usuario] || u.status || 'Ativo',
           objective: u.objetivo || 'Aguardando Avaliação',
           lastCheck: new Date(u.data_cadastro).toLocaleDateString('pt-BR'),
           expirationDate: u.vencimento || storedVencimentos[u.usuario] || '',
@@ -202,15 +202,15 @@ const AdminPage = () => {
         try {
           console.log("Tentando excluir usuário:", username)
           const { error } = await supabase.from('usuarios').delete().eq('usuario', username)
-          
+
           if (error) {
             console.error("Erro retornado pelo Supabase:", error)
             throw error
           }
-          
+
           // Re-fetch to ensure UI is updated immediately
           await fetchData()
-          
+
           setConfirmModal(prev => ({ ...prev, show: false }))
           showNotification(`Acesso de "${username}" removido.`);
         } catch (err) {
@@ -225,7 +225,7 @@ const AdminPage = () => {
   const handleToggleStatus = async (student) => {
     const newStatus = student.status === 'Inativo' ? 'Ativo' : 'Inativo';
     const actionText = newStatus === 'Inativo' ? 'inativar' : 'ativar';
-    
+
     setConfirmModal({
       show: true,
       title: `${newStatus === 'Inativo' ? 'Inativar' : 'Ativar'} Aluna`,
@@ -235,7 +235,7 @@ const AdminPage = () => {
           const storedStatus = JSON.parse(localStorage.getItem('rm_status') || '{}');
           storedStatus[student.name] = newStatus;
           localStorage.setItem('rm_status', JSON.stringify(storedStatus));
-          
+
           await fetchData();
           setConfirmModal(prev => ({ ...prev, show: false }));
           showNotification(`Aluna ${student.name} foi ${newStatus === 'Inativo' ? 'inativada' : 'ativada'} com sucesso.`);
@@ -269,36 +269,36 @@ const AdminPage = () => {
     try {
       const templates = {
         'Hipertrofia': [
-          { day: "SEG", title: "SEG: QUADRÍCEPS & PANTURRILHA", exercises: [ { exercise: "Cadeira Extensora", sets: "4 x 12", detail: "Foco em pico de contração" }, { exercise: "Panturrilha Sentado", sets: "4 x 12", detail: "Máxima amplitude" }, { exercise: "Leg Press 45º", sets: "4 x 12", detail: "Cadência controlada" }, { exercise: "Hack Machine", sets: "4 x 12", detail: "Foco em quadríceps" } ] },
-          { day: "TER", title: "TER: PEITO & TRÍCEPS", exercises: [ { exercise: "Supino Reto", sets: "4 x 10", detail: "Barra, cadência 3010" }, { exercise: "Tríceps Testa", sets: "4 x 12", detail: "Foco na excêntrica" }, { exercise: "Crucifixo Inclinado", sets: "4 x 12", detail: "Halteres" }, { exercise: "Tríceps Corda", sets: "4 x 15", detail: "Pico de contração" } ] },
-          { day: "QUA", title: "QUA: COSTA & BÍCEPS", exercises: [ { exercise: "Puxada Frontal", sets: "4 x 12", detail: "Pegada aberta" }, { exercise: "Remada Curvada", sets: "4 x 10", detail: "Tronco 45º" }, { exercise: "Rosca Direta", sets: "4 x 12", detail: "Barra W" }, { exercise: "Rosca Martelo", sets: "4 x 12", detail: "Halteres" } ] },
-          { day: "QUI", title: "QUI: OMBRO ISOLADO", exercises: [ { exercise: "Desenvolvimento", sets: "4 x 10", detail: "Halteres" }, { exercise: "Elevação Lateral", sets: "4 x 15", detail: "Cabo cruzado" }, { exercise: "Crucifixo Invertido", sets: "4 x 15", detail: "Máquina" }, { exercise: "Encolhimento", sets: "4 x 15", detail: "Halteres" } ] },
-          { day: "SEX", title: "SEX: GLÚTEOS & POSTERIOR", exercises: [ { exercise: "Elevação Pélvica", sets: "4 x 12", detail: "Pausa de 2s no topo" }, { exercise: "Mesa Flexora", sets: "4 x 12", detail: "Pico de contração" }, { exercise: "Stiff", sets: "4 x 12", detail: "Halteres" }, { exercise: "Cadeira Abdutora", sets: "4 x 15", detail: "Tronco inclinado" } ] },
-          { day: "SAB", title: "SAB: FULL BODY", exercises: [ { exercise: "Agachamento Livre", sets: "4 x 10", detail: "Amplitude total" }, { exercise: "Supino Inclinado", sets: "4 x 12", detail: "Halteres" }, { exercise: "Remada Máquina", sets: "4 x 12", detail: "Pegada neutra" }, { exercise: "Prancha", sets: "4 x 45s", detail: "Isometria" } ] }
+          { day: "SEG", title: "SEG: QUADRÍCEPS & PANTURRILHA", exercises: [{ exercise: "Cadeira Extensora", sets: "4 x 12", detail: "Foco em pico de contração" }, { exercise: "Panturrilha Sentado", sets: "4 x 12", detail: "Máxima amplitude" }, { exercise: "Leg Press 45º", sets: "4 x 12", detail: "Cadência controlada" }, { exercise: "Hack Machine", sets: "4 x 12", detail: "Foco em quadríceps" }] },
+          { day: "TER", title: "TER: PEITO & TRÍCEPS", exercises: [{ exercise: "Supino Reto", sets: "4 x 10", detail: "Barra, cadência 3010" }, { exercise: "Tríceps Testa", sets: "4 x 12", detail: "Foco na excêntrica" }, { exercise: "Crucifixo Inclinado", sets: "4 x 12", detail: "Halteres" }, { exercise: "Tríceps Corda", sets: "4 x 15", detail: "Pico de contração" }] },
+          { day: "QUA", title: "QUA: COSTA & BÍCEPS", exercises: [{ exercise: "Puxada Frontal", sets: "4 x 12", detail: "Pegada aberta" }, { exercise: "Remada Curvada", sets: "4 x 10", detail: "Tronco 45º" }, { exercise: "Rosca Direta", sets: "4 x 12", detail: "Barra W" }, { exercise: "Rosca Martelo", sets: "4 x 12", detail: "Halteres" }] },
+          { day: "QUI", title: "QUI: OMBRO ISOLADO", exercises: [{ exercise: "Desenvolvimento", sets: "4 x 10", detail: "Halteres" }, { exercise: "Elevação Lateral", sets: "4 x 15", detail: "Cabo cruzado" }, { exercise: "Crucifixo Invertido", sets: "4 x 15", detail: "Máquina" }, { exercise: "Encolhimento", sets: "4 x 15", detail: "Halteres" }] },
+          { day: "SEX", title: "SEX: GLÚTEOS & POSTERIOR", exercises: [{ exercise: "Elevação Pélvica", sets: "4 x 12", detail: "Pausa de 2s no topo" }, { exercise: "Mesa Flexora", sets: "4 x 12", detail: "Pico de contração" }, { exercise: "Stiff", sets: "4 x 12", detail: "Halteres" }, { exercise: "Cadeira Abdutora", sets: "4 x 15", detail: "Tronco inclinado" }] },
+          { day: "SAB", title: "SAB: FULL BODY", exercises: [{ exercise: "Agachamento Livre", sets: "4 x 10", detail: "Amplitude total" }, { exercise: "Supino Inclinado", sets: "4 x 12", detail: "Halteres" }, { exercise: "Remada Máquina", sets: "4 x 12", detail: "Pegada neutra" }, { exercise: "Prancha", sets: "4 x 45s", detail: "Isometria" }] }
         ],
         'Emagrecimento': [
-          { day: "SEG", title: "SEG: HIIT & CORE", exercises: [ { exercise: "Tiro na Esteira", sets: "10 x 1 min", detail: "Descanso 30s" }, { exercise: "Prancha Frontal", sets: "4 x 1 min", detail: "Isometria" }, { exercise: "Abdominal Remador", sets: "4 x 20", detail: "Explosão" }, { exercise: "Burpees", sets: "4 x 15", detail: "Intenso" } ] },
-          { day: "TER", title: "TER: CIRCUITO SUPERIOR", exercises: [ { exercise: "Flexão de Braço", sets: "4 x Falha", detail: "Sem pausa" }, { exercise: "Remada TRX", sets: "4 x 15", detail: "Rápido" }, { exercise: "Polichinelo", sets: "4 x 50", detail: "Cardio" }, { exercise: "Desenvolvimento Arnold", sets: "4 x 15", detail: "Leve" } ] },
-          { day: "QUA", title: "QUA: CARDIO LONGO", exercises: [ { exercise: "Bicicleta", sets: "45 min", detail: "Ritmo moderado" }, { exercise: "Abdominal Infra", sets: "4 x 20", detail: "No solo" }, { exercise: "Prancha Lateral", sets: "3 x 45s", detail: "Cada lado" } ] },
-          { day: "QUI", title: "QUI: CIRCUITO INFERIOR", exercises: [ { exercise: "Agachamento Salto", sets: "4 x 20", detail: "Explosão" }, { exercise: "Afundo Alternado", sets: "4 x 20", detail: "Dinâmico" }, { exercise: "Pular Corda", sets: "4 x 3 min", detail: "Cardio" }, { exercise: "Elevação Pélvica Solo", sets: "4 x 20", detail: "Rápido" } ] },
-          { day: "SEX", title: "SEX: METABÓLICO", exercises: [ { exercise: "Kettlebell Swing", sets: "4 x 20", detail: "Potência" }, { exercise: "Mountain Climber", sets: "4 x 40", detail: "Rápido" }, { exercise: "Thruster", sets: "4 x 15", detail: "Halteres leves" }, { exercise: "Corrida Estacionária", sets: "4 x 1 min", detail: "Joelhos altos" } ] },
-          { day: "SAB", title: "SAB: DESAFIO CARDIO", exercises: [ { exercise: "Corrida Rua", sets: "5 km", detail: "Melhor tempo" }, { exercise: "Alongamento Geral", sets: "15 min", detail: "Recuperação" } ] }
+          { day: "SEG", title: "SEG: HIIT & CORE", exercises: [{ exercise: "Tiro na Esteira", sets: "10 x 1 min", detail: "Descanso 30s" }, { exercise: "Prancha Frontal", sets: "4 x 1 min", detail: "Isometria" }, { exercise: "Abdominal Remador", sets: "4 x 20", detail: "Explosão" }, { exercise: "Burpees", sets: "4 x 15", detail: "Intenso" }] },
+          { day: "TER", title: "TER: CIRCUITO SUPERIOR", exercises: [{ exercise: "Flexão de Braço", sets: "4 x Falha", detail: "Sem pausa" }, { exercise: "Remada TRX", sets: "4 x 15", detail: "Rápido" }, { exercise: "Polichinelo", sets: "4 x 50", detail: "Cardio" }, { exercise: "Desenvolvimento Arnold", sets: "4 x 15", detail: "Leve" }] },
+          { day: "QUA", title: "QUA: CARDIO LONGO", exercises: [{ exercise: "Bicicleta", sets: "45 min", detail: "Ritmo moderado" }, { exercise: "Abdominal Infra", sets: "4 x 20", detail: "No solo" }, { exercise: "Prancha Lateral", sets: "3 x 45s", detail: "Cada lado" }] },
+          { day: "QUI", title: "QUI: CIRCUITO INFERIOR", exercises: [{ exercise: "Agachamento Salto", sets: "4 x 20", detail: "Explosão" }, { exercise: "Afundo Alternado", sets: "4 x 20", detail: "Dinâmico" }, { exercise: "Pular Corda", sets: "4 x 3 min", detail: "Cardio" }, { exercise: "Elevação Pélvica Solo", sets: "4 x 20", detail: "Rápido" }] },
+          { day: "SEX", title: "SEX: METABÓLICO", exercises: [{ exercise: "Kettlebell Swing", sets: "4 x 20", detail: "Potência" }, { exercise: "Mountain Climber", sets: "4 x 40", detail: "Rápido" }, { exercise: "Thruster", sets: "4 x 15", detail: "Halteres leves" }, { exercise: "Corrida Estacionária", sets: "4 x 1 min", detail: "Joelhos altos" }] },
+          { day: "SAB", title: "SAB: DESAFIO CARDIO", exercises: [{ exercise: "Corrida Rua", sets: "5 km", detail: "Melhor tempo" }, { exercise: "Alongamento Geral", sets: "15 min", detail: "Recuperação" }] }
         ],
         'Glúteos & Core': [
-          { day: "SEG", title: "SEG: GLÚTEO MÁXIMO", exercises: [ { exercise: "Elevação Pélvica Barra", sets: "4 x 10", detail: "Pausa no topo" }, { exercise: "Agachamento Sumô", sets: "4 x 12", detail: "Halter" }, { exercise: "Glúteo Polia", sets: "4 x 15", detail: "Perna estendida" } ] },
-          { day: "TER", title: "TER: CORE INTENSO", exercises: [ { exercise: "Prancha com Movimento", sets: "4 x 45s", detail: "Toca ombro" }, { exercise: "Abdominal Bicicleta", sets: "4 x 30", detail: "Tronco alto" }, { exercise: "Elevação de Pernas", sets: "4 x 15", detail: "Lento na descida" } ] },
-          { day: "QUA", title: "QUA: GLÚTEO MÉDIO", exercises: [ { exercise: "Cadeira Abdutora", sets: "4 x 15", detail: "Tronco inclinado" }, { exercise: "Elevação Pélvica Unilateral", sets: "4 x 12", detail: "Cada perna" }, { exercise: "Passada", sets: "4 x 20 passos", detail: "Com halteres" } ] },
-          { day: "QUI", title: "QUI: DESCANSO ATIVO", exercises: [ { exercise: "Caminhada", sets: "30 min", detail: "Ritmo leve" }, { exercise: "Mobilidade Quadril", sets: "15 min", detail: "Foco articular" } ] },
-          { day: "SEX", title: "SEX: ISOLAMENTO", exercises: [ { exercise: "Glúteo 4 Apoios", sets: "4 x 15", detail: "Caneleira" }, { exercise: "Levantamento Terra", sets: "4 x 10", detail: "Barra" }, { exercise: "Stiff", sets: "4 x 12", detail: "Barra" } ] },
-          { day: "SAB", title: "SAB: CORE & CARDIO", exercises: [ { exercise: "Abdominal Remador", sets: "4 x 20", detail: "Completo" }, { exercise: "Prancha Frontal", sets: "4 x 1 min", detail: "Isometria" }, { exercise: "Escada", sets: "20 min", detail: "Cardio" } ] }
+          { day: "SEG", title: "SEG: GLÚTEO MÁXIMO", exercises: [{ exercise: "Elevação Pélvica Barra", sets: "4 x 10", detail: "Pausa no topo" }, { exercise: "Agachamento Sumô", sets: "4 x 12", detail: "Halter" }, { exercise: "Glúteo Polia", sets: "4 x 15", detail: "Perna estendida" }] },
+          { day: "TER", title: "TER: CORE INTENSO", exercises: [{ exercise: "Prancha com Movimento", sets: "4 x 45s", detail: "Toca ombro" }, { exercise: "Abdominal Bicicleta", sets: "4 x 30", detail: "Tronco alto" }, { exercise: "Elevação de Pernas", sets: "4 x 15", detail: "Lento na descida" }] },
+          { day: "QUA", title: "QUA: GLÚTEO MÉDIO", exercises: [{ exercise: "Cadeira Abdutora", sets: "4 x 15", detail: "Tronco inclinado" }, { exercise: "Elevação Pélvica Unilateral", sets: "4 x 12", detail: "Cada perna" }, { exercise: "Passada", sets: "4 x 20 passos", detail: "Com halteres" }] },
+          { day: "QUI", title: "QUI: DESCANSO ATIVO", exercises: [{ exercise: "Caminhada", sets: "30 min", detail: "Ritmo leve" }, { exercise: "Mobilidade Quadril", sets: "15 min", detail: "Foco articular" }] },
+          { day: "SEX", title: "SEX: ISOLAMENTO", exercises: [{ exercise: "Glúteo 4 Apoios", sets: "4 x 15", detail: "Caneleira" }, { exercise: "Levantamento Terra", sets: "4 x 10", detail: "Barra" }, { exercise: "Stiff", sets: "4 x 12", detail: "Barra" }] },
+          { day: "SAB", title: "SAB: CORE & CARDIO", exercises: [{ exercise: "Abdominal Remador", sets: "4 x 20", detail: "Completo" }, { exercise: "Prancha Frontal", sets: "4 x 1 min", detail: "Isometria" }, { exercise: "Escada", sets: "20 min", detail: "Cardio" }] }
         ],
         'Condicionamento': [
-          { day: "SEG", title: "SEG: FORÇA TOTAL", exercises: [ { exercise: "Levantamento Terra", sets: "4 x 8", detail: "Pesado" }, { exercise: "Supino Reto", sets: "4 x 8", detail: "Pesado" }, { exercise: "Barra Fixa", sets: "4 x Falha", detail: "Livre" } ] },
-          { day: "TER", title: "TER: CAPACIDADE AERÓBICA", exercises: [ { exercise: "Remo Seco", sets: "4 x 5 min", detail: "Intenso" }, { exercise: "Pular Corda", sets: "5 x 3 min", detail: "Constante" } ] },
-          { day: "QUA", title: "QUA: POTÊNCIA", exercises: [ { exercise: "Box Jump", sets: "4 x 10", detail: "Salto na caixa" }, { exercise: "Medicine Ball Slam", sets: "4 x 15", detail: "Explosão" }, { exercise: "Kettlebell Swing", sets: "4 x 15", detail: "Pesado" } ] },
-          { day: "QUI", title: "QUI: RESISTÊNCIA MUSCULAR", exercises: [ { exercise: "Flexão de Braço", sets: "4 x 20", detail: "Controlado" }, { exercise: "Agachamento Livre", sets: "4 x 20", detail: "Sem peso" }, { exercise: "Barra Supinada", sets: "4 x 12", detail: "Controlado" } ] },
-          { day: "SEX", title: "SEX: MOBILIDADE & CORE", exercises: [ { exercise: "Prancha", sets: "4 x 1 min", detail: "Firme" }, { exercise: "Abdominal Canivete", sets: "4 x 15", detail: "Completo" }, { exercise: "Yoga/Alongamento", sets: "20 min", detail: "Corpo todo" } ] },
-          { day: "SAB", title: "SAB: DESAFIO FINAL", exercises: [ { exercise: "Burpees", sets: "100 repetições", detail: "Menor tempo possível" }, { exercise: "Corrida", sets: "3 km", detail: "Ritmo forte" } ] }
+          { day: "SEG", title: "SEG: FORÇA TOTAL", exercises: [{ exercise: "Levantamento Terra", sets: "4 x 8", detail: "Pesado" }, { exercise: "Supino Reto", sets: "4 x 8", detail: "Pesado" }, { exercise: "Barra Fixa", sets: "4 x Falha", detail: "Livre" }] },
+          { day: "TER", title: "TER: CAPACIDADE AERÓBICA", exercises: [{ exercise: "Remo Seco", sets: "4 x 5 min", detail: "Intenso" }, { exercise: "Pular Corda", sets: "5 x 3 min", detail: "Constante" }] },
+          { day: "QUA", title: "QUA: POTÊNCIA", exercises: [{ exercise: "Box Jump", sets: "4 x 10", detail: "Salto na caixa" }, { exercise: "Medicine Ball Slam", sets: "4 x 15", detail: "Explosão" }, { exercise: "Kettlebell Swing", sets: "4 x 15", detail: "Pesado" }] },
+          { day: "QUI", title: "QUI: RESISTÊNCIA MUSCULAR", exercises: [{ exercise: "Flexão de Braço", sets: "4 x 20", detail: "Controlado" }, { exercise: "Agachamento Livre", sets: "4 x 20", detail: "Sem peso" }, { exercise: "Barra Supinada", sets: "4 x 12", detail: "Controlado" }] },
+          { day: "SEX", title: "SEX: MOBILIDADE & CORE", exercises: [{ exercise: "Prancha", sets: "4 x 1 min", detail: "Firme" }, { exercise: "Abdominal Canivete", sets: "4 x 15", detail: "Completo" }, { exercise: "Yoga/Alongamento", sets: "20 min", detail: "Corpo todo" }] },
+          { day: "SAB", title: "SAB: DESAFIO FINAL", exercises: [{ exercise: "Burpees", sets: "100 repetições", detail: "Menor tempo possível" }, { exercise: "Corrida", sets: "3 km", detail: "Ritmo forte" }] }
         ]
       };
 
@@ -316,7 +316,7 @@ const AdminPage = () => {
       });
 
       if (error) throw error;
-      
+
       await fetchWorkouts();
       setShowWorkoutModal(false);
       showNotification('Treino gerado com sucesso!');
@@ -357,10 +357,10 @@ const AdminPage = () => {
       });
 
       if (error) throw error;
-      
+
       await fetchWorkouts();
       setShowWorkoutModal(false);
-      
+
       setManualTitle('');
       setManualFocus('Hipertrofia');
       setManualWorkouts([
@@ -372,7 +372,7 @@ const AdminPage = () => {
         { day: "SAB", title: "SAB: Full Body", exercises: [{ exercise: "", sets: "", detail: "" }] },
         { day: "DOM", title: "DOM: Descanso Ativo", exercises: [{ exercise: "", sets: "", detail: "" }] }
       ]);
-      
+
       showNotification('Treino cadastrado com sucesso!');
     } catch (err) {
       console.error("Error saving manual workout:", err);
@@ -435,13 +435,13 @@ const AdminPage = () => {
     <div className="h-[100dvh] bg-black text-white flex overflow-hidden">
       <AnimatePresence>
         {loading && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[200] flex items-center justify-center bg-black"
           >
             <motion.div
-              animate={{ 
+              animate={{
                 scale: [1, 1.05, 1],
                 opacity: [0.5, 1, 0.5]
               }}
@@ -454,9 +454,9 @@ const AdminPage = () => {
       </AnimatePresence>
 
       <div className="absolute inset-0 mix-blend-overlay z-0 pointer-events-none opacity-10">
-        <img 
-          src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1470&auto=format&fit=crop" 
-          alt="Gym Background" 
+        <img
+          src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1470&auto=format&fit=crop"
+          alt="Gym Background"
           className="w-full h-full object-cover"
         />
       </div>
@@ -465,7 +465,7 @@ const AdminPage = () => {
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -475,56 +475,55 @@ const AdminPage = () => {
         )}
       </AnimatePresence>
 
-      <aside 
+      <aside
         className={`fixed lg:static inset-y-0 left-0 flex flex-col w-64 bg-black/95 backdrop-blur-xl border-r border-white/10 p-6 h-full z-[110] transition-transform duration-300 ease-in-out lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="mb-10 flex justify-between items-center">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center">
-                <span className="text-white font-display font-black text-xl">RM</span>
-              </div>
-              <div>
-                <span className="font-display font-black text-base text-white">RAYANA</span>
-                <span className="block text-[10px] tracking-[0.2em] uppercase text-bordeaux font-black">Admin Hub</span>
-              </div>
-            </Link>
-            <button className="lg:hidden text-white/40 hover:text-white" onClick={() => setSidebarOpen(false)}>
-              <FiX size={24} />
-            </button>
-          </div>
-
-          <nav className="space-y-2 flex-1 overflow-y-auto pr-2">
-            {adminLinks.map((link) => (
-              <button 
-                key={link.id} 
-                onClick={() => { setActiveTab(link.id); setSidebarOpen(false) }}
-                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-bold tracking-tight transition-all duration-300 ${
-                  activeTab === link.id
-                    ? 'bg-bordeaux/20 text-white border border-bordeaux/30'
-                    : 'text-white/40 hover:text-white hover:bg-white/[0.03]'
-                }`}
-              >
-                <link.icon className={`w-5 h-5 ${activeTab === link.id ? 'text-bordeaux' : ''}`} />
-                {link.label}
-              </button>
-            ))}
-          </nav>
-
-          <button onClick={() => navigate('/')} className="mt-6 flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold transition-colors text-white/30 hover:text-white">
-            <FiArrowLeft className="w-5 h-5" /> Voltar para o site
+          <Link to="/" className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center">
+              <span className="text-white font-display font-black text-xl">RM</span>
+            </div>
+            <div>
+              <span className="font-display font-black text-base text-white">RAYANA</span>
+              <span className="block text-[10px] tracking-[0.2em] uppercase text-bordeaux font-black">Admin Hub</span>
+            </div>
+          </Link>
+          <button className="lg:hidden text-white/40 hover:text-white" onClick={() => setSidebarOpen(false)}>
+            <FiX size={24} />
           </button>
+        </div>
 
-          {/* Footer info inside Admin sidebar */}
-          <div className="pt-4 border-t border-white/10 flex flex-col gap-2 mt-auto">
-            <a 
-              href="https://automize-one.vercel.app/" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-[10px] text-white/30 hover:text-white/60 font-bold transition-all text-center flex items-center justify-center gap-1 bg-white/5 py-2 rounded-xl cursor-pointer"
+        <nav className="space-y-2 flex-1 overflow-y-auto pr-2">
+          {adminLinks.map((link) => (
+            <button
+              key={link.id}
+              onClick={() => { setActiveTab(link.id); setSidebarOpen(false) }}
+              className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-bold tracking-tight transition-all duration-300 ${activeTab === link.id
+                  ? 'bg-bordeaux/20 text-white border border-bordeaux/30'
+                  : 'text-white/40 hover:text-white hover:bg-white/[0.03]'
+                }`}
             >
-              Desenvolvido por <span className="text-rose-soft">Automize</span>
-            </a>
-          </div>
+              <link.icon className={`w-5 h-5 ${activeTab === link.id ? 'text-bordeaux' : ''}`} />
+              {link.label}
+            </button>
+          ))}
+        </nav>
+
+        <button onClick={() => navigate('/')} className="mt-6 flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold transition-colors text-white/30 hover:text-white">
+          <FiArrowLeft className="w-5 h-5" /> Voltar para o site
+        </button>
+
+        {/* Footer info inside Admin sidebar */}
+        <div className="pt-4 border-t border-white/10 flex flex-col gap-2 mt-auto">
+          <a
+            href="https://automize-one.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] text-white/30 hover:text-white/60 font-bold transition-all text-center flex items-center justify-center gap-1 bg-white/5 py-2 rounded-xl cursor-pointer"
+          >
+            Desenvolvido por <span className="text-rose-soft">Automize</span>
+          </a>
+        </div>
       </aside>
 
       <main className="flex-1 h-full flex flex-col min-w-0 overflow-y-auto relative z-10 bg-black">
@@ -539,7 +538,7 @@ const AdminPage = () => {
           </div>
         </header>
 
-        <div className="p-8 max-w-7xl mx-auto w-full">
+        <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">
           {activeTab === 'dashboard' && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -566,8 +565,8 @@ const AdminPage = () => {
                 <div className="space-y-6">
                   <h2 className="font-display font-black text-lg uppercase tracking-tight text-white">Ações Rápidas</h2>
                   <div className="grid grid-cols-1 gap-4">
-                    <button 
-                      onClick={() => { 
+                    <button
+                      onClick={() => {
                         setEditingUser(null);
                         setGeneratedUser('');
                         setGeneratedPassword('');
@@ -575,8 +574,8 @@ const AdminPage = () => {
                         setNewUserStatus('Ativo');
                         setNewUserExpiration('');
                         setNewUserContact('');
-                        setCreateError(null); 
-                        setIsCreatingUser(true); 
+                        setCreateError(null);
+                        setIsCreatingUser(true);
                       }}
                       className="flex items-center gap-4 p-5 rounded-3xl backdrop-blur-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-wine-900/40 transition-all group text-left shadow-2xl"
                     >
@@ -588,7 +587,7 @@ const AdminPage = () => {
                         <p className="text-white/30 text-[10px]">Criar usuário e senha</p>
                       </div>
                     </button>
-                    <button 
+                    <button
                       onClick={() => { setShowWorkoutModal(true); setSelectedStudentId(''); }}
                       className="flex items-center gap-4 p-5 rounded-3xl backdrop-blur-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-bordeaux/40 transition-all group text-left shadow-2xl"
                     >
@@ -655,7 +654,7 @@ const AdminPage = () => {
                   <FiSearch className="text-white/40" />
                   <input type="text" placeholder="Buscar por nome ou plano..." className="bg-transparent border-none outline-none flex-1 text-sm font-bold text-white" />
                 </div>
-                
+
                 <div className="hidden md:grid md:grid-cols-5 p-6 text-[10px] font-black uppercase tracking-widest border-b text-white/40 border-white/5">
                   <div>Aluna</div>
                   <div>Plano</div>
@@ -666,37 +665,34 @@ const AdminPage = () => {
 
                 <div className="divide-y divide-white/5">
                   {studentsData.map((s, i) => (
-                    <div key={i} className="grid grid-cols-1 md:grid-cols-5 items-center p-6 gap-4 md:gap-0 hover:bg-white/[0.02] transition-colors border-white/5">
+                    <div key={i} className="grid grid-cols-1 md:grid-cols-5 items-center p-4 sm:p-6 gap-4 md:gap-0 hover:bg-white/[0.02] transition-colors border-white/5">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-wine-950 to-bordeaux flex items-center justify-center text-white font-black text-xs shadow-lg">{s.name[0]}</div>
                         <div>
                           <span className="font-bold text-sm block text-white">{s.name}</span>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[9px] font-black uppercase tracking-widest opacity-40">{s.objective}</span>
-                            {s.contact && (
-                              <>
-                                <span className="w-1 h-1 rounded-full bg-white/10" />
-                                <span className="text-[9px] text-emerald-400 font-black whitespace-nowrap">{s.contact}</span>
-                              </>
-                            )}
-                          </div>
+                          <span className="text-[9px] font-black uppercase tracking-widest opacity-40 block mt-0.5">{s.objective}</span>
+                          {s.contact && (
+                            <div className="flex items-center gap-1.5 mt-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg w-fit">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                              <span className="text-[9px] font-black tracking-wider whitespace-nowrap">{s.contact}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
                       <div className="hidden md:block">
-                        <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm inline-block ${
-                          s.plano === 'Administrador'
+                        <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm inline-block ${s.plano === 'Administrador'
                             ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                            : s.plano === 'VIP Elite' 
+                            : s.plano === 'VIP Elite'
                               ? 'bg-bordeaux/20 text-rose-soft border-bordeaux/30'
                               : s.plano === 'Premium'
                                 ? 'bg-wine-900/20 text-white border-white/10'
                                 : 'bg-white/5 text-white/50 border-white/5'
-                        }`}>
+                          }`}>
                           {s.plano}
                         </span>
                       </div>
-                      
+
                       <div className="hidden md:flex flex-col">
                         <span className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-0.5">Criado em</span>
                         <span className="text-xs font-bold text-white">{s.lastCheck}</span>
@@ -704,18 +700,17 @@ const AdminPage = () => {
 
                       <div className="flex md:block items-center justify-between">
                         <span className="md:hidden text-[10px] font-black uppercase tracking-widest opacity-30">Status</span>
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${
-                          s.status === 'Inativo' 
-                            ? 'bg-red-500/10 text-red-500 border-red-500/20' 
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${s.status === 'Inativo'
+                            ? 'bg-red-500/10 text-red-500 border-red-500/20'
                             : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                        }`}>
+                          }`}>
                           {s.status || 'Ativo'}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-end gap-3 border-t md:border-t-0 pt-4 md:pt-0 border-white/5">
                         {s.status === 'Inativo' ? (
-                          <button 
+                          <button
                             onClick={() => handleToggleStatus(s)}
                             className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/25 cursor-pointer"
                           >
@@ -723,7 +718,7 @@ const AdminPage = () => {
                             <span className="hidden md:inline">Ativar</span>
                           </button>
                         ) : (
-                          <button 
+                          <button
                             onClick={() => handleToggleStatus(s)}
                             className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/25 cursor-pointer"
                           >
@@ -731,14 +726,14 @@ const AdminPage = () => {
                             <span className="hidden md:inline">Inativar</span>
                           </button>
                         )}
-                        <button 
+                        <button
                           onClick={() => handleEditStudent(s)}
                           className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-white/5 text-white hover:bg-white/10 cursor-pointer"
                         >
                           <FiEdit size={12} />
                           <span className="hidden md:inline">Editar</span>
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDeleteStudent(s.name)}
                           className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 hover:bg-red-500/20 cursor-pointer"
                         >
@@ -760,7 +755,7 @@ const AdminPage = () => {
                   <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white">Verificar Treinos</h2>
                   <p className="text-white/40 text-sm">Inspecione de forma detalhada as planilhas semanais das alunas.</p>
                 </div>
-                <button 
+                <button
                   onClick={() => setShowWorkoutModal(true)}
                   className="px-6 py-3 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-xl cursor-pointer"
                 >
@@ -783,11 +778,10 @@ const AdminPage = () => {
                             setSelectedInspectStudent(student);
                             setInspectDayTab('SEG');
                           }}
-                          className={`w-full p-4 rounded-2xl text-left transition-all border flex items-center justify-between group cursor-pointer ${
-                            isSelected 
-                              ? 'bg-gradient-to-r from-wine-900 to-bordeaux border-bordeaux text-white shadow-lg' 
+                          className={`w-full p-4 rounded-2xl text-left transition-all border flex items-center justify-between group cursor-pointer ${isSelected
+                              ? 'bg-gradient-to-r from-wine-900 to-bordeaux border-bordeaux text-white shadow-lg'
                               : 'bg-white/5 border-white/5 text-white/80 hover:bg-white/10 hover:border-white/10'
-                          }`}
+                            }`}
                         >
                           <div>
                             <p className="font-bold text-sm tracking-tight">{student.name}</p>
@@ -795,11 +789,10 @@ const AdminPage = () => {
                               {student.plano}
                             </p>
                           </div>
-                          <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full ${
-                            hasWorkout 
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/10' 
+                          <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full ${hasWorkout
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/10'
                               : 'bg-amber-500/20 text-amber-400 border border-amber-500/10'
-                          }`}>
+                            }`}>
                             {hasWorkout ? 'Ativo' : 'Sem Treino'}
                           </span>
                         </button>
@@ -849,11 +842,10 @@ const AdminPage = () => {
                                   <button
                                     key={day}
                                     onClick={() => setInspectDayTab(day)}
-                                    className={`px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all border cursor-pointer ${
-                                      isDaySelected 
-                                        ? 'bg-bordeaux border-bordeaux text-white shadow-md' 
+                                    className={`px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all border cursor-pointer ${isDaySelected
+                                        ? 'bg-bordeaux border-bordeaux text-white shadow-md'
                                         : 'bg-white/5 border-white/5 text-white/50 hover:bg-white/10 hover:text-white'
-                                    }`}
+                                      }`}
                                   >
                                     {day}
                                   </button>
@@ -958,7 +950,7 @@ const AdminPage = () => {
                         if (!s.expirationDate) return false;
                         const expDate = new Date(s.expirationDate);
                         const today = new Date();
-                        today.setHours(0,0,0,0);
+                        today.setHours(0, 0, 0, 0);
                         const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
                         return diffDays >= 0 && diffDays <= 7;
                       }).length} Pendentes
@@ -995,10 +987,10 @@ const AdminPage = () => {
                       if (!expirationDate) return { text: 'Sem Vencimento Definido', days: 999, status: 'none', color: 'text-white/40 bg-white/5 border-white/5' };
                       const expDate = new Date(expirationDate);
                       const today = new Date();
-                      today.setHours(0,0,0,0);
+                      today.setHours(0, 0, 0, 0);
                       const diffTime = expDate - today;
                       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                      
+
                       const formattedExpDate = new Date(expirationDate).toLocaleDateString('pt-BR');
 
                       if (diffDays < 0) {
@@ -1014,17 +1006,17 @@ const AdminPage = () => {
                     };
 
                     const statusInfo = getRemainingDaysInfo(student.expirationDate);
-                    
+
                     // Predefined customized friendly reminder message
                     const reminderMsg = `Olá, ${student.name}! 🌟 Passando para lembrar que a sua assinatura da consultoria Rayana Maria vence em breve (${student.expirationDate ? new Date(student.expirationDate).toLocaleDateString('pt-BR') : ''}). Vamos renovar para continuar firmes nos seus treinos e evolução? Qualquer dúvida estou por aqui!`;
-                    
+
                     const rawContact = student.contact ? student.contact.replace(/\D/g, '') : '';
                     const formattedContact = rawContact.length > 0
                       ? (rawContact.startsWith('55') ? rawContact : '55' + rawContact)
                       : '';
                     const whatsappBillingUrl = formattedContact
                       ? `https://wa.me/${formattedContact}?text=${encodeURIComponent(reminderMsg)}`
-                      : `https://wa.me/5500000000000?text=${encodeURIComponent(reminderMsg)}`;
+                      : `https://wa.me/558174016680?text=${encodeURIComponent(reminderMsg)}`;
 
                     return (
                       <div key={student.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white-[0.02] transition-colors">
@@ -1035,19 +1027,25 @@ const AdminPage = () => {
                           <div>
                             <div className="flex items-center gap-2">
                               <h4 className="font-bold text-white text-sm">{student.name}</h4>
-                              <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${
-                                student.status === 'Ativo' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
-                              }`}>
+                              <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${student.status === 'Ativo' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+                                }`}>
                                 {student.status}
                               </span>
                             </div>
-                            <p className="text-white/40 text-xs mt-1 flex flex-wrap items-center gap-2">
+                            <p className="text-white/40 text-xs mt-1">
                               <span>Plano: {student.plano}</span>
-                              <span className="w-1 h-1 rounded-full bg-white/10 hidden sm:inline" />
-                              <span className={student.contact ? 'text-white/50' : 'text-amber-400/80 font-bold'}>
-                                {student.contact ? `WhatsApp: ${student.contact}` : '⚠️ Sem WhatsApp'}
-                              </span>
                             </p>
+                            {student.contact ? (
+                              <div className="flex items-center gap-1.5 mt-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg w-fit">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                <span className="text-[9px] font-black tracking-wider whitespace-nowrap">{student.contact}</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1.5 mt-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-lg w-fit">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                <span className="text-[9px] font-black tracking-wider whitespace-nowrap">⚠️ Sem WhatsApp</span>
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -1133,17 +1131,17 @@ const AdminPage = () => {
       <AnimatePresence>
         {isCreatingUser && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className={`p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl relative border ${isDarkMode ? 'bg-wine-950 border-white/10' : 'bg-white border-wine-100'}`}
             >
               <button onClick={() => setIsCreatingUser(false)} className={`absolute top-6 right-6 transition-colors ${isDarkMode ? 'text-white/40 hover:text-white' : 'text-wine-900/40 hover:text-wine-900'}`}><FiX size={24} /></button>
-              
+
               <h2 className={`text-2xl font-black uppercase tracking-tighter mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>{editingUser ? 'Editar Acesso' : 'Gerar Novo Acesso'}</h2>
               <p className={`text-sm mb-8 font-medium ${isDarkMode ? 'text-white/60' : 'text-wine-900/60'}`}>{editingUser ? 'Atualize os dados da aluna.' : 'Preencha os dados da aluna para criar o login.'}</p>
-              
+
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 setIsSavingUser(true);
@@ -1160,7 +1158,7 @@ const AdminPage = () => {
                         plano: newUserPlan
                       })
                       .eq('usuario', editingUser);
-                    
+
                     if (error) throw error;
 
                     // Update in local storage
@@ -1241,7 +1239,7 @@ const AdminPage = () => {
                 }
               }} className="space-y-6">
                 {createError && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-3"
@@ -1253,8 +1251,8 @@ const AdminPage = () => {
                 <div>
 
                   <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Nome de Usuário</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={generatedUser}
                     onChange={(e) => setGeneratedUser(e.target.value)}
                     placeholder="ex: ana_paula"
@@ -1264,8 +1262,8 @@ const AdminPage = () => {
                 </div>
                 <div>
                   <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Senha de Acesso {editingUser && '(Deixe em branco para manter a atual)'}</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={generatedPassword}
                     onChange={(e) => setGeneratedPassword(e.target.value)}
                     placeholder={editingUser ? "Nova senha (opcional)" : "ex: ray123"}
@@ -1273,9 +1271,9 @@ const AdminPage = () => {
                     className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
                   />
                 </div>
-                 <div>
+                <div>
                   <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Plano da Aluna</label>
-                  <select 
+                  <select
                     value={newUserPlan}
                     onChange={(e) => setNewUserPlan(e.target.value)}
                     className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
@@ -1289,7 +1287,7 @@ const AdminPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Status de Acesso</label>
-                    <select 
+                    <select
                       value={newUserStatus}
                       onChange={(e) => setNewUserStatus(e.target.value)}
                       className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
@@ -1300,8 +1298,8 @@ const AdminPage = () => {
                   </div>
                   <div>
                     <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Data de Vencimento</label>
-                    <input 
-                      type="date" 
+                    <input
+                      type="date"
                       value={newUserExpiration}
                       onChange={(e) => setNewUserExpiration(e.target.value)}
                       className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
@@ -1309,8 +1307,8 @@ const AdminPage = () => {
                   </div>
                   <div>
                     <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>WhatsApp da Aluna (com DDD)</label>
-                    <input 
-                      type="tel" 
+                    <input
+                      type="tel"
                       placeholder="Ex: (11) 99999-9999"
                       value={newUserContact}
                       onChange={(e) => setNewUserContact(formatPhoneNumber(e.target.value))}
@@ -1332,7 +1330,7 @@ const AdminPage = () => {
       <AnimatePresence>
         {confirmModal.show && (
           <div className="fixed inset-0 z-[250] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -1343,15 +1341,15 @@ const AdminPage = () => {
               </div>
               <h2 className={`text-xl font-black uppercase tracking-tighter mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>{confirmModal.title}</h2>
               <p className={`text-sm mb-8 font-medium ${isDarkMode ? 'text-white/60' : 'text-wine-900/60'}`}>{confirmModal.message}</p>
-              
+
               <div className="grid grid-cols-2 gap-3">
-                <button 
+                <button
                   onClick={() => setConfirmModal(prev => ({ ...prev, show: false }))}
                   className={`py-4 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all ${isDarkMode ? 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white' : 'bg-wine-50 text-wine-900/60 hover:bg-wine-100 hover:text-wine-900'}`}
                 >
                   Cancelar
                 </button>
-                <button 
+                <button
                   onClick={confirmModal.onConfirm}
                   className="py-4 bg-red-500 hover:bg-red-600 rounded-xl text-white font-black uppercase tracking-widest text-[10px] transition-colors shadow-lg shadow-red-500/20"
                 >
@@ -1367,13 +1365,13 @@ const AdminPage = () => {
       <AnimatePresence>
         {showNewUserModal && (
           <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               className={`p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl relative border ${isDarkMode ? 'bg-wine-950 border-white/10' : 'bg-white border-wine-100'}`}
             >
-              <button 
+              <button
                 onClick={() => { setShowNewUserModal(false); setCreateError(null); }}
                 className={`p-2 rounded-xl transition-colors absolute top-6 right-6 ${isDarkMode ? 'hover:bg-white/5 text-white/40' : 'hover:bg-wine-50 text-wine-900/40'}`}
               >
@@ -1384,7 +1382,7 @@ const AdminPage = () => {
               </div>
               <h2 className={`text-2xl font-black uppercase tracking-tighter text-center mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Acesso Criado!</h2>
               <p className={`text-sm text-center mb-8 font-medium ${isDarkMode ? 'text-white/60' : 'text-wine-900/60'}`}>Credenciais salvas com sucesso. Envie para a aluna.</p>
-              
+
               <div className="space-y-4 mb-8">
                 <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-wine-50 border-wine-100'}`}>
                   <p className="text-[10px] font-black uppercase text-wine-800 tracking-[0.1em] mb-1">Usuário / Plano</p>
@@ -1396,7 +1394,7 @@ const AdminPage = () => {
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={() => {
                   navigator.clipboard.writeText(`Seu acesso ao Portal Rayana Maria\nPlano: ${newUserPlan}\nUsuário: ${generatedUser}\nSenha: ${generatedPassword}`);
                   setShowNewUserModal(false);
@@ -1414,38 +1412,35 @@ const AdminPage = () => {
       <AnimatePresence>
         {showWorkoutModal && (
           <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className={`p-8 rounded-[2.5rem] w-full shadow-2xl relative border transition-all duration-500 ${
-                workoutGenMode === 'manual' ? 'max-w-3xl max-h-[90vh] overflow-y-auto' : 'max-w-md'
-              } ${isDarkMode ? 'bg-wine-950 border-white/10' : 'bg-white border-wine-100'}`}
+              className={`p-8 rounded-[2.5rem] w-full shadow-2xl relative border transition-all duration-500 ${workoutGenMode === 'manual' ? 'max-w-3xl max-h-[90vh] overflow-y-auto' : 'max-w-md'
+                } ${isDarkMode ? 'bg-wine-950 border-white/10' : 'bg-white border-wine-100'}`}
             >
               <button onClick={() => setShowWorkoutModal(false)} className={`absolute top-6 right-6 transition-colors ${isDarkMode ? 'text-white/40 hover:text-white' : 'text-wine-900/40 hover:text-wine-900'}`}><FiX size={24} /></button>
-              
+
               <h2 className={`text-2xl font-black uppercase tracking-tighter mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>Gerenciar Treino</h2>
               <p className={`text-sm mb-6 font-medium ${isDarkMode ? 'text-white/60' : 'text-wine-900/60'}`}>Escolha gerar um treino completo por IA ou criar uma planilha manual.</p>
-              
+
               {/* Tab Selector */}
               <div className={`flex border p-1 rounded-2xl mb-6 ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-wine-50 border-wine-100'}`}>
-                <button 
+                <button
                   onClick={() => setWorkoutGenMode('ai')}
-                  className={`flex-1 py-3 text-center text-xs font-black uppercase tracking-wider rounded-xl transition-all ${
-                    workoutGenMode === 'ai' 
-                      ? 'bg-gradient-to-r from-wine-900 to-bordeaux text-white shadow-lg' 
+                  className={`flex-1 py-3 text-center text-xs font-black uppercase tracking-wider rounded-xl transition-all ${workoutGenMode === 'ai'
+                      ? 'bg-gradient-to-r from-wine-900 to-bordeaux text-white shadow-lg'
                       : (isDarkMode ? 'text-white/40 hover:text-white' : 'text-wine-900/40 hover:text-wine-900')
-                  }`}
+                    }`}
                 >
                   Gerar via IA
                 </button>
-                <button 
+                <button
                   onClick={() => setWorkoutGenMode('manual')}
-                  className={`flex-1 py-3 text-center text-xs font-black uppercase tracking-wider rounded-xl transition-all ${
-                    workoutGenMode === 'manual' 
-                      ? 'bg-gradient-to-r from-wine-900 to-bordeaux text-white shadow-lg' 
+                  className={`flex-1 py-3 text-center text-xs font-black uppercase tracking-wider rounded-xl transition-all ${workoutGenMode === 'manual'
+                      ? 'bg-gradient-to-r from-wine-900 to-bordeaux text-white shadow-lg'
                       : (isDarkMode ? 'text-white/40 hover:text-white' : 'text-wine-900/40 hover:text-wine-900')
-                  }`}
+                    }`}
                 >
                   Cadastrar Manual
                 </button>
@@ -1454,7 +1449,7 @@ const AdminPage = () => {
               <div className="space-y-6">
                 <div>
                   <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Selecionar Aluna</label>
-                  <select 
+                  <select
                     value={selectedStudentId}
                     onChange={(e) => setSelectedStudentId(e.target.value)}
                     className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
@@ -1470,7 +1465,7 @@ const AdminPage = () => {
                   <>
                     <div>
                       <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Foco do Treino</label>
-                      <select 
+                      <select
                         value={workoutType}
                         onChange={(e) => setWorkoutType(e.target.value)}
                         className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
@@ -1488,7 +1483,7 @@ const AdminPage = () => {
                       <p className="text-xs mt-2 italic font-medium opacity-60">"Ajustando cargas e descansos com base no perfil da aluna."</p>
                     </div>
 
-                    <button 
+                    <button
                       onClick={handleGenerateWorkout}
                       disabled={isGenerating || !selectedStudentId}
                       className="w-full py-5 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
@@ -1503,7 +1498,7 @@ const AdminPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Título da Planilha</label>
-                        <input 
+                        <input
                           type="text"
                           value={manualTitle}
                           onChange={(e) => setManualTitle(e.target.value)}
@@ -1513,7 +1508,7 @@ const AdminPage = () => {
                       </div>
                       <div>
                         <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Foco Principal</label>
-                        <select 
+                        <select
                           value={manualFocus}
                           onChange={(e) => setManualFocus(e.target.value)}
                           className={`w-full p-4 rounded-2xl border transition-all font-bold text-sm appearance-none ${isDarkMode ? 'bg-white/5 border-white/10 text-white focus:border-bordeaux' : 'bg-wine-50 border-wine-100 text-wine-950 focus:border-wine-900'}`}
@@ -1535,11 +1530,10 @@ const AdminPage = () => {
                             key={w.day}
                             type="button"
                             onClick={() => setActiveManualDay(w.day)}
-                            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border ${
-                              activeManualDay === w.day
+                            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border ${activeManualDay === w.day
                                 ? 'bg-gradient-to-r from-wine-900 to-bordeaux text-white border-transparent shadow-md'
                                 : (isDarkMode ? 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10' : 'bg-wine-50 border-wine-100 text-wine-950 hover:bg-wine-100')
-                            }`}
+                              }`}
                           >
                             {w.day}
                           </button>
@@ -1556,10 +1550,10 @@ const AdminPage = () => {
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-[10px] font-black uppercase text-bordeaux tracking-widest">Editando Treino de {activeManualDay}</span>
                           </div>
-                          
+
                           <div>
                             <label className={`block text-[10px] font-black uppercase tracking-[0.1em] mb-2 ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Título do Treino de {activeManualDay}</label>
-                            <input 
+                            <input
                               type="text"
                               value={dayWorkout.title}
                               onChange={(e) => updateDayTitle(activeManualDay, e.target.value)}
@@ -1570,25 +1564,25 @@ const AdminPage = () => {
 
                           <div className="space-y-3 pt-2">
                             <label className={`block text-[10px] font-black uppercase tracking-[0.1em] ${isDarkMode ? 'text-white/40' : 'text-wine-900/40'}`}>Exercícios</label>
-                            
+
                             {dayWorkout.exercises.map((ex, idx) => (
                               <div key={idx} className="flex gap-2 items-center">
                                 <div className="grid grid-cols-3 gap-2 flex-1">
-                                  <input 
+                                  <input
                                     type="text"
                                     value={ex.exercise}
                                     onChange={(e) => updateExerciseField(activeManualDay, idx, 'exercise', e.target.value)}
                                     placeholder="Exercício"
                                     className={`p-2.5 rounded-xl border font-bold text-xs ${isDarkMode ? 'bg-wine-950 border-white/10 text-white focus:border-bordeaux' : 'bg-white border-wine-100 text-wine-950 focus:border-wine-900'}`}
                                   />
-                                  <input 
+                                  <input
                                     type="text"
                                     value={ex.sets}
                                     onChange={(e) => updateExerciseField(activeManualDay, idx, 'sets', e.target.value)}
                                     placeholder="Séries (4x12)"
                                     className={`p-2.5 rounded-xl border font-bold text-xs ${isDarkMode ? 'bg-wine-950 border-white/10 text-white focus:border-bordeaux' : 'bg-white border-wine-100 text-wine-950 focus:border-wine-900'}`}
                                   />
-                                  <input 
+                                  <input
                                     type="text"
                                     value={ex.detail}
                                     onChange={(e) => updateExerciseField(activeManualDay, idx, 'detail', e.target.value)}
@@ -1609,9 +1603,8 @@ const AdminPage = () => {
                             <button
                               type="button"
                               onClick={() => addExerciseRow(activeManualDay)}
-                              className={`w-full py-2.5 border border-dashed rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
-                                isDarkMode ? 'border-white/20 text-white/50 hover:bg-white/5 hover:text-white' : 'border-wine-200 text-wine-900/60 hover:bg-wine-50'
-                              }`}
+                              className={`w-full py-2.5 border border-dashed rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${isDarkMode ? 'border-white/20 text-white/50 hover:bg-white/5 hover:text-white' : 'border-wine-200 text-wine-900/60 hover:bg-wine-50'
+                                }`}
                             >
                               + Adicionar Exercício
                             </button>
@@ -1620,7 +1613,7 @@ const AdminPage = () => {
                       );
                     })()}
 
-                    <button 
+                    <button
                       onClick={handleSaveManualWorkout}
                       disabled={isGenerating || !selectedStudentId || !manualTitle}
                       className="w-full py-5 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all mt-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
@@ -1640,14 +1633,14 @@ const AdminPage = () => {
       <AnimatePresence>
         {selectedWorkout && (
           <div className="fixed inset-0 z-[160] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className={`p-10 rounded-[2.5rem] w-full max-w-2xl shadow-2xl relative border max-h-[85vh] overflow-y-auto ${isDarkMode ? 'bg-wine-950 border-white/10' : 'bg-white border-wine-100'}`}
             >
               <button onClick={() => setSelectedWorkout(null)} className={`absolute top-6 right-6 transition-colors ${isDarkMode ? 'text-white/40 hover:text-white' : 'text-wine-900/40 hover:text-wine-900'}`}><FiX size={24} /></button>
-              
+
               <div className="mb-8">
                 <span className="inline-block px-3 py-1 bg-bordeaux/10 text-bordeaux rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border border-bordeaux/20">Detalhamento IA</span>
                 <h2 className={`text-3xl font-black uppercase tracking-tighter mb-2 ${isDarkMode ? 'text-white' : 'text-wine-950'}`}>{selectedWorkout.titulo}</h2>
@@ -1710,7 +1703,7 @@ const AdminPage = () => {
                 )}
               </div>
 
-              <button 
+              <button
                 onClick={() => setSelectedWorkout(null)}
                 className="w-full py-4 bg-gradient-to-r from-wine-900 to-bordeaux rounded-2xl text-white font-black uppercase tracking-widest text-xs hover:shadow-wine transition-all"
               >
@@ -1727,11 +1720,10 @@ const AdminPage = () => {
             initial={{ opacity: 0, y: 50, x: '-50%' }}
             animate={{ opacity: 1, y: 0, x: '-50%' }}
             exit={{ opacity: 0, y: 20, x: '-50%' }}
-            className={`fixed bottom-10 left-1/2 z-[200] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px] backdrop-blur-xl border ${
-              notification.type === 'success' 
-                ? 'bg-emerald-500/90 text-white border-emerald-400/20' 
+            className={`fixed bottom-10 left-1/2 z-[200] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px] backdrop-blur-xl border ${notification.type === 'success'
+                ? 'bg-emerald-500/90 text-white border-emerald-400/20'
                 : 'bg-red-500/90 text-white border-red-400/20'
-            }`}
+              }`}
           >
             {notification.type === 'success' ? <FiCheckCircle size={20} /> : <FiAlertCircle size={20} />}
             <p className="font-bold text-sm">{notification.message}</p>

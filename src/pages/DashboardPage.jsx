@@ -33,7 +33,11 @@ const DashboardPage = () => {
   const [activeWorkout, setActiveWorkout] = useState(null)
   const [completedExercises, setCompletedExercises] = useState([])
   const [isWorkoutFinished, setIsWorkoutFinished] = useState(false)
-  const [activeWorkoutTab, setActiveWorkoutTab] = useState(0)
+  const [activeWorkoutTab, setActiveWorkoutTab] = useState(() => {
+    // Initialize to today's day-of-week index (Sun=0...Sat=6)
+    // Will be corrected to the workout array index after data loads
+    return 0;
+  })
   const [isDoingWorkout, setIsDoingWorkout] = useState(false)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
@@ -110,6 +114,13 @@ const DashboardPage = () => {
 
         if (!workoutError && workoutData) {
           setActiveWorkout(workoutData)
+          
+          // Auto-select today's workout tab index
+          const todayDayNames = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
+          const todayName = todayDayNames[new Date().getDay()];
+          const workouts = workoutData?.conteudo_treino?.workouts || [];
+          const todayIdx = workouts.findIndex(w => w.day === todayName);
+          if (todayIdx >= 0) setActiveWorkoutTab(todayIdx);
           
           // Check if already finished today
           const today = new Date().toDateString()
@@ -484,20 +495,38 @@ const DashboardPage = () => {
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2" style={{ color: '#881337' }}>Planejamento Completo</p>
                   <h1 className="text-4xl md:text-5xl font-serif italic text-white mb-6">Meu Treino</h1>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {activeWorkout?.conteudo_treino?.workouts ? activeWorkout.conteudo_treino.workouts.map((w, idx) => (
+                  {activeWorkout?.conteudo_treino?.workouts ? (() => {
+                    // Sort so today's workout appears first
+                    const workouts = activeWorkout.conteudo_treino.workouts;
+                    const todayIdx = workouts.findIndex(w => w.day === currentDayName);
+                    const sorted = todayIdx >= 0
+                      ? [workouts[todayIdx], ...workouts.filter((_, i) => i !== todayIdx)]
+                      : workouts;
+                    return sorted.map((w, idx) => {
+                    const isToday = w.day === currentDayName;
+                    return (
                     <motion.div 
-                      key={idx}
+                      key={w.day}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.1 }}
-                      className="bg-wine-950 rounded-[2.5rem] p-8 md:p-10 text-white shadow-wine relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500 flex flex-col justify-between"
+                      className={`rounded-[2.5rem] p-8 md:p-10 text-white relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500 flex flex-col justify-between ${isToday ? 'shadow-[0_0_40px_rgba(136,19,55,0.4)]' : 'shadow-wine'}`}
+                      style={{ backgroundColor: isToday ? '#1a0510' : '#0a0507', border: isToday ? '1px solid rgba(136,19,55,0.5)' : '1px solid rgba(255,255,255,0.05)' }}
                     >
                       <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl rounded-full" />
+                      {isToday && <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-bordeaux via-rose-soft to-bordeaux opacity-60 rounded-t-[2.5rem]" />}
                       
                       <div className="relative z-10 flex-1 flex flex-col justify-between">
                         <div>
                           <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-xl font-bold text-rose-soft/90 uppercase tracking-wider">{w.title}</h3>
+                            <div className="flex items-center gap-3">
+                              <h3 className="text-xl font-bold text-rose-soft/90 uppercase tracking-wider">{w.title}</h3>
+                              {isToday && (
+                                <span className="px-2 py-0.5 bg-bordeaux/30 border border-bordeaux/50 text-rose-soft text-[9px] font-black uppercase tracking-widest rounded-full animate-pulse">
+                                  Hoje
+                                </span>
+                              )}
+                            </div>
                             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-20 group-hover:opacity-100 transition-opacity">
                               <FiTarget size={14} className="text-rose-soft" />
                             </div>
@@ -542,7 +571,9 @@ const DashboardPage = () => {
                         </div>
                       </div>
                     </motion.div>
-                  )) : activeWorkout?.conteudo_treino?.exercises ? (
+                    );
+                  });
+                  })() : activeWorkout?.conteudo_treino?.exercises ? (
                     <div className="col-span-full space-y-4">
                       {activeWorkout.conteudo_treino.exercises.map((ex, i) => (
                         <div key={i} className="bg-white p-6 rounded-3xl border border-wine-50 shadow-premium flex flex-col md:flex-row md:items-center gap-6">
@@ -560,9 +591,9 @@ const DashboardPage = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="col-span-full py-20 text-center bg-white rounded-[2.5rem] border border-dashed border-wine-200">
-                      <FiTarget className="w-12 h-12 text-wine-100 mx-auto mb-4" />
-                      <p className="text-wine-900/40 font-medium">Nenhum exercício listado para este ciclo.</p>
+                    <div className="col-span-full py-20 text-center bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-dashed border-white/10">
+                      <FiTarget className="w-12 h-12 text-bordeaux mx-auto mb-4 animate-pulse" />
+                      <p className="text-white/60 text-sm font-medium">Nenhum exercício listado para este ciclo.</p>
                     </div>
                   )}
                 </div>
