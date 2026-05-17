@@ -10,6 +10,7 @@ import {
 import { supabase } from '../lib/supabase'
 
 const adminLinks = [
+  { icon: FiHome, label: 'Dashboard', id: 'dashboard' },
   { icon: FiUsers, label: 'Gestão de Alunas', id: 'students' },
   { icon: FiTarget, label: 'Planilhas de Treino', id: 'workouts' },
   { icon: FiBarChart2, label: 'Evolução Global', id: 'analytics' },
@@ -21,7 +22,7 @@ const adminLinks = [
 
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState('students')
+  const [activeTab, setActiveTab] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showNewUserModal, setShowNewUserModal] = useState(false)
   const [generatedUser, setGeneratedUser] = useState('')
@@ -405,13 +406,88 @@ const AdminPage = () => {
               <span className="text-white font-display font-black text-xs">RM</span>
             </div>
           </div>
-          <div className="flex items-center gap-4 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 shadow-sm">
-            <FiBell className="w-5 h-5 text-white/40" />
-            <span className="w-4 h-4 rounded-full bg-bordeaux text-[9px] text-white flex items-center justify-center font-black">5</span>
-          </div>
         </header>
 
         <div className="p-8 max-w-7xl mx-auto w-full">
+          {activeTab === 'dashboard' && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { icon: FiUsers, label: 'Alunas Ativas', value: stats.activeStudents, change: '+0%', color: 'text-wine-800', bg: 'bg-wine-800/10' },
+                  { icon: FiDollarSign, label: 'Receita Mensal', value: `R$ ${stats.monthlyRevenue}`, change: '+0%', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+                  { icon: FiActivity, label: 'Treinos Gerados', value: stats.workoutsGenerated, change: '+0', color: 'text-blue-400', bg: 'bg-blue-500/10' },
+                  { icon: FiTrendingUp, label: 'Taxa Retenção', value: `${stats.retentionRate}%`, change: '+0%', color: 'text-bordeaux', bg: 'bg-bordeaux/10' },
+                ].map((s, i) => (
+                  <div key={i} className="backdrop-blur-xl rounded-[32px] p-6 border border-white/5 bg-white/5 shadow-2xl">
+                    <div className={`w-12 h-12 rounded-2xl ${s.bg} flex items-center justify-center mb-4`}>
+                      <s.icon className={`w-6 h-6 ${s.color}`} />
+                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-widest mb-1 text-white/40">{s.label}</p>
+                    <div className="flex items-baseline gap-2">
+                      <p className="font-display font-black text-3xl text-white">{s.value}</p>
+                      <span className={`text-[10px] font-black ${s.change.startsWith('+') ? 'text-emerald-400' : 'text-red-400'}`}>{s.change}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid lg:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <h2 className="font-display font-black text-lg uppercase tracking-tight text-white">Ações Rápidas</h2>
+                  <div className="grid grid-cols-1 gap-4">
+                    <button 
+                      onClick={() => { setCreateError(null); setIsCreatingUser(true); }}
+                      className="flex items-center gap-4 p-5 rounded-3xl backdrop-blur-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-wine-900/40 transition-all group text-left shadow-2xl"
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-wine-900/20 flex items-center justify-center group-hover:bg-wine-900/40 transition-all">
+                        <FiPlus className="w-6 h-6 text-wine-800" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm uppercase tracking-tight text-white">Gerar Acesso</p>
+                        <p className="text-white/30 text-[10px]">Criar usuário e senha</p>
+                      </div>
+                    </button>
+                    <button 
+                      onClick={() => { setShowWorkoutModal(true); setSelectedStudentId(''); }}
+                      className="flex items-center gap-4 p-5 rounded-3xl backdrop-blur-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-bordeaux/40 transition-all group text-left shadow-2xl"
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-bordeaux/10 flex items-center justify-center group-hover:bg-bordeaux/20 transition-all">
+                        <FiTarget className="w-6 h-6 text-bordeaux" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm uppercase tracking-tight text-white">Gerar Planilha</p>
+                        <p className="text-white/30 text-[10px]">Lançar novo ciclo</p>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <h2 className="font-display font-black text-lg uppercase tracking-tight text-white opacity-0 hidden lg:block">_</h2>
+                  <div className="backdrop-blur-xl rounded-[32px] p-8 border border-white/5 bg-white/5 shadow-2xl h-[calc(100%-3rem)]">
+                    <h3 className="font-display font-black text-xs uppercase tracking-widest mb-6 text-white">Planos Ativos</h3>
+                    <div className="space-y-4">
+                      {[
+                        { label: 'Essencial', val: studentsData.filter(s => s.plano === 'Essencial').length, color: 'bg-white/20' },
+                        { label: 'Premium', val: studentsData.filter(s => s.plano === 'Premium').length, color: 'bg-wine-800' },
+                        { label: 'VIP Elite', val: studentsData.filter(s => s.plano === 'VIP Elite').length, color: 'bg-bordeaux' },
+                      ].map((p, i) => (
+                        <div key={i} className="space-y-2">
+                          <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                            <span className="text-white/40">{p.label}</span>
+                            <span className="text-white">{p.val}</span>
+                          </div>
+                          <div className="h-1.5 w-full rounded-full overflow-hidden bg-white/5">
+                            <div className={`h-full ${p.color}`} style={{ width: `${studentsData.length > 0 ? (p.val / studentsData.length) * 100 : 0}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {activeTab === 'students' && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
