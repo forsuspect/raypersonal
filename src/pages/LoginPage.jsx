@@ -24,14 +24,8 @@ const LoginPage = () => {
     setError(null)
     setLoading(true)
 
-    // Hardcoded Admin Access
-    if (email.trim() === 'admin' && password === 'admin') {
-      navigate('/admin')
-      return
-    }
-
     try {
-      // Direct database query for custom Username and Password
+      // Query DB for the user — always, including admins and developers
       const { data, error } = await supabase
         .from('usuarios')
         .select('*')
@@ -45,17 +39,15 @@ const LoginPage = () => {
 
       const user = data[0]
 
-      // Check if student status is set to Inativo (Supabase or LocalStorage fallback)
-      const storedStatus = JSON.parse(localStorage.getItem('rm_status') || '{}')
-      const userStatus = storedStatus[user.usuario] || user.status || 'Ativo'
-      if (userStatus === 'Inativo') {
-        setError('inativa') // Set custom error code to trigger stylized inactive card
+      // Always check status from the database — not localStorage
+      if (user.status === 'Inativo') {
+        setError('inativa')
         return
       }
 
-      // Use the returned data to determine navigation
-      if (user.role === 'admin' || email.trim() === 'admin') {
-        localStorage.setItem('rm_user', JSON.stringify({ ...user, usuario: email.trim() }))
+      // Route by role
+      if (user.role === 'admin' || user.role === 'desenvolvedor') {
+        localStorage.setItem('rm_user', JSON.stringify(user))
         navigate('/admin')
       } else {
         localStorage.setItem('rm_user', JSON.stringify(user))
@@ -64,7 +56,7 @@ const LoginPage = () => {
     } catch (err) {
       console.error('Login error:', err)
       setError('Usuário ou senha incorretos. Tente novamente.')
-      setTimeout(() => setError(null), 4000) // Message disappears after 4 seconds
+      setTimeout(() => setError(null), 4000)
     } finally {
       setLoading(false)
     }

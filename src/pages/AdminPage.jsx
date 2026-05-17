@@ -5,7 +5,7 @@ import {
   FiHome, FiUsers, FiTarget, FiDollarSign, FiBarChart2,
   FiBell, FiMenu, FiX, FiPlus, FiRefreshCw, FiUser,
   FiSearch, FiTrendingUp, FiActivity,
-  FiEdit, FiTrash2, FiCheckCircle, FiChevronRight, FiArrowLeft, FiAlertCircle, FiLogOut, FiLock, FiUnlock
+  FiEdit, FiTrash2, FiCheckCircle, FiChevronRight, FiArrowLeft, FiAlertCircle, FiLogOut, FiLock, FiUnlock, FiShield
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
@@ -34,6 +34,14 @@ const AdminPage = () => {
   const [createError, setCreateError] = useState(null)
   const isDarkMode = true // Permanent Dark Theme
   const [studentsData, setStudentsData] = useState([])
+  // Detect logged-in user role for developer-only features
+  const [currentUserRole, setCurrentUserRole] = useState(() => {
+    try {
+      const u = JSON.parse(localStorage.getItem('rm_user') || '{}')
+      return u.role || ''
+    } catch { return '' }
+  })
+  const isDeveloper = currentUserRole === 'desenvolvedor'
   const [stats, setStats] = useState({
     activeStudents: 0,
     monthlyRevenue: 0,
@@ -146,12 +154,13 @@ const AdminPage = () => {
         setStudentsData(users.map(u => ({
           id: u.id,
           name: u.usuario || 'Usuário Sem Nome',
-          plano: u.role === 'admin' || u.usuario === 'admin' ? 'Administrador' : (u.plano || 'Premium'),
-          status: storedStatus[u.usuario] || u.status || 'Ativo',
+          plano: u.role === 'admin' || u.role === 'desenvolvedor' ? (u.role === 'desenvolvedor' ? 'Desenvolvedor' : 'Administrador') : (u.plano || 'Premium'),
+          status: u.status || 'Ativo',
           objective: u.objetivo || 'Aguardando Avaliação',
           lastCheck: new Date(u.data_cadastro).toLocaleDateString('pt-BR'),
-          expirationDate: u.vencimento || storedVencimentos[u.usuario] || '',
-          contact: storedContatos[u.usuario] || '',
+          expirationDate: u.vencimento || '',
+          contact: u.contato || '',
+          role: u.role || 'aluna',
           raw: u
         })))
 
@@ -232,21 +241,48 @@ const AdminPage = () => {
 
     setConfirmModal({
       show: true,
-      title: `${newStatus === 'Inativo' ? 'Inativar' : 'Ativar'} Aluna`,
+      title: `${newStatus === 'Inativo' ? 'Inativar' : 'Ativar'} Conta`,
       message: `Tem certeza que deseja ${actionText} o acesso de ${student.name}?`,
       onConfirm: async () => {
         try {
-          const storedStatus = JSON.parse(localStorage.getItem('rm_status') || '{}');
-          storedStatus[student.name] = newStatus;
-          localStorage.setItem('rm_status', JSON.stringify(storedStatus));
+          // Persist status directly to Supabase — survives code deploys
+          const { error } = await supabase
+            .from('usuarios')
+            .update({ status: newStatus })
+            .eq('id', student.id);
+          if (error) throw error;
 
           await fetchData();
           setConfirmModal(prev => ({ ...prev, show: false }));
-          showNotification(`Aluna ${student.name} foi ${newStatus === 'Inativo' ? 'inativada' : 'ativada'} com sucesso.`);
+          showNotification(`${student.name} foi ${newStatus === 'Inativo' ? 'inativada' : 'ativada'} com sucesso.`);
         } catch (err) {
-          console.error("Erro ao alterar status:", err);
+          console.error('Erro ao alterar status:', err);
           setConfirmModal(prev => ({ ...prev, show: false }));
           showNotification(`Erro ao alterar status: ${err.message}`, 'error');
+        }
+      }
+    });
+  }
+
+  const handleSetRole = async (student, newRole) => {
+    if (!isDeveloper) return;
+    setConfirmModal({
+      show: true,
+      title: `Definir como ${newRole}`,
+      message: `Tem certeza que deseja definir "${student.name}" como ${newRole}?`,
+      onConfirm: async () => {
+        try {
+          const { error } = await supabase
+            .from('usuarios')
+            .update({ role: newRole })
+            .eq('id', student.id);
+          if (error) throw error;
+          await fetchData();
+          setConfirmModal(prev => ({ ...prev, show: false }));
+          showNotification(`${student.name} agora é ${newRole}.`);
+        } catch (err) {
+          setConfirmModal(prev => ({ ...prev, show: false }));
+          showNotification(`Erro: ${err.message}`, 'error');
         }
       }
     });
@@ -681,14 +717,17 @@ const AdminPage = () => {
                       </div>
 
                       <div className="hidden md:block">
-                        <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm inline-block ${s.plano === 'Administrador'
-                            ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                            : s.plano === 'VIP Elite'
-                              ? 'bg-bordeaux/20 text-rose-soft border-bordeaux/30'
-                              : s.plano === 'Premium'
-                                ? 'bg-wine-900/20 text-white border-white/10'
-                                : 'bg-white/5 text-white/50 border-white/5'
-                          }`}>
+                        <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm inline-block ${
+                          s.plano === 'Desenvolvedor'
+                            ? 'bg-violet-500/20 text-violet-300 border-violet-500/30'
+                            : s.plano === 'Administrador'
+                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                              : s.plano === 'VIP Elite'
+                                ? 'bg-bordeaux/20 text-rose-soft border-bordeaux/30'
+                                : s.plano === 'Premium'
+                                  ? 'bg-wine-900/20 text-white border-white/10'
+                                  : 'bg-white/5 text-white/50 border-white/5'
+                        }`}>
                           {s.plano}
                         </span>
                       </div>
@@ -733,13 +772,49 @@ const AdminPage = () => {
                           <FiEdit size={12} />
                           <span className="hidden md:inline">Editar</span>
                         </button>
-                        <button
-                          onClick={() => handleDeleteStudent(s.name)}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 hover:bg-red-500/20 cursor-pointer"
-                        >
-                          <FiTrash2 size={12} />
-                          <span className="hidden md:inline">Excluir</span>
-                        </button>
+                        {/* Developer-only: delete any user incl. admins */}
+                        {isDeveloper ? (
+                          <>
+                            <button
+                              onClick={() => handleDeleteStudent(s.name)}
+                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 hover:bg-red-500/20 cursor-pointer"
+                            >
+                              <FiTrash2 size={12} />
+                              <span className="hidden md:inline">Excluir</span>
+                            </button>
+                            {s.role !== 'desenvolvedor' && (
+                              <button
+                                onClick={() => handleSetRole(s, 'desenvolvedor')}
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-violet-500/10 text-violet-400 border border-violet-500/20 hover:bg-violet-500/20 cursor-pointer"
+                                title="Definir como Desenvolvedor"
+                              >
+                                <FiShield size={12} />
+                                <span className="hidden md:inline">Dev</span>
+                              </button>
+                            )}
+                            {s.role === 'admin' && (
+                              <button
+                                onClick={() => handleSetRole(s, 'aluna')}
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 cursor-pointer"
+                                title="Rebaixar Admin"
+                              >
+                                <FiArrowLeft size={12} />
+                                <span className="hidden md:inline">Rebaixar</span>
+                              </button>
+                            )}
+                          </>
+                        ) : (
+                          // Non-developer: can't delete admins
+                          s.role !== 'admin' && s.role !== 'desenvolvedor' && (
+                            <button
+                              onClick={() => handleDeleteStudent(s.name)}
+                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest bg-red-500/10 text-red-400 hover:bg-red-500/20 cursor-pointer"
+                            >
+                              <FiTrash2 size={12} />
+                              <span className="hidden md:inline">Excluir</span>
+                            </button>
+                          )
+                        )}
                       </div>
                     </div>
                   ))}
