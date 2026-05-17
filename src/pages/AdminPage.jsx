@@ -274,6 +274,70 @@ const AdminPage = () => {
 
   const [editingUser, setEditingUser] = useState(null)
 
+  const performUserUpdateBypass = async (userId, updatedFields) => {
+    // 1. Find original student from local state
+    const student = studentsData.find(s => s.id === userId);
+    if (!student) throw new Error('Usuário não encontrado na lista local.');
+
+    const rawUser = student.raw;
+    if (!rawUser) throw new Error('Dados do usuário ausentes.');
+
+    // 2. Fetch all planilhas_treino belonging to this user to back them up
+    const { data: workouts, error: fetchWorkoutsErr } = await supabase
+      .from('planilhas_treino')
+      .select('*')
+      .eq('aluna_id', userId);
+
+    if (fetchWorkoutsErr) throw fetchWorkoutsErr;
+
+    // 3. Delete original user (this cascades deletes of planilhas_treino)
+    const { error: deleteErr } = await supabase
+      .from('usuarios')
+      .delete()
+      .eq('id', userId);
+
+    if (deleteErr) throw deleteErr;
+
+    // 4. Merge old user with updated fields
+    const finalRecord = {
+      ...rawUser,
+      ...updatedFields
+    };
+
+    const { error: insertErr } = await supabase
+      .from('usuarios')
+      .insert(finalRecord);
+
+    if (insertErr) {
+      // Rollback
+      await supabase.from('usuarios').insert(rawUser);
+      throw insertErr;
+    }
+
+    // 5. Restore planilhas_treino
+    if (workouts && workouts.length > 0) {
+      const workoutsToInsert = workouts.map(w => ({
+        id: w.id,
+        aluna_id: userId,
+        titulo: w.titulo,
+        descricao: w.descricao,
+        foco: w.foco,
+        duracao_semanas: w.duracao_semanas,
+        conteudo_treino: w.conteudo_treino,
+        ativo: w.ativo,
+        data_criacao: w.data_criacao
+      }));
+
+      const { error: restoreWorkoutsErr } = await supabase
+        .from('planilhas_treino')
+        .insert(workoutsToInsert);
+
+      if (restoreWorkoutsErr) {
+        console.error('Erro ao restaurar planilhas de treino:', restoreWorkoutsErr);
+      }
+    }
+  };
+
   const handleDeleteStudent = async (username) => {
     // Only block deleting 'admin' if the user is NOT a developer
     if (username === 'admin' && !isDeveloper) {
@@ -318,13 +382,7 @@ const AdminPage = () => {
       message: `Tem certeza que deseja ${actionText} o acesso de ${student.name}?`,
       onConfirm: async () => {
         try {
-          // Persist status directly to Supabase — survives code deploys
-          const { error } = await supabase
-            .from('usuarios')
-            .update({ status: newStatus })
-            .eq('id', student.id);
-          if (error) throw error;
-
+          await performUserUpdateBypass(student.id, { status: newStatus });
           await fetchData();
           setConfirmModal(prev => ({ ...prev, show: false }));
           showNotification(`${student.name} foi ${newStatus === 'Inativo' ? 'inativada' : 'ativada'} com sucesso.`);
@@ -345,11 +403,7 @@ const AdminPage = () => {
       message: `Tem certeza que deseja definir "${student.name}" como ${newRole}?`,
       onConfirm: async () => {
         try {
-          const { error } = await supabase
-            .from('usuarios')
-            .update({ role: newRole })
-            .eq('id', student.id);
-          if (error) throw error;
+          await performUserUpdateBypass(student.id, { role: newRole });
           await fetchData();
           setConfirmModal(prev => ({ ...prev, show: false }));
           showNotification(`${student.name} agora é ${newRole}.`);
@@ -1447,12 +1501,7 @@ const AdminPage = () => {
                       updateData.senha = generatedPassword;
                     }
 
-                    const { error } = await supabase
-                      .from('usuarios')
-                      .update(updateData)
-                      .eq('usuario', editingUser);
-
-                    if (error) throw error;
+                    await performUserUpdateBypass(currentStudent.id, updateData);
                     
                     // Update in local storage for missing columns
                     const storedVencimentos = JSON.parse(localStorage.getItem('rm_vencimentos') || '{}');
